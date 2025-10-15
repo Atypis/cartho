@@ -1,0 +1,14 @@
+{
+  "name": "eu-ai-act-cartography",
+  "version": "1.0.0",
+  "description": "EU AI Act actionable legal framework - cartography project",
+  "type": "module",
+  "scripts": {
+    "scrape:react-flow": "node scripts/scrape-react-flow-docs.js",
+    "split:ai-sdk": "node scripts/split-ai-sdk-docs.js"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0",
+    "turndown": "^7.2.0"
+  }
+}

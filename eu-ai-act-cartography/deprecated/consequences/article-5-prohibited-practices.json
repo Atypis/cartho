@@ -1,0 +1,442 @@
+{
+  "provision": "Article 5",
+  "title": "Prohibited AI practices",
+  "type": "absolute_prohibitions",
+  "legal_effect": "Prohibited activities - criminal/administrative sanctions",
+  "structure": "Eight prohibited practices (a-h) with (h) having narrow exceptions + detailed procedural regime",
+  "prohibitions": {
+    "5_1_a_manipulation": {
+      "id": "prohibition-subliminal-manipulation",
+      "article": "5(1)(a)",
+      "title": "Subliminal and manipulative techniques",
+      "prohibited_activities": {
+        "operator": "OR",
+        "activities": ["placing on the market", "putting into service", "use"]
+      },
+      "system_characteristics": {
+        "operator": "AND",
+        "elements": [
+          {
+            "element": "AI system that deploys subliminal techniques beyond person's consciousness OR purposefully manipulative or deceptive techniques",
+            "operator": "OR_WITHIN",
+            "confidence": "HIGH"
+          },
+          {
+            "element": "With objective OR effect of materially distorting behaviour",
+            "operator": "OR",
+            "confidence": "MEDIUM",
+            "flag": "MEDIUM_CONFIDENCE: 'materially distorting' requires context-specific evaluation",
+            "llm_evaluation_needed": true
+          },
+          {
+            "element": "By appreciably impairing ability to make informed decision",
+            "confidence": "MEDIUM",
+            "flag": "MEDIUM_CONFIDENCE: 'appreciably impairing' - threshold unclear",
+            "llm_evaluation_needed": true
+          },
+          {
+            "element": "Thereby causing decision person would not have otherwise taken",
+            "confidence": "HIGH",
+            "note": "Counterfactual causation"
+          },
+          {
+            "element": "In manner that causes or is reasonably likely to cause significant harm",
+            "confidence": "LOW",
+            "flag": "LOW_CONFIDENCE: 'significant harm' undefined - requires interpretation",
+            "llm_evaluation_needed": true,
+            "note": "To that person, another person, or group of persons"
+          }
+        ]
+      },
+      "cumulative_requirements": "ALL elements must be present",
+      "confidence_overall": "MEDIUM",
+      "interpretative_challenges": [
+        "Subliminal vs. persuasive techniques boundary",
+        "Materiality of distortion",
+        "Appreciation of impairment",
+        "Significance of harm",
+        "Causation (but-for test)"
+      ],
+      "examples_hypothetical": [
+        "AI-powered dark patterns with subliminal cues",
+        "Manipulative chatbots exploiting cognitive biases",
+        "Deceptive recommendation systems"
+      ]
+    },
+    "5_1_b_vulnerability_exploitation": {
+      "id": "prohibition-vulnerability-exploitation",
+      "article": "5(1)(b)",
+      "title": "Exploitation of vulnerabilities",
+      "prohibited_activities": {
+        "operator": "OR",
+        "activities": ["placing on the market", "putting into service", "use"]
+      },
+      "system_characteristics": {
+        "operator": "AND",
+        "elements": [
+          {
+            "element": "AI system that exploits vulnerabilities",
+            "confidence": "HIGH"
+          },
+          {
+            "element": "Of natural person or specific group",
+            "confidence": "HIGH"
+          },
+          {
+            "element": "Due to age, disability, or specific social or economic situation",
+            "operator": "OR",
+            "confidence": "HIGH",
+            "vulnerabilities": ["age", "disability", "specific social situation", "specific economic situation"]
+          },
+          {
+            "element": "With objective OR effect of materially distorting behaviour",
+            "operator": "OR",
+            "confidence": "MEDIUM",
+            "flag": "MEDIUM_CONFIDENCE: Same interpretative issues as 5(1)(a)",
+            "llm_evaluation_needed": true
+          },
+          {
+            "element": "In manner that causes or is reasonably likely to cause significant harm",
+            "confidence": "LOW",
+            "flag": "LOW_CONFIDENCE: 'significant harm' undefined",
+            "llm_evaluation_needed": true
+          }
+        ]
+      },
+      "cumulative_requirements": "ALL elements must be present",
+      "confidence_overall": "MEDIUM",
+      "protected_groups": "Vulnerable persons - children, elderly, disabled, economically/socially disadvantaged",
+      "examples_hypothetical": [
+        "Predatory lending AI targeting vulnerable groups",
+        "Manipulative advertising to children",
+        "Exploitative AI targeting elderly"
+      ]
+    },
+    "5_1_c_social_scoring": {
+      "id": "prohibition-social-scoring",
+      "article": "5(1)(c)",
+      "title": "Social scoring (INFERRED FROM CONTEXT)",
+      "source_note": "Full text missing from source MD - reconstructed from Recital 31 and sub-points (i)(ii)",
+      "confidence_overall": "MEDIUM - source incomplete",
+      "inferred_prohibition": "AI systems for social scoring leading to detrimental treatment",
+      "sub_conditions": {
+        "operator": "OR",
+        "conditions": [
+          {
+            "id": "5_1_c_i",
+            "text": "Detrimental or unfavourable treatment of certain natural persons or groups of persons in social contexts that are unrelated to the contexts in which the data was originally generated or collected",
+            "confidence": "HIGH",
+            "note": "Context mismatch - using data out of original context"
+          },
+          {
+            "id": "5_1_c_ii",
+            "text": "Detrimental or unfavourable treatment of certain natural persons or groups of persons that is unjustified or disproportionate to their social behaviour or its gravity",
+            "confidence": "HIGH",
+            "flag": "MEDIUM_CONFIDENCE: 'unjustified or disproportionate' requires evaluation",
+            "llm_evaluation_needed": true
+          }
+        ]
+      },
+      "recital_31_guidance": "Evaluating/classifying persons based on social behaviour data over time, leading to detrimental treatment in unrelated contexts or disproportionate to behaviour",
+      "examples_from_recital": "Social credit systems",
+      "note": "REQUIRES SOURCE TEXT VERIFICATION"
+    },
+    "5_1_d_criminal_risk_assessment": {
+      "id": "prohibition-criminal-risk-profiling",
+      "article": "5(1)(d)",
+      "title": "Criminal risk assessment based solely on profiling",
+      "prohibited_activities": {
+        "operator": "OR",
+        "activities": ["placing on the market", "putting into service for this specific purpose", "use"]
+      },
+      "system_purpose": {
+        "operator": "AND",
+        "elements": [
+          {
+            "element": "Making risk assessments of natural persons",
+            "confidence": "HIGH"
+          },
+          {
+            "element": "To assess or predict risk of committing criminal offence",
+            "confidence": "HIGH"
+          },
+          {
+            "element": "Based SOLELY on profiling OR assessing personality traits and characteristics",
+            "emphasis": "SOLELY",
+            "operator": "OR",
+            "confidence": "HIGH",
+            "critical": "SOLELY is key - if combined with other factors, not prohibited"
+          }
+        ]
+      },
+      "exception": {
+        "text": "Prohibition shall NOT apply to AI systems used to SUPPORT human assessment of involvement in criminal activity, which is already based on objective and verifiable facts directly linked to criminal activity",
+        "confidence": "HIGH",
+        "conditions_for_exception": [
+          "Supports (not replaces) human assessment",
+          "Assessment already based on objective and verifiable facts",
+          "Facts directly linked to criminal activity"
+        ],
+        "note": "Exception allows risk assessment tools if human remains decision-maker and objective evidence exists"
+      },
+      "confidence_overall": "HIGH",
+      "critical_distinction": "Purely predictive profiling (prohibited) vs. evidence-based human-assisted assessment (permitted)",
+      "examples": "Minority Report style pure prediction = prohibited; Evidence-based risk tools supporting investigators = permitted"
+    },
+    "5_1_e_facial_recognition_scraping": {
+      "id": "prohibition-facial-database-scraping",
+      "article": "5(1)(e)",
+      "title": "Untargeted facial recognition database creation",
+      "prohibited_activities": {
+        "operator": "OR",
+        "activities": ["placing on the market", "putting into service for this specific purpose", "use"]
+      },
+      "system_purpose": {
+        "operator": "AND",
+        "elements": [
+          {
+            "element": "AI systems that create or expand facial recognition databases",
+            "operator": "OR",
+            "confidence": "HIGH"
+          },
+          {
+            "element": "Through untargeted scraping",
+            "emphasis": "UNTARGETED",
+            "confidence": "HIGH",
+            "critical": "Untargeted = indiscriminate collection"
+          },
+          {
+            "element": "Of facial images from internet or CCTV footage",
+            "operator": "OR",
+            "confidence": "HIGH"
+          }
+        ]
+      },
+      "confidence_overall": "HIGH",
+      "critical_element": "Untargeted scraping - mass collection without consent",
+      "examples": "Clearview AI type database creation",
+      "permitted": "Targeted, consensual database creation for specific purposes"
+    },
+    "5_1_f_emotion_recognition_workplace_education": {
+      "id": "prohibition-emotion-recognition-workplace-education",
+      "article": "5(1)(f)",
+      "title": "Emotion inference in workplace and education",
+      "prohibited_activities": {
+        "operator": "OR",
+        "activities": ["placing on the market", "putting into service for this specific purpose", "use"]
+      },
+      "system_characteristics": {
+        "operator": "AND",
+        "elements": [
+          {
+            "element": "AI systems to infer emotions of natural person",
+            "reference": "Emotion recognition system (3(39))",
+            "confidence": "HIGH"
+          },
+          {
+            "element": "In areas of workplace and education institutions",
+            "operator": "OR",
+            "confidence": "HIGH",
+            "contexts": ["workplace", "education institutions"]
+          }
+        ]
+      },
+      "exception": {
+        "text": "EXCEPT where use intended to be put in place or into market for medical or safety reasons",
+        "confidence": "HIGH",
+        "permitted_purposes": ["medical reasons", "safety reasons"],
+        "operator": "OR",
+        "examples": "Driver fatigue detection, medical diagnosis"
+      },
+      "confidence_overall": "HIGH",
+      "policy_rationale": "Protect worker and student rights against emotional surveillance",
+      "critical_distinction": "Emotion recognition vs. physical state detection (fatigue) per Recital 18"
+    },
+    "5_1_g_biometric_categorisation_sensitive_attributes": {
+      "id": "prohibition-biometric-categorisation-sensitive",
+      "article": "5(1)(g)",
+      "title": "Biometric categorisation for sensitive attributes",
+      "prohibited_activities": {
+        "operator": "OR",
+        "activities": ["placing on the market", "putting into service for this specific purpose", "use"]
+      },
+      "system_characteristics": {
+        "operator": "AND",
+        "elements": [
+          {
+            "element": "Biometric categorisation systems",
+            "reference": "3(40)",
+            "confidence": "HIGH"
+          },
+          {
+            "element": "That categorise natural persons based on biometric data",
+            "confidence": "HIGH"
+          },
+          {
+            "element": "To deduce or infer sensitive attributes",
+            "operator": "OR",
+            "confidence": "HIGH",
+            "sensitive_attributes": [
+              "race",
+              "political opinions",
+              "trade union membership",
+              "religious or philosophical beliefs",
+              "sex life",
+              "sexual orientation"
+            ],
+            "note": "Mirrors GDPR Article 9(1) special categories"
+          }
+        ]
+      },
+      "exception": {
+        "text": "Prohibition does NOT cover labelling/filtering of lawfully acquired biometric datasets OR categorizing biometric data in law enforcement",
+        "confidence": "HIGH",
+        "conditions": [
+          "Lawfully acquired datasets",
+          "Labelling/filtering (not inference for decision-making)",
+          "OR law enforcement context"
+        ],
+        "examples": "Sorting police database images by hair/eye color for investigation"
+      },
+      "confidence_overall": "HIGH",
+      "policy_rationale": "Prevent discriminatory profiling based on protected characteristics"
+    },
+    "5_1_h_realtime_biometric_identification": {
+      "id": "prohibition-realtime-remote-biometric-id",
+      "article": "5(1)(h) + 5(2)-(7)",
+      "title": "Real-time remote biometric identification in publicly accessible spaces for law enforcement",
+      "source_note": "Full text missing from source MD - reconstructed from sub-points (i)(ii)(iii) and extensive procedural regime in 5(2)-(7)",
+      "confidence_overall": "MEDIUM-HIGH - source incomplete but clear from context",
+      "general_prohibition": "Use of real-time remote biometric identification systems in publicly accessible spaces for law enforcement purposes",
+      "narrow_exceptions": {
+        "operator": "OR",
+        "description": "Prohibited EXCEPT for exhaustively listed law enforcement objectives",
+        "objectives": [
+          {
+            "id": "5_1_h_i",
+            "text": "The targeted search for specific victims of abduction, trafficking in human beings or sexual exploitation of human beings, as well as the search for missing persons",
+            "confidence": "HIGH",
+            "note": "Victim/missing person search"
+          },
+          {
+            "id": "5_1_h_ii",
+            "text": "The prevention of a specific, substantial and imminent threat to the life or physical safety of natural persons or a genuine and present or genuine and foreseeable threat of a terrorist attack",
+            "confidence": "HIGH",
+            "cumulative_requirements": ["specific", "substantial", "imminent threat"],
+            "note": "Emergency/terrorist threat prevention"
+          },
+          {
+            "id": "5_1_h_iii",
+            "text": "The localisation or identification of a person suspected of having committed a criminal offence, for the purpose of conducting a criminal investigation or prosecution or executing a criminal penalty for offences referred to in Annex II and punishable in the Member State concerned by a custodial sentence or a detention order for a maximum period of at least four years",
+            "confidence": "HIGH",
+            "requirements": [
+              "Suspected of criminal offence",
+              "Offence listed in Annex II",
+              "Punishable by ≥4 years custody in Member State"
+            ],
+            "note": "Serious crime suspects only - threshold ensures proportionality"
+          }
+        ]
+      },
+      "procedural_safeguards": {
+        "description": "Even when exception applies, strict procedural requirements per Art 5(2)-(7)",
+        "requirements": [
+          {
+            "requirement": "Prior authorization",
+            "article": "5(3)",
+            "authority": "Judicial authority OR independent administrative authority with binding decision",
+            "timing": "Before use (except duly justified urgency - then within 24h)",
+            "consequences_if_rejected": "Immediate cessation, data deletion"
+          },
+          {
+            "requirement": "Fundamental rights impact assessment",
+            "article": "5(2), 27",
+            "mandatory": true
+          },
+          {
+            "requirement": "Registration in EU database",
+            "article": "49",
+            "timing": "Before use (except urgency)"
+          },
+          {
+            "requirement": "Notification to authorities",
+            "article": "5(4)",
+            "authorities": ["Market surveillance authority", "National data protection authority"]
+          },
+          {
+            "requirement": "Necessity and proportionality",
+            "article": "5(2), 5(3)",
+            "elements": [
+              "Nature of situation",
+              "Seriousness, probability, scale of harm if not used",
+              "Consequences for rights/freedoms",
+              "Temporal, geographic, personal limitations"
+            ]
+          },
+          {
+            "requirement": "Confirm identity only",
+            "article": "5(2)",
+            "note": "Only to confirm specifically targeted individual's identity"
+          },
+          {
+            "requirement": "Member State opt-in",
+            "article": "5(5)",
+            "note": "Member State must explicitly authorize in national law"
+          },
+          {
+            "requirement": "No sole decision-making",
+            "article": "5(3)",
+            "note": "No adverse legal effect based solely on system output"
+          },
+          {
+            "requirement": "Annual reporting",
+            "article": "5(6)-(7)",
+            "authorities": ["National authorities to Commission", "Commission publishes aggregated reports"]
+          }
+        ]
+      },
+      "confidence_overall": "HIGH on procedural regime, MEDIUM on base prohibition text",
+      "policy_balance": "General prohibition with narrow, heavily proceduralized exceptions for serious law enforcement needs",
+      "critical_note": "Most restrictive prohibition in entire Act - reflects fundamental rights concerns (Recitals 32-38)"
+    }
+  },
+  "article_5_8": {
+    "text": "This Article shall not affect the prohibitions that apply where an AI practice infringes other Union law",
+    "interpretation": "Article 5 is cumulative with other prohibitions - not exclusive",
+    "confidence": "HIGH"
+  },
+  "synthesis": {
+    "total_prohibitions": 8,
+    "absolute_prohibitions": ["5(1)(a)", "5(1)(b)", "5(1)(c)", "5(1)(e)", "5(1)(f)", "5(1)(g)"],
+    "prohibition_with_narrow_exceptions": ["5(1)(d)", "5(1)(h)"],
+    "most_complex": "5(1)(h) - real-time biometric ID with extensive procedural regime",
+    "interpretative_intensity": "HIGH - many fuzzy concepts requiring LLM evaluation",
+    "enforcement": "Criminal/administrative sanctions per Chapter VIII"
+  },
+  "dependencies": {
+    "definitions": [
+      "AI system (3(1))",
+      "Biometric data (3(34))",
+      "Biometric identification (3(35))",
+      "Biometric categorisation system (3(40))",
+      "Remote biometric identification (3(41))",
+      "Real-time remote biometric identification (3(42))",
+      "Publicly accessible space (3(44))",
+      "Law enforcement (3(46))",
+      "Emotion recognition system (3(39))",
+      "Profiling (3(52))"
+    ],
+    "annexes": ["Annex II (criminal offences for 5(1)(h)(iii))"],
+    "cross_references": [
+      "Article 27 (fundamental rights impact assessment)",
+      "Article 49 (registration database)",
+      "Article 57, 60 (real-world testing)"
+    ]
+  },
+  "metadata": {
+    "created": "2025-10-08",
+    "status": "complete with source verification needed for 5(1)(c) and 5(1)(h) full text",
+    "confidence_overall": "MEDIUM-HIGH",
+    "source_issues": "MD source missing full text of 5(1)(c) and 5(1)(h) - reconstructed from context"
+  }
+}

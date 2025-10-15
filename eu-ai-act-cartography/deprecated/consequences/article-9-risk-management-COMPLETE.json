@@ -1,0 +1,408 @@
+{
+  "provision": "Article 9",
+  "title": "Risk management system",
+  "type": "substantive_obligation",
+  "addressee": "provider",
+  "confidence_overall": "HIGH on structure, MEDIUM on interpretative elements",
+
+  "wirknorm": {
+    "legal_consequence": "Obligation to establish, implement, document and maintain a risk management system",
+    "legal_effect": "mandatory",
+    "confidence": "HIGH"
+  },
+
+  "COMPLETE_threshold_chain": {
+    "description": "EVERY layer must be satisfied for obligation to apply",
+    "operator": "AND",
+    "layers": [
+      {
+        "layer": 0,
+        "name": "EU AI Act applies",
+        "reference": "scope-applicability.json",
+        "operator": "AND",
+        "requirements": [
+          {
+            "requirement": "At least one Article 2(1) scope pathway satisfied",
+            "confidence": "HIGH"
+          },
+          {
+            "requirement": "No Article 2(2)-(12) exclusion applies",
+            "reference": "scope-exclusions.json",
+            "confidence": "HIGH"
+          }
+        ]
+      },
+      {
+        "layer": 1,
+        "name": "System is AI system",
+        "reference": "ai-system-definition.json",
+        "article": "3(1)",
+        "confidence": "MEDIUM-HIGH",
+        "flag": "Some boundary cases require LLM evaluation"
+      },
+      {
+        "layer": 2,
+        "name": "System is HIGH-RISK",
+        "reference": "high-risk-classification.json",
+        "article": "6",
+        "operator": "OR",
+        "pathways": [
+          {
+            "pathway": "Article 6(1) - Product safety",
+            "conditions": [
+              "Safety component or product itself per Annex I",
+              "Third-party conformity assessment required"
+            ],
+            "opt_out_available": false,
+            "confidence": "HIGH"
+          },
+          {
+            "pathway": "Article 6(2) - Annex III use cases",
+            "reference": "annex-iii-high-risk-use-cases.json",
+            "conditions": [
+              "Falls within one of 25 Annex III use cases"
+            ],
+            "opt_out_available": true,
+            "opt_out_conditions": "Article 6(3) - no significant risk AND one of (a)-(d) conditions",
+            "opt_out_impossible_if": "System performs profiling per Article 6(3) second subparagraph",
+            "confidence": "HIGH"
+          }
+        ]
+      },
+      {
+        "layer": 3,
+        "name": "Actor is PROVIDER",
+        "reference": "core-actor-definitions.json provider",
+        "article": "3(3)",
+        "confidence": "MEDIUM-HIGH",
+        "note": "Article 9 doesn't explicitly state provider but clear from Chapter III Section 2 structure (Article 8(1)-(2), Article 16)",
+        "deployer_can_become_provider": "Yes, via substantial modification per Article 3(23) and Article 28"
+      },
+      {
+        "layer": 4,
+        "name": "Temporal trigger",
+        "description": "Obligation arises throughout lifecycle, including before market placement",
+        "article": "9(2) 'throughout the entire lifecycle', 9(8) 'prior to...placement'",
+        "confidence": "HIGH",
+        "timing": "Development phase through post-market"
+      }
+    ],
+    "conclusion": "IF all layers 0-4 satisfied → Provider MUST comply with Article 9 risk management obligations"
+  },
+
+  "substantive_obligations": {
+    "core_obligation": {
+      "description": "Establish, implement, document and maintain risk management system",
+      "article": "9(1)",
+      "verbs": ["establish", "implement", "document", "maintain"],
+      "confidence": "HIGH"
+    },
+
+    "system_characteristics": {
+      "operator": "AND",
+      "requirements": [
+        {
+          "requirement": "Continuous iterative process",
+          "article": "9(2)",
+          "confidence": "HIGH"
+        },
+        {
+          "requirement": "Planned and run throughout entire lifecycle",
+          "article": "9(2)",
+          "lifecycle_phases": ["Development", "Deployment", "Post-market"],
+          "confidence": "HIGH"
+        },
+        {
+          "requirement": "Regular systematic review and updating",
+          "article": "9(2)",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+
+    "four_process_steps": {
+      "description": "Risk management system shall comprise following steps",
+      "operator": "AND",
+      "article": "9(2)",
+      "steps": [
+        {
+          "step": "a",
+          "description": "Identification and analysis of known and reasonably foreseeable risks",
+          "targets": ["health", "safety", "fundamental rights"],
+          "context": "When system used according to intended purpose",
+          "reference": "Intended purpose (3(12))",
+          "confidence": "HIGH",
+          "interpretative_element": {
+            "concept": "reasonably foreseeable risks",
+            "confidence": "MEDIUM",
+            "llm_evaluation_needed": true
+          }
+        },
+        {
+          "step": "b",
+          "description": "Estimation and evaluation of risks under intended purpose AND reasonably foreseeable misuse",
+          "operator": "AND",
+          "contexts": [
+            "Intended purpose use",
+            "Reasonably foreseeable misuse"
+          ],
+          "reference": "Reasonably foreseeable misuse (3(13))",
+          "confidence": "HIGH",
+          "interpretative_element": {
+            "concept": "reasonably foreseeable misuse",
+            "confidence": "LOW",
+            "llm_evaluation_needed": true,
+            "note": "Highly context-dependent - what provider should foresee"
+          }
+        },
+        {
+          "step": "c",
+          "description": "Evaluation of risks from post-market monitoring data",
+          "article": "9(2)(c)",
+          "confidence": "HIGH",
+          "dependency": {
+            "requirement": "Post-market monitoring system per Article 72",
+            "note": "Provider must have established post-market monitoring"
+          }
+        },
+        {
+          "step": "d",
+          "description": "Adoption of appropriate and targeted risk management measures",
+          "article": "9(2)(d)",
+          "confidence": "HIGH",
+          "addresses": "Risks identified in step (a)",
+          "further_detailed_in": "Article 9(4)-(5)"
+        }
+      ]
+    },
+
+    "scope_limitation": {
+      "article": "9(3)",
+      "text": "Risks shall concern only those which may be reasonably mitigated or eliminated through development/design or provision of adequate technical information",
+      "confidence": "MEDIUM-HIGH",
+      "flag": "LOW_CONFIDENCE: 'reasonably mitigated' - what about inherent risks?",
+      "llm_evaluation_needed": true,
+      "interpretation": "Provider only responsible for risks addressable through AI design/development/documentation, not risks inherent to use case itself"
+    },
+
+    "risk_management_measures_requirements": {
+      "article": "9(4)-(5)",
+      "operator": "AND",
+      "requirements": [
+        {
+          "requirement": "Consider effects and interaction of combined Section 2 requirements",
+          "article": "9(4)",
+          "confidence": "MEDIUM",
+          "note": "Holistic view - risk measures must balance all Chapter III Section 2 obligations"
+        },
+        {
+          "requirement": "Residual risk must be acceptable",
+          "article": "9(5)",
+          "confidence": "LOW",
+          "flag": "LOW_CONFIDENCE: 'acceptable' undefined - no numeric threshold",
+          "llm_evaluation_needed": true,
+          "note": "Each hazard's residual risk AND overall residual risk must be acceptable"
+        },
+        {
+          "requirement": "Three-tier hierarchy of measures",
+          "article": "9(5)(a)-(c)",
+          "confidence": "HIGH",
+          "hierarchy": [
+            {
+              "priority": 1,
+              "description": "Elimination/reduction through design and development",
+              "article": "9(5)(a)",
+              "requirement": "In as far as technically feasible",
+              "confidence": "HIGH",
+              "note": "Design-out risks first"
+            },
+            {
+              "priority": 2,
+              "description": "Mitigation and control measures for uneliminable risks",
+              "article": "9(5)(b)",
+              "requirement": "Where appropriate",
+              "confidence": "HIGH",
+              "note": "If can't eliminate, mitigate"
+            },
+            {
+              "priority": 3,
+              "description": "Information provision (Article 13) and deployer training",
+              "article": "9(5)(c)",
+              "requirement": "Where appropriate",
+              "confidence": "HIGH",
+              "dependency": "Article 13 information to deployers",
+              "note": "If can't eliminate or fully mitigate, inform and train"
+            }
+          ]
+        },
+        {
+          "requirement": "Consider deployer capabilities and context",
+          "article": "9(5) final paragraph",
+          "factors": [
+            "Technical knowledge of deployer",
+            "Experience",
+            "Education",
+            "Training to be expected",
+            "Presumable context of use"
+          ],
+          "confidence": "MEDIUM",
+          "flag": "LOW_CONFIDENCE: Requires judgment about deployer",
+          "llm_evaluation_needed": true
+        }
+      ]
+    },
+
+    "testing_requirements": {
+      "article": "9(6)-(8)",
+      "operator": "AND",
+      "requirements": [
+        {
+          "requirement": "Systems shall be tested",
+          "purpose": "Identify appropriate risk management measures",
+          "article": "9(6)",
+          "confidence": "HIGH"
+        },
+        {
+          "requirement": "Testing must ensure consistent performance and compliance",
+          "article": "9(6)",
+          "ensures": [
+            "Consistent performance for intended purpose",
+            "Compliance with Section 2 requirements"
+          ],
+          "confidence": "HIGH"
+        },
+        {
+          "requirement": "May include real-world testing",
+          "article": "9(7)",
+          "reference": "Article 60 real-world testing",
+          "mandatory": false,
+          "confidence": "HIGH"
+        },
+        {
+          "requirement": "Testing timing",
+          "article": "9(8)",
+          "operator": "AND",
+          "timings": [
+            {
+              "timing": "Any time during development",
+              "mandatory": false,
+              "confidence": "HIGH"
+            },
+            {
+              "timing": "Prior to market placement or putting into service",
+              "mandatory": true,
+              "confidence": "HIGH",
+              "critical": "Pre-market testing MANDATORY"
+            }
+          ]
+        },
+        {
+          "requirement": "Testing against predefined metrics and probabilistic thresholds",
+          "article": "9(8)",
+          "confidence": "MEDIUM-HIGH",
+          "flag": "LOW_CONFIDENCE: 'appropriate' thresholds - context-dependent",
+          "llm_evaluation_needed": true,
+          "note": "Thresholds must be appropriate to intended purpose"
+        }
+      ]
+    },
+
+    "vulnerable_groups": {
+      "article": "9(9)",
+      "operator": "AND",
+      "requirements": [
+        {
+          "requirement": "Consider adverse impact on persons under 18",
+          "mandatory": true,
+          "confidence": "HIGH"
+        },
+        {
+          "requirement": "Consider other vulnerable groups as appropriate",
+          "mandatory": "as appropriate",
+          "confidence": "MEDIUM",
+          "flag": "LOW_CONFIDENCE: 'other vulnerable groups' open-ended",
+          "llm_evaluation_needed": true
+        }
+      ]
+    },
+
+    "integration_with_other_law": {
+      "article": "9(10)",
+      "description": "May integrate with risk management under other Union law",
+      "mandatory": false,
+      "confidence": "HIGH",
+      "note": "Allows harmonization with sectoral risk management requirements"
+    }
+  },
+
+  "dependencies": {
+    "definitions": [
+      "AI system (3(1))",
+      "Provider (3(3))",
+      "High-risk AI system (Art 6)",
+      "Intended purpose (3(12))",
+      "Reasonably foreseeable misuse (3(13))",
+      "Placing on market (3(9))",
+      "Putting into service (3(11))"
+    ],
+    "other_provisions": [
+      "Article 6 - High-risk classification",
+      "Article 8 - Compliance framework",
+      "Article 13 - Information to deployers",
+      "Article 60 - Real-world testing",
+      "Article 72 - Post-market monitoring",
+      "Chapter III Section 2 - All high-risk requirements"
+    ],
+    "annexes": [
+      "Annex I - Product safety legislation (if Art 6(1) pathway)",
+      "Annex III - High-risk use cases (if Art 6(2) pathway)"
+    ]
+  },
+
+  "low_confidence_flags_requiring_llm_evaluation": [
+    {
+      "location": "9(2)(a)",
+      "issue": "Reasonably foreseeable risks",
+      "evaluation_factors": ["System type", "Intended purpose", "State of art", "Historical incidents"]
+    },
+    {
+      "location": "9(2)(b)",
+      "issue": "Reasonably foreseeable misuse",
+      "evaluation_factors": ["Common usage patterns", "Known misuse cases", "Technical safeguards", "User sophistication"]
+    },
+    {
+      "location": "9(3)",
+      "issue": "Reasonably mitigated or eliminated",
+      "evaluation_factors": ["Technical feasibility", "State of art", "Cost-benefit"]
+    },
+    {
+      "location": "9(5)",
+      "issue": "Acceptable residual risk",
+      "evaluation_factors": ["Sector norms", "Severity of harm", "Probability", "Risk-benefit balance", "State of art"]
+    },
+    {
+      "location": "9(5) final para",
+      "issue": "Deployer capabilities and context",
+      "evaluation_factors": ["Expected deployer expertise", "Deployment environment", "Training availability"]
+    },
+    {
+      "location": "9(8)",
+      "issue": "Appropriate testing thresholds",
+      "evaluation_factors": ["Intended purpose criticality", "Performance expectations", "Sector standards"]
+    },
+    {
+      "location": "9(9)",
+      "issue": "Other vulnerable groups",
+      "evaluation_factors": ["System use case", "Affected populations", "Power imbalances"]
+    }
+  ],
+
+  "metadata": {
+    "created": "2025-10-08",
+    "version": "COMPLETE with full threshold chain",
+    "replaces": "article-9-risk-management.json (incomplete version)",
+    "status": "complete",
+    "confidence_overall": "HIGH on structure and requirements, MEDIUM-LOW on interpretative thresholds",
+    "critical_importance": "Core high-risk obligation - triggers most provider compliance work"
+  }
+}

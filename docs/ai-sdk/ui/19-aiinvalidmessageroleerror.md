@@ -1,0 +1,33 @@
+# AI_InvalidMessageRoleError
+
+**Source:** https://ai-sdk.dev/
+**Section:** ui
+**Split from:** ai-sdk-complete.md
+
+---
+
+# AI_InvalidMessageRoleError
+
+This error occurs when an invalid message role is provided.
+
+## Properties
+
+- `role`: The invalid role value
+- `message`: The error message
+
+## Checking for this Error
+
+You can check if an error is an instance of `AI_InvalidMessageRoleError` using:
+
+```typescript
+import { InvalidMessageRoleError } from 'ai';
+
+if (InvalidMessageRoleError.isInstance(error)) {
+  // Handle the error
+}
+```
+
+---
+title: AI_InvalidPromptError
+description: Learn how to fix AI_InvalidPromptError
+---

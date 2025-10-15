@@ -1,0 +1,387 @@
+{
+  "provision": "Article 9",
+  "title": "Risk management system",
+  "wirknorm": {
+    "legal_consequence": "Obligation to establish, implement, document and maintain a risk management system",
+    "legal_effect": "mandatory",
+    "confidence": "HIGH",
+    "addressee": {
+      "actor": "provider",
+      "confidence": "MEDIUM-HIGH",
+      "note": "Not explicit in Art 9 but clear from Section 2 context (Art 8)",
+      "flag": "LOW_CONFIDENCE: Unclear if deployers have parallel obligations"
+    }
+  },
+  "threshold_requirements": {
+    "description": "Cumulative requirements that must all be fulfilled for obligation to apply",
+    "operator": "AND",
+    "requirements": [
+      {
+        "id": "high-risk-classification",
+        "description": "AI system must be classified as high-risk",
+        "type": "reference",
+        "source": "definitions/high-risk-classification.json",
+        "article_reference": "Article 6",
+        "confidence": "HIGH",
+        "note": "Shared node - used by all Chapter III Section 2 obligations"
+      },
+      {
+        "id": "temporal-trigger",
+        "description": "System is placed on market or put into service (or in development phase)",
+        "type": "interpretative",
+        "confidence": "MEDIUM",
+        "flag": "LOW_CONFIDENCE: Art 9 doesn't explicitly state timing. Art 11(1) says technical docs must exist BEFORE market placement. Art 9(2) 'throughout entire lifecycle' suggests pre-market obligation. Art 9(8) requires testing 'prior to' market placement.",
+        "interpretation_required": true,
+        "llm_evaluation_needed": true
+      }
+    ]
+  },
+  "substantive_obligations": {
+    "description": "What must be done once threshold requirements are met",
+    "core_obligation": {
+      "description": "Establish, implement, document and maintain risk management system",
+      "article": "9(1)",
+      "confidence": "HIGH"
+    },
+    "system_characteristics": {
+      "operator": "AND",
+      "requirements": [
+        {
+          "id": "continuous-iterative-process",
+          "description": "System must be continuous iterative process",
+          "article": "9(2)",
+          "confidence": "HIGH"
+        },
+        {
+          "id": "lifecycle-coverage",
+          "description": "Planned and run throughout entire lifecycle",
+          "article": "9(2)",
+          "confidence": "HIGH"
+        },
+        {
+          "id": "regular-review",
+          "description": "Regular systematic review and updating required",
+          "article": "9(2)",
+          "confidence": "HIGH"
+        }
+      ]
+    },
+    "process_steps": {
+      "description": "Four mandatory process steps",
+      "operator": "AND",
+      "requirements": [
+        {
+          "id": "step-a-identification",
+          "description": "Identification and analysis of known and reasonably foreseeable risks to health, safety or fundamental rights when used according to intended purpose",
+          "article": "9(2)(a)",
+          "confidence": "HIGH",
+          "interpretative_elements": [
+            {
+              "concept": "reasonably foreseeable risks",
+              "confidence": "MEDIUM",
+              "llm_evaluation_needed": true,
+              "note": "Requires contextual judgment about what risks are 'reasonably foreseeable'"
+            }
+          ]
+        },
+        {
+          "id": "step-b-estimation",
+          "description": "Estimation and evaluation of risks during intended purpose use and under reasonably foreseeable misuse",
+          "article": "9(2)(b)",
+          "confidence": "HIGH",
+          "flag": "LOW_CONFIDENCE: 'reasonably foreseeable misuse' requires contextual interpretation",
+          "interpretative_elements": [
+            {
+              "concept": "reasonably foreseeable misuse",
+              "confidence": "LOW",
+              "llm_evaluation_needed": true,
+              "note": "Highly context-dependent - what constitutes foreseeable misuse varies by system type, deployment context, user sophistication"
+            }
+          ]
+        },
+        {
+          "id": "step-c-post-market",
+          "description": "Evaluation of risks arising from post-market monitoring data",
+          "article": "9(2)(c)",
+          "confidence": "HIGH",
+          "dependencies": [
+            {
+              "type": "reference",
+              "id": "post-market-monitoring",
+              "article_reference": "Article 72",
+              "note": "Requires provider to have established post-market monitoring system"
+            }
+          ]
+        },
+        {
+          "id": "step-d-measures",
+          "description": "Adoption of appropriate and targeted risk management measures to address identified risks",
+          "article": "9(2)(d)",
+          "confidence": "HIGH",
+          "further_requirements": "See risk_management_measures section"
+        }
+      ]
+    },
+    "scope_limitation": {
+      "description": "Only risks that may be reasonably mitigated or eliminated through development/design or provision of adequate technical information",
+      "article": "9(3)",
+      "confidence": "MEDIUM-HIGH",
+      "flag": "LOW_CONFIDENCE: 'reasonably mitigated' is interpretative. What about risks inherent to the use case itself that cannot be designed out?",
+      "llm_evaluation_needed": true
+    },
+    "risk_management_measures": {
+      "description": "Requirements for the measures adopted in step (d)",
+      "operator": "AND",
+      "requirements": [
+        {
+          "id": "interaction-consideration",
+          "description": "Measures shall consider effects and interaction of combined requirements in Section 2",
+          "article": "9(4)",
+          "confidence": "MEDIUM",
+          "note": "Must balance measures to fulfill multiple requirements"
+        },
+        {
+          "id": "residual-risk-acceptable",
+          "description": "Residual risk must be judged acceptable",
+          "article": "9(5)",
+          "confidence": "LOW",
+          "flag": "LOW_CONFIDENCE: 'acceptable' is highly interpretative - no defined threshold",
+          "llm_evaluation_needed": true,
+          "interpretative_elements": [
+            {
+              "concept": "acceptable residual risk",
+              "confidence": "LOW",
+              "note": "Requires risk-benefit analysis, consideration of state of art, sector-specific norms"
+            }
+          ]
+        },
+        {
+          "id": "measure-hierarchy",
+          "description": "Three-tier hierarchy of risk management measures",
+          "article": "9(5)(a-c)",
+          "confidence": "HIGH",
+          "operator": "PRIORITY_SEQUENCE",
+          "measures": [
+            {
+              "priority": 1,
+              "description": "Elimination or reduction of risks through adequate design and development",
+              "article": "9(5)(a)",
+              "requirement": "Eliminate/reduce in as far as technically feasible",
+              "confidence": "HIGH"
+            },
+            {
+              "priority": 2,
+              "description": "Implementation of adequate mitigation and control measures for risks that cannot be eliminated",
+              "article": "9(5)(b)",
+              "requirement": "Where appropriate",
+              "confidence": "HIGH"
+            },
+            {
+              "priority": 3,
+              "description": "Provision of information (Article 13) and training to deployers",
+              "article": "9(5)(c)",
+              "requirement": "Where appropriate",
+              "confidence": "HIGH",
+              "dependencies": [
+                {
+                  "type": "reference",
+                  "article_reference": "Article 13",
+                  "description": "Information to deployers requirement"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "deployer-consideration",
+          "description": "Must consider technical knowledge, experience, education, training expected of deployer and presumable context of use",
+          "article": "9(5) final paragraph",
+          "confidence": "MEDIUM",
+          "flag": "LOW_CONFIDENCE: Requires judgment about deployer capabilities and context",
+          "llm_evaluation_needed": true
+        }
+      ]
+    },
+    "testing_requirements": {
+      "operator": "AND",
+      "requirements": [
+        {
+          "id": "testing-purpose",
+          "description": "Systems shall be tested to identify appropriate risk management measures",
+          "article": "9(6)",
+          "confidence": "HIGH"
+        },
+        {
+          "id": "testing-standards",
+          "description": "Testing must ensure consistent performance for intended purpose and compliance with Section 2 requirements",
+          "article": "9(6)",
+          "confidence": "HIGH"
+        },
+        {
+          "id": "real-world-testing-option",
+          "description": "Testing may include real-world conditions per Article 60",
+          "article": "9(7)",
+          "confidence": "HIGH",
+          "requirement_type": "optional",
+          "dependencies": [
+            {
+              "type": "reference",
+              "article_reference": "Article 60",
+              "description": "Real-world testing conditions"
+            }
+          ]
+        },
+        {
+          "id": "testing-timing",
+          "description": "Testing at any time during development, and in any event prior to market placement/service",
+          "article": "9(8)",
+          "confidence": "HIGH",
+          "requirements": [
+            {
+              "timing": "any time during development",
+              "mandatory": false
+            },
+            {
+              "timing": "prior to market placement or putting into service",
+              "mandatory": true,
+              "confidence": "HIGH"
+            }
+          ]
+        },
+        {
+          "id": "testing-parameters",
+          "description": "Testing against predefined metrics and probabilistic thresholds appropriate to intended purpose",
+          "article": "9(8)",
+          "confidence": "MEDIUM-HIGH",
+          "flag": "LOW_CONFIDENCE: 'appropriate' thresholds is interpretative - varies by use case, risk level, sector",
+          "llm_evaluation_needed": true
+        }
+      ]
+    },
+    "vulnerable_groups": {
+      "description": "Consideration of impact on vulnerable groups",
+      "article": "9(9)",
+      "operator": "AND",
+      "requirements": [
+        {
+          "id": "under-18-consideration",
+          "description": "Consider whether system likely to adversely impact persons under 18",
+          "confidence": "HIGH",
+          "mandatory": true
+        },
+        {
+          "id": "other-vulnerable-groups",
+          "description": "As appropriate, consider other vulnerable groups",
+          "confidence": "MEDIUM",
+          "flag": "LOW_CONFIDENCE: 'other vulnerable groups' is open-ended, 'as appropriate' is discretionary",
+          "llm_evaluation_needed": true
+        }
+      ]
+    },
+    "integration_provision": {
+      "description": "Risk management may be integrated with procedures under other Union law",
+      "article": "9(10)",
+      "confidence": "HIGH",
+      "requirement_type": "optional"
+    }
+  },
+  "shared_nodes_identified": [
+    {
+      "id": "high-risk-classification",
+      "description": "Determination of whether AI system is high-risk",
+      "article_reference": "Article 6",
+      "used_by_multiple_provisions": true,
+      "extraction_recommended": true
+    },
+    {
+      "id": "provider-definition",
+      "description": "Definition of 'provider' as addressee",
+      "article_reference": "Article 3(3)",
+      "used_by_multiple_provisions": true,
+      "extraction_recommended": true
+    },
+    {
+      "id": "intended-purpose",
+      "description": "Concept of 'intended purpose' of AI system",
+      "article_reference": "Article 3(12)",
+      "used_by_multiple_provisions": true,
+      "extraction_recommended": true
+    },
+    {
+      "id": "placing-on-market",
+      "description": "Temporal trigger: placing on market or putting into service",
+      "article_reference": "Article 3(9), (11)",
+      "used_by_multiple_provisions": true,
+      "extraction_recommended": true
+    },
+    {
+      "id": "post-market-monitoring",
+      "description": "Post-market monitoring system obligation",
+      "article_reference": "Article 72",
+      "dependency_type": "required for Article 9(2)(c)",
+      "extraction_recommended": true
+    },
+    {
+      "id": "information-to-deployers",
+      "description": "Obligation to provide information to deployers",
+      "article_reference": "Article 13",
+      "dependency_type": "referenced in Article 9(5)(c)",
+      "extraction_recommended": true
+    }
+  ],
+  "low_confidence_flags": [
+    {
+      "location": "addressee determination",
+      "issue": "Article 9 doesn't explicitly state 'provider' as addressee - inferred from context",
+      "requires_review": true
+    },
+    {
+      "location": "temporal trigger (threshold requirement)",
+      "issue": "Unclear if obligation arises before market placement or only upon placement",
+      "requires_review": true
+    },
+    {
+      "location": "Article 9(2)(b) - reasonably foreseeable misuse",
+      "issue": "Highly context-dependent interpretation needed",
+      "llm_evaluation": true
+    },
+    {
+      "location": "Article 9(3) - reasonably mitigated",
+      "issue": "What about risks inherent to use case that cannot be designed out?",
+      "requires_review": true
+    },
+    {
+      "location": "Article 9(5) - acceptable residual risk",
+      "issue": "No defined threshold for 'acceptable' - requires interpretation",
+      "llm_evaluation": true
+    },
+    {
+      "location": "Article 9(5) final para - deployer consideration",
+      "issue": "Requires judgment about deployer capabilities",
+      "llm_evaluation": true
+    },
+    {
+      "location": "Article 9(8) - appropriate thresholds",
+      "issue": "Context-dependent determination of appropriate testing thresholds",
+      "llm_evaluation": true
+    },
+    {
+      "location": "Article 9(9) - other vulnerable groups",
+      "issue": "Open-ended category, discretionary application",
+      "llm_evaluation": true
+    }
+  ],
+  "metadata": {
+    "created": "2025-10-08",
+    "methodology_version": "v0.1",
+    "status": "draft",
+    "requires_legal_review": true,
+    "next_steps": [
+      "Extract shared nodes to /definitions/ and /shared-requirements/",
+      "Map Article 6 (high-risk classification) as foundational dependency",
+      "Review low-confidence flags with legal expert",
+      "Validate interpretation of temporal trigger",
+      "Define LLM evaluation parameters for interpretative elements"
+    ]
+  }
+}

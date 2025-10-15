@@ -1,0 +1,315 @@
+{
+  "id": "remaining-definitions-batch-1",
+  "title": "Compliance, Governance, and Miscellaneous Definitions",
+  "article": "Article 3 - various",
+  "definitions": {
+    "instructions_for_use": {
+      "id": "instructions-for-use",
+      "article": "3(15)",
+      "definition": "The information provided by the provider to inform the deployer of, in particular, an AI system's intended purpose and proper use",
+      "confidence": "HIGH",
+      "critical_for": "Article 13, determines intended purpose",
+      "provider_obligation": true
+    },
+    "recall": {
+      "id": "recall-ai-system",
+      "article": "3(16)",
+      "definition": "Any measure aiming to achieve the return to the provider or taking out of service or disabling the use of an AI system made available to deployers",
+      "confidence": "HIGH",
+      "post_market_corrective_action": true
+    },
+    "withdrawal": {
+      "id": "withdrawal-ai-system",
+      "article": "3(17)",
+      "definition": "Any measure aiming to prevent an AI system in the supply chain being made available on the market",
+      "confidence": "HIGH",
+      "distinction": "Withdrawal = prevent market availability, Recall = remove from deployers",
+      "pre_vs_post_deployment": "Withdrawal is supply chain focused"
+    },
+    "notifying_authority": {
+      "id": "notifying-authority",
+      "article": "3(19)",
+      "definition": "The national authority responsible for setting up and carrying out the necessary procedures for the assessment, designation and notification of conformity assessment bodies and for their monitoring",
+      "confidence": "HIGH",
+      "governance_role": "Oversees conformity assessment bodies"
+    },
+    "conformity_assessment": {
+      "id": "conformity-assessment",
+      "article": "3(20)",
+      "definition": "The process of demonstrating whether the requirements set out in Chapter III, Section 2 relating to a high-risk AI system have been fulfilled",
+      "confidence": "HIGH",
+      "scope": "Chapter III Section 2 (high-risk requirements)",
+      "critical_process": "Provider responsibility, sometimes third-party"
+    },
+    "conformity_assessment_body": {
+      "id": "conformity-assessment-body",
+      "article": "3(21)",
+      "definition": "A body that performs third-party conformity assessment activities, including testing, certification and inspection",
+      "confidence": "HIGH",
+      "activities": ["testing", "certification", "inspection"]
+    },
+    "notified_body": {
+      "id": "notified-body",
+      "article": "3(22)",
+      "definition": "A conformity assessment body notified in accordance with this Regulation and other relevant Union harmonisation legislation",
+      "confidence": "HIGH",
+      "relationship": "Subset of conformity assessment bodies - officially notified/designated"
+    },
+    "ce_marking": {
+      "id": "ce-marking",
+      "article": "3(24)",
+      "definition": "A marking by which a provider indicates that an AI system is in conformity with the requirements set out in Chapter III, Section 2 and other applicable Union harmonisation legislation providing for its affixing",
+      "confidence": "HIGH",
+      "purpose": "Conformity declaration",
+      "scope": "High-risk AI systems + other harmonised products"
+    },
+    "post_market_monitoring_system": {
+      "id": "post-market-monitoring-system",
+      "article": "3(25)",
+      "definition": "All activities carried out by providers of AI systems to collect and review experience gained from the use of AI systems they place on the market or put into service for the purpose of identifying any need to immediately apply any necessary corrective or preventive actions",
+      "confidence": "HIGH",
+      "provider_obligation": true,
+      "critical_for": "Article 72, Article 9(2)(c) risk management",
+      "purpose": "Identify need for corrective/preventive actions"
+    },
+    "market_surveillance_authority": {
+      "id": "market-surveillance-authority",
+      "article": "3(26)",
+      "definition": "The national authority carrying out the activities and taking the measures pursuant to Regulation (EU) 2019/1020",
+      "confidence": "HIGH",
+      "reference": "EU Market Surveillance Regulation",
+      "role": "Enforcement and monitoring"
+    },
+    "harmonised_standard": {
+      "id": "harmonised-standard",
+      "article": "3(27)",
+      "definition": "A harmonised standard as defined in Article 2(1), point (c), of Regulation (EU) No 1025/2012",
+      "confidence": "HIGH",
+      "reference": "EU Standardisation Regulation",
+      "legal_effect": "Presumption of conformity if applied"
+    },
+    "common_specification": {
+      "id": "common-specification",
+      "article": "3(28)",
+      "definition": "A set of technical specifications as defined in Article 2, point (4) of Regulation (EU) No 1025/2012, providing means to comply with certain requirements established under this Regulation",
+      "confidence": "HIGH",
+      "purpose": "Alternative to harmonised standards",
+      "when_used": "When standards insufficient or absent"
+    },
+    "special_categories_personal_data": {
+      "id": "special-categories-personal-data",
+      "article": "3(37)",
+      "definition": "The categories of personal data referred to in Article 9(1) of Regulation (EU) 2016/679, Article 10 of Directive (EU) 2016/680 and Article 10(1) of Regulation (EU) 2018/1725",
+      "confidence": "HIGH",
+      "reference": "GDPR Article 9(1) - racial/ethnic origin, political opinions, religious/philosophical beliefs, trade union membership, genetic data, biometric data for ID, health data, sex life/sexual orientation",
+      "special_protection": "Heightened restrictions on processing"
+    },
+    "sensitive_operational_data": {
+      "id": "sensitive-operational-data",
+      "article": "3(38)",
+      "definition": "Operational data related to activities of prevention, detection, investigation or prosecution of criminal offences, the disclosure of which could jeopardise the integrity of criminal proceedings",
+      "confidence": "HIGH",
+      "law_enforcement_specific": true,
+      "protection": "Disclosure restrictions"
+    },
+    "publicly_accessible_space": {
+      "id": "publicly-accessible-space",
+      "article": "3(44)",
+      "definition": "Any publicly or privately owned physical place accessible to an undetermined number of natural persons, regardless of whether certain conditions for access may apply, and regardless of the potential capacity restrictions",
+      "confidence": "MEDIUM-HIGH",
+      "critical_for": "Article 5(1)(h) real-time biometric identification prohibition",
+      "scope": "Public OR private ownership - accessibility is key",
+      "examples": ["Streets", "Parks", "Shops", "Stadiums", "Train stations"],
+      "flag": "MEDIUM_CONFIDENCE: 'undetermined number' - excludes purely private venues?"
+    },
+    "law_enforcement_authority": {
+      "id": "law-enforcement-authority",
+      "article": "3(45)",
+      "definition_note": "Definition appears split in source - lines 555-557 show (a) and (b) sub-points",
+      "inferred_definition": "Public authority competent for prevention, investigation, detection or prosecution of criminal offences or execution of criminal penalties, OR other body entrusted by Member State law to exercise public authority for these purposes",
+      "confidence": "MEDIUM",
+      "flag": "SOURCE_INCOMPLETE: Need full text verification"
+    },
+    "law_enforcement": {
+      "id": "law-enforcement",
+      "article": "3(46)",
+      "definition": "Activities carried out by law enforcement authorities or on their behalf for the prevention, investigation, detection or prosecution of criminal offences or the execution of criminal penalties, including safeguarding against and preventing threats to public security",
+      "confidence": "HIGH",
+      "scope": ["Prevention", "Investigation", "Detection", "Prosecution", "Execution of penalties", "Safeguarding public security"]
+    },
+    "ai_office": {
+      "id": "ai-office",
+      "article": "3(47)",
+      "definition": "The Commission's function of contributing to the implementation, monitoring and supervision of AI systems and general-purpose AI models, and AI governance, provided for in Commission Decision of 24 January 2024; references in this Regulation to the AI Office shall be construed as references to the Commission",
+      "confidence": "HIGH",
+      "governance_body": "EU-level oversight",
+      "legal_construction": "References = Commission"
+    },
+    "national_competent_authority": {
+      "id": "national-competent-authority",
+      "article": "3(48)",
+      "definition": "A notifying authority or a market surveillance authority; as regards AI systems put into service or used by Union institutions, agencies, offices and bodies, references to national competent authorities or market surveillance authorities in this Regulation shall be construed as references to the European Data Protection Supervisor",
+      "confidence": "HIGH",
+      "operator": "OR",
+      "includes": ["Notifying authority", "Market surveillance authority"],
+      "special_case": "EU institutions → EDPS"
+    },
+    "serious_incident": {
+      "id": "serious-incident",
+      "article": "3(49)",
+      "definition_reconstructed_from_lines_565_571": "Incident that results in: (a) death or serious harm to health; (b) serious and irreversible disruption of critical infrastructure; (c) infringement of Union law obligations protecting fundamental rights; (d) serious harm to property or environment",
+      "confidence": "HIGH",
+      "operator": "OR",
+      "reporting_obligation": "Article 73",
+      "criticality": "Triggers mandatory provider reporting"
+    },
+    "personal_data": {
+      "id": "personal-data",
+      "article": "3(50)",
+      "definition": "Personal data as defined in Article 4, point (1), of Regulation (EU) 2016/679",
+      "confidence": "HIGH",
+      "reference": "GDPR definition"
+    },
+    "non_personal_data": {
+      "id": "non-personal-data",
+      "article": "3(51)",
+      "definition": "Data other than personal data as defined in Article 4, point (1), of Regulation (EU) 2016/679",
+      "confidence": "HIGH",
+      "negative_definition": true
+    },
+    "profiling": {
+      "id": "profiling",
+      "article": "3(52)",
+      "definition": "Profiling as defined in Article 4, point (4), of Regulation (EU) 2016/679",
+      "confidence": "HIGH",
+      "reference": "GDPR Article 4(4) - automated processing to evaluate personal aspects"
+    },
+    "real_world_testing_plan": {
+      "id": "real-world-testing-plan",
+      "article": "3(53)",
+      "definition": "A document that describes the objectives, methodology, geographical, population and temporal scope, monitoring, organisation and conduct of testing in real-world conditions",
+      "confidence": "HIGH",
+      "required_for": "Article 57, 60 real-world testing"
+    },
+    "sandbox_plan": {
+      "id": "sandbox-plan",
+      "article": "3(54)",
+      "definition": "A document agreed between the participating provider and the competent authority describing the objectives, conditions, timeframe, methodology and requirements for the activities carried out within the sandbox",
+      "confidence": "HIGH",
+      "regulatory_innovation_tool": true
+    },
+    "ai_regulatory_sandbox": {
+      "id": "ai-regulatory-sandbox",
+      "article": "3(55)",
+      "definition": "A controlled framework set up by a competent authority which offers providers or prospective providers of AI systems the possibility to develop, train, validate and test, where appropriate in real-world conditions, an innovative AI system, pursuant to a sandbox plan for a limited time under regulatory supervision",
+      "confidence": "HIGH",
+      "purpose": "Innovation facilitation with regulatory oversight",
+      "time_limited": true
+    },
+    "ai_literacy": {
+      "id": "ai-literacy",
+      "article": "3(56)",
+      "definition": "Skills, knowledge and understanding that allow providers, deployers and affected persons, taking into account their respective rights and obligations in the context of this Regulation, to make an informed deployment of AI systems, as well as to gain awareness about the opportunities and risks of AI and possible harm it can cause",
+      "confidence": "HIGH",
+      "obligation": "Article 4 - providers and deployers must ensure staff AI literacy"
+    },
+    "testing_in_real_world_conditions": {
+      "id": "testing-real-world-conditions",
+      "article": "3(57)",
+      "definition": "The temporary testing of an AI system for its intended purpose in real-world conditions outside a laboratory or otherwise simulated environment, with a view to gathering reliable and robust data and to assessing and verifying the conformity of the AI system with the requirements of this Regulation and it does not qualify as placing the AI system on the market or putting it into service within the meaning of this Regulation, provided that all the conditions laid down in Article 57 or 60 are fulfilled",
+      "confidence": "HIGH",
+      "critical_legal_effect": "NOT placing on market/putting into service if conditions met",
+      "enables": "Pre-market real-world testing without triggering full compliance"
+    },
+    "subject_testing": {
+      "id": "subject-real-world-testing",
+      "article": "3(58)",
+      "definition": "A natural person who participates in testing in real-world conditions",
+      "confidence": "HIGH",
+      "rights": "Informed consent required per 3(59)"
+    },
+    "informed_consent": {
+      "id": "informed-consent",
+      "article": "3(59)",
+      "definition": "A subject's freely given, specific, unambiguous and voluntary expression of his or her willingness to participate in a particular testing in real-world conditions, after having been informed of all aspects of the testing that are relevant to the subject's decision to participate",
+      "confidence": "HIGH",
+      "cumulative_requirements": ["freely given", "specific", "unambiguous", "voluntary", "after full information"],
+      "similar_to": "GDPR consent standard"
+    },
+    "deep_fake": {
+      "id": "deep-fake",
+      "article": "3(60)",
+      "definition": "AI-generated or manipulated image, audio or video content that resembles existing persons, objects, places, entities or events and would falsely appear to a person to be authentic or truthful",
+      "confidence": "HIGH",
+      "critical_element": "False appearance of authenticity",
+      "regulatory_treatment": "Transparency obligations Article 50"
+    },
+    "critical_infrastructure": {
+      "id": "critical-infrastructure",
+      "article": "3(62)",
+      "definition": "Critical infrastructure as defined in Article 2, point (4), of Directive (EU) 2022/2557",
+      "confidence": "HIGH",
+      "reference": "Critical Entities Resilience Directive",
+      "relevance": "High-risk classification, serious incident definition"
+    },
+    "general_purpose_ai_model": {
+      "id": "general-purpose-ai-model",
+      "article": "3(63)",
+      "definition": "An AI model, including where such an AI model is trained with a large amount of data using self-supervision at scale, that displays significant generality and is capable of competently performing a wide range of distinct tasks regardless of the way the model is placed on the market and that can be integrated into a variety of downstream systems or applications, except AI models that are used for research, development or prototyping activities before they are placed on the market",
+      "confidence": "MEDIUM-HIGH",
+      "key_characteristics": ["significant generality", "wide range of distinct tasks", "integrable into downstream systems"],
+      "exclusion": "R&D/prototyping before market placement",
+      "examples": ["Foundation models", "Large language models", "Multimodal models"],
+      "separate_regime": "Chapter V",
+      "flag": "MEDIUM_CONFIDENCE: 'significant generality' and 'competently performing' are interpretative"
+    },
+    "high_impact_capabilities": {
+      "id": "high-impact-capabilities",
+      "article": "3(64)",
+      "definition": "Capabilities that match or exceed the capabilities recorded in the most advanced general-purpose AI models",
+      "confidence": "LOW",
+      "flag": "LOW_CONFIDENCE: Circular/relative definition - depends on state of art",
+      "llm_evaluation_needed": true,
+      "dynamic_threshold": "Evolves with technology"
+    },
+    "systemic_risk": {
+      "id": "systemic-risk",
+      "article": "3(65)",
+      "definition": "A risk that is specific to the high-impact capabilities of general-purpose AI models, having a significant impact on the Union market due to their reach, or due to actual or reasonably foreseeable negative effects on public health, safety, public security, fundamental rights, or the society as a whole, that can be propagated at scale across the value chain",
+      "confidence": "MEDIUM",
+      "cumulative_elements": ["specific to high-impact capabilities", "significant Union market impact", "propagated at scale"],
+      "triggers": "Additional obligations for GP AI models with systemic risk",
+      "flag": "MEDIUM_CONFIDENCE: 'significant impact' and scale thresholds interpretative"
+    },
+    "general_purpose_ai_system": {
+      "id": "general-purpose-ai-system",
+      "article": "3(66)",
+      "definition": "An AI system which is based on a general-purpose AI model and which has the capability to serve a variety of purposes, both for direct use as well as for integration in other AI systems",
+      "confidence": "HIGH",
+      "relationship": "System built on GP AI model",
+      "versatility": "Multi-purpose capability"
+    },
+    "floating_point_operation": {
+      "id": "floating-point-operation",
+      "article": "3(67)",
+      "definition": "Any mathematical operation or assignment involving floating-point numbers, which are a subset of the real numbers typically represented on computers by an integer of fixed precision scaled by an integer exponent of a fixed base",
+      "confidence": "HIGH",
+      "purpose": "Computational metric for GP AI models (FLOPs threshold)",
+      "technical_definition": true
+    },
+    "downstream_provider": {
+      "id": "downstream-provider",
+      "article": "3(68)",
+      "definition": "A provider of an AI system, including a general-purpose AI system, which integrates an AI model, regardless of whether the AI model is provided by themselves and vertically integrated or provided by another entity based on contractual relations",
+      "confidence": "HIGH",
+      "value_chain_position": "Integrates models into systems",
+      "relationship": "May use third-party or own models"
+    }
+  },
+  "metadata": {
+    "batch": 1,
+    "created": "2025-10-08",
+    "status": "complete",
+    "note": "All Article 3 definitions now mapped"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "qp:is_deployer",
+  "title": "Deployer (Art. 3(4)) — Role Gate",
+  "namespace": "qp",
+  "article_refs": [ { "article": 3, "paragraph": 4 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      { "id": "R-1", "label": "All deployer elements hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2"] },
+      { "id": "R-1.1", "label": "Entity type", "kind": "primitive", "question": { "prompt": "Is the entity a natural or legal person, public authority, agency or other body?", "answer_type": "boolean" }, "sources": [ { "article": 3, "paragraph": 4 } ] },
+      { "id": "R-1.2", "label": "Uses AI under its authority and not personal/non‑professional", "kind": "composite", "operator": "allOf", "children": ["R-1.2.1", "R-1.2.2"] },
+      { "id": "R-1.2.1", "label": "Uses an AI system under its authority", "kind": "primitive", "question": { "prompt": "Does the entity use an AI system under its authority?", "answer_type": "boolean" }, "sources": [ { "article": 3, "paragraph": 4 } ] },
+      { "id": "R-1.2.2", "label": "Not a personal non‑professional activity", "kind": "composite", "operator": "not", "children": ["R-1.2.2.1"], "sources": [ { "article": 3, "paragraph": 4 } ],
+        "context": { "items": [ { "label": "Personal/non‑professional exclusion", "kind": "definition", "text": "Use by a natural person for a purely personal, non‑professional activity is excluded from the deployer definition.", "sources": [ { "article": 3, "paragraph": 4 } ] } ] } },
+      { "id": "R-1.2.2.1", "label": "Personal non‑professional use", "kind": "primitive", "question": { "prompt": "Is the use for a purely personal, non‑professional activity?", "answer_type": "boolean" }, "sources": [ { "article": 3, "paragraph": 4 } ] }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-10" }
+}
+

@@ -1,0 +1,135 @@
+{
+  "id": "PN-04",
+  "title": "AI literacy duty for providers and deployers",
+  "type": "duty",
+  "article_refs": [
+    {
+      "article": 4,
+      "quote": "Providers and deployers of AI systems shall take measures to ensure, to their best extent, a sufficient level of AI literacy of their staff and other persons dealing with the operation and use of AI systems on their behalf, taking into account their technical knowledge, experience, education and training and the context the AI systems are to be used in, and considering the persons or groups of persons on whom the AI systems are to be used."
+    },
+    {
+      "article": 3,
+      "point": "(56)",
+      "quote": "‘AI literacy’ means skills, knowledge and understanding that allow providers, deployers and affected persons, taking into account their respective rights and obligations in the context of this Regulation, to make an informed deployment of AI systems, as well as to gain awareness about the opportunities and risks of AI and possible harm it can cause;"
+    }
+  ],
+  "legal_consequence": {
+    "verbatim": "Providers and deployers of AI systems shall take measures to ensure, to their best extent, a sufficient level of AI literacy of their staff and other persons dealing with the operation and use of AI systems on their behalf, taking into account their technical knowledge, experience, education and training and the context the AI systems are to be used in, and considering the persons or groups of persons on whom the AI systems are to be used.",
+    "notes": "Applies to all AI systems (not limited to high-risk). ‘AI literacy’ is defined in Art. 3(56).",
+    "context": {
+      "items": [
+        {
+          "label": "Definition — AI literacy (Art. 3(56))",
+          "kind": "definition",
+          "text": "Skills, knowledge and understanding to make informed deployment; awareness of opportunities, risks, potential harm; tailored to rights/obligations of providers, deployers and affected persons.",
+          "sources": [ { "article": 3, "point": "(56)" } ]
+        },
+        {
+          "label": "Obligation context — target population and factors",
+          "kind": "guidance",
+          "text": "Target: staff and other persons dealing with operation and use of AI systems on the actor’s behalf. Factors: technical knowledge, experience, education, training, context of use, and persons/groups on whom the AI systems are to be used.",
+          "sources": [ { "article": 4 } ]
+        }
+      ]
+    }
+  },
+  "side_info": {
+    "effective_from": "2025-02-02"
+  },
+  "requirements": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "All gates must hold",
+        "kind": "composite",
+        "operator": "allOf",
+        "children": ["R-1.1", "R-1.2"]
+      },
+      {
+        "id": "R-1.1",
+        "label": "Global scope gate (Art. 2)",
+        "kind": "primitive",
+        "ref": "qp:in_scope_art2",
+        "sources": [ { "article": 2 } ],
+        "question": {
+          "prompt": "Does Article 2 scope apply (and no exclusion)?",
+          "answer_type": "boolean",
+          "help": "Check Union nexus (Art. 2(1)) and exclusions (Art. 2(3),(4),(6),(8))."
+        },
+        "context": {
+          "items": [
+            {
+              "label": "Scope — third-country with EU output included",
+              "kind": "guidance",
+              "text": "Art. 2(1)(c): providers/deployers in a third country are in scope when the output is used in the Union.",
+              "sources": [ { "article": 2, "paragraph": 1 } ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "R-1.2",
+        "label": "Actor is provider or deployer",
+        "kind": "composite",
+        "operator": "anyOf",
+        "children": ["R-1.2.1", "R-1.2.2"]
+      },
+      {
+        "id": "R-1.2.1",
+        "label": "Actor is a provider (Art. 3(2))",
+        "kind": "primitive",
+        "ref": "qp:is_provider",
+        "sources": [ { "article": 3, "paragraph": 2, "quote": "‘provider’ means a natural or legal person..." } ],
+        "question": {
+          "prompt": "Is the actor a provider per Art. 3(2)?",
+          "answer_type": "boolean",
+          "help": "Develops or has developed an AI system or GPAI model to place on the market or put into service under own name/mark."
+        },
+        "context": {
+          "items": [
+            {
+              "label": "Provider — core elements",
+              "kind": "definition",
+              "text": "Develops or has developed an AI system or GPAI model and places or puts it into service under own name/trademark (Art. 3(2)).",
+              "sources": [ { "article": 3, "paragraph": 2 } ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "R-1.2.2",
+        "label": "Actor is a deployer (Art. 3(4))",
+        "kind": "primitive",
+        "ref": "qp:is_deployer",
+        "sources": [ { "article": 3, "paragraph": 4, "quote": "‘deployer’ means a natural or legal person, public authority, agency or other body using an AI system under its authority..." } ],
+        "question": {
+          "prompt": "Is the actor a deployer per Art. 3(4)?",
+          "answer_type": "boolean",
+          "help": "Uses an AI system under its authority, except for personal non‑professional activity."
+        },
+        "context": {
+          "items": [
+            {
+              "label": "Deployer — personal/non‑professional exclusion",
+              "kind": "definition",
+              "text": "Deployer excludes use by a natural person for a personal non‑professional activity (Art. 3(4)).",
+              "sources": [ { "article": 3, "paragraph": 4 } ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "shared_refs": [
+    "qp:in_scope_art2",
+    "qp:is_provider",
+    "qp:is_deployer"
+  ],
+  "metadata": {
+    "version": "1.0",
+    "status": "review",
+    "extraction_date": "2025-10-10"
+  },
+  "test_vectors": []
+}

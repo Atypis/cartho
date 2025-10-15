@@ -1,0 +1,110 @@
+{
+  "id": "technical-data-definitions",
+  "title": "Technical and Data Definitions",
+  "article": "Article 3(14), (18), (29)-(33)",
+  "type": "foundational_definitions",
+  "definitions": {
+    "safety_component": {
+      "id": "safety-component",
+      "article": "3(14)",
+      "definition": "A component of a product or of an AI system which fulfils a safety function for that product or AI system, or the failure or malfunctioning of which endangers the health and safety of persons or property",
+      "operator": "OR",
+      "alternative_formulations": [
+        {
+          "description": "Component that fulfils a safety function",
+          "confidence": "HIGH"
+        },
+        {
+          "description": "Component whose failure or malfunctioning endangers health and safety",
+          "confidence": "HIGH",
+          "note": "Negative definition - risk-based"
+        }
+      ],
+      "critical_for": "Article 6(1) high-risk classification pathway",
+      "examples_implied": [
+        "Braking system AI in autonomous vehicle",
+        "Medical device diagnostic component",
+        "Industrial machinery safety control"
+      ],
+      "confidence": "HIGH",
+      "dependencies": {"references": ["AI system (3(1))"]}
+    },
+    "performance": {
+      "id": "performance-ai-system",
+      "article": "3(18)",
+      "definition": "The ability of an AI system to achieve its intended purpose",
+      "confidence": "HIGH",
+      "note": "Functional definition - links to intended purpose",
+      "implications": [
+        "Performance measured against intended purpose",
+        "Article 15 accuracy/robustness requirements",
+        "Testing requirements (Art 9)"
+      ],
+      "dependencies": {"references": ["AI system (3(1))", "Intended purpose (3(12))"]}
+    },
+    "training_data": {
+      "id": "training-data",
+      "article": "3(29)",
+      "definition": "Data used for training an AI system through fitting its learnable parameters",
+      "confidence": "HIGH",
+      "technical_note": "ML-specific - refers to parameter optimization",
+      "scope": "Supervised, unsupervised, reinforcement learning",
+      "critical_for": "Article 10 data governance requirements",
+      "dependencies": {"references": ["AI system (3(1))"]}
+    },
+    "validation_data": {
+      "id": "validation-data",
+      "article": "3(30)",
+      "definition": "Data used for providing an evaluation of the trained AI system and for tuning its non-learnable parameters and its learning process in order, inter alia, to prevent underfitting or overfitting",
+      "confidence": "HIGH",
+      "technical_note": "Hyperparameter tuning, model selection",
+      "purpose": "Prevent overfitting/underfitting",
+      "relationship_to_training": "Separate from training data or may overlap per Art 3(31)",
+      "dependencies": {"references": ["AI system (3(1))", "Training data (3(29))"]}
+    },
+    "validation_data_set": {
+      "id": "validation-data-set",
+      "article": "3(31)",
+      "definition": "A separate data set or part of the training data set, either as a fixed or variable split",
+      "confidence": "HIGH",
+      "flexibility": "Can be separate or split from training data",
+      "note": "Recognizes practical ML workflows",
+      "dependencies": {"references": ["Training data (3(29))", "Validation data (3(30))"]}
+    },
+    "testing_data": {
+      "id": "testing-data",
+      "article": "3(32)",
+      "definition": "Data used for providing an independent evaluation of the AI system in order to confirm the expected performance of that system before its placing on the market or putting into service",
+      "confidence": "HIGH",
+      "critical_characteristics": [
+        "Independent evaluation",
+        "Confirms expected performance",
+        "Before market placement/service"
+      ],
+      "temporal_trigger": "Pre-market/pre-service",
+      "critical_for": "Article 9(6)-(8) testing requirements",
+      "dependencies": {"references": ["AI system (3(1))", "Performance (3(18))", "Placing on market (3(9))", "Putting into service (3(11))"]}
+    },
+    "input_data": {
+      "id": "input-data",
+      "article": "3(33)",
+      "definition": "Data provided to or directly acquired by an AI system on the basis of which the system produces an output",
+      "confidence": "HIGH",
+      "scope": "Operational/inference data, not training",
+      "relationship": "Distinct from training/validation/testing - this is runtime data",
+      "critical_for": "Article 12 logging requirements",
+      "dependencies": {"references": ["AI system (3(1))"]}
+    }
+  },
+  "data_lifecycle_synthesis": {
+    "development_phase": ["Training data (3(29))", "Validation data (3(30))", "Testing data (3(32))"],
+    "operational_phase": ["Input data (3(33))"],
+    "note": "Clear separation between development and operational data"
+  },
+  "metadata": {
+    "foundational": true,
+    "shared_node": true,
+    "created": "2025-10-08",
+    "status": "complete"
+  }
+}

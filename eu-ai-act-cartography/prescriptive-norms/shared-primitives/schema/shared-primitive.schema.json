@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/shared-primitive.schema.json",
+  "title": "Shared Primitive Predicate (EU AI Act)",
+  "type": "object",
+  "required": ["id", "title", "namespace", "article_refs", "logic"],
+  "properties": {
+    "id": { "type": "string", "description": "Namespaced id (e.g., qp:in_scope_art2)" },
+    "title": { "type": "string" },
+    "namespace": { "type": "string", "enum": ["qp", "sys", "ctx", "ex"] },
+    "article_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["article"],
+        "properties": {
+          "article": { "type": "integer" },
+          "paragraph": { "type": ["integer", "string"] },
+          "point": { "type": "string" },
+          "quote": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "logic": {
+      "type": "object",
+      "required": ["root", "nodes"],
+      "properties": {
+        "root": { "type": "string", "pattern": "^R-[0-9]+(\\.[0-9]+)*$" },
+        "nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Node" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "review", "final"] },
+        "extraction_date": { "type": "string", "format": "date" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "Node": {
+      "type": "object",
+      "required": ["id", "kind"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^R-[0-9]+(\\.[0-9]+)*$" },
+        "label": { "type": "string" },
+        "kind": { "type": "string", "enum": ["composite", "primitive", "exception"] },
+        "operator": { "type": "string", "enum": ["allOf", "anyOf", "not", "xor"] },
+        "children": { "type": "array", "items": { "type": "string", "pattern": "^R-[0-9]+(\\.[0-9]+)*$" } },
+        "ref": { "type": "string", "description": "Reference to another shared primitive id" },
+        "question": {
+          "type": "object",
+          "properties": {
+            "prompt": { "type": "string" },
+            "answer_type": { "type": "string", "enum": ["boolean", "enum", "text", "number", "date"] },
+            "options": { "type": "array", "items": { "type": "string" } },
+            "help": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["article"],
+            "properties": {
+              "article": { "type": "integer" },
+              "paragraph": { "type": ["integer", "string"] },
+              "point": { "type": "string" },
+              "quote": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "context": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/ContextItem" }
+            },
+            "refs": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "composite" } } }, "then": { "required": ["operator", "children"] } },
+        { "if": { "properties": { "kind": { "const": "primitive" } } }, "then": { "required": ["question"], "properties": { "children": { "maxItems": 0 } } } }
+      ]
+    },
+    "ContextItem": {
+      "type": "object",
+      "required": ["label"],
+      "properties": {
+        "label": { "type": "string" },
+        "kind": { "type": "string", "enum": ["definition", "factor", "guidance", "note"], "default": "definition" },
+        "text": { "type": "string" },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["article"],
+            "properties": {
+              "article": { "type": "integer" },
+              "paragraph": { "type": ["integer", "string"] },
+              "point": { "type": "string" },
+              "quote": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
+

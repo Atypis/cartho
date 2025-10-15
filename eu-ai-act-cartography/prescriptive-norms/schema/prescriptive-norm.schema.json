@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/prescriptive-norm.schema.json",
+  "title": "Prescriptive Norm (EU AI Act)",
+  "type": "object",
+  "required": ["id", "title", "type", "legal_consequence", "article_refs", "requirements"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable PN identifier (e.g., PN-16C)",
+      "pattern": "^PN-[0-9]{1,3}[A-Za-z0-9\-]*$"
+    },
+    "title": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": ["duty", "prohibition", "permission"],
+      "description": "Outward-facing norm type"
+    },
+    "article_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["article"],
+        "properties": {
+          "article": { "type": "integer", "minimum": 1 },
+          "paragraph": { "type": ["integer", "string"] },
+          "point": { "type": "string" },
+          "subpoint": { "type": "string" },
+          "quote": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "legal_consequence": {
+      "type": "object",
+      "required": ["verbatim"],
+      "properties": {
+        "verbatim": { "type": "string", "description": "Exact legal text of the consequence (copy/paste)" },
+        "notes": { "type": "string" },
+        "context": {
+          "type": "object",
+          "properties": {
+            "items": { "type": "array", "items": { "$ref": "#/$defs/ContextItem" } },
+            "refs": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "side_info": {
+      "type": "object",
+      "description": "Optional side information (not primary at this stage)",
+      "properties": {
+        "effective_from": { "type": "string", "format": "date" },
+        "effective_until": { "type": "string", "format": "date" },
+        "penalty_tier": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "requirements": {
+      "type": "object",
+      "required": ["root"],
+      "properties": {
+        "root": { "type": "string", "description": "ID of the root requirement node (e.g., R-1)" },
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/RequirementNode" }
+        },
+        "requirements_context": {
+          "type": "array",
+          "description": "Context that applies to the requirements as a whole (rare)",
+          "items": { "$ref": "#/$defs/ContextItem" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "interpretation": {
+      "type": "array",
+      "description": "Non-gating interpretive items that clarify meaning/scope of the legal consequence (definitions, factors to consider, guidance). These DO NOT affect applicability evaluation.",
+      "items": { "$ref": "#/$defs/InterpretationItem" }
+    },
+    "shared_refs": {
+      "type": "array",
+      "description": "Referenced shared primitives used in this PN",
+      "items": { "type": "string" }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "review", "final"] },
+        "authors": { "type": "array", "items": { "type": "string" } },
+        "reviewers": { "type": "array", "items": { "type": "string" } },
+        "extraction_date": { "type": "string", "format": "date" }
+      },
+      "additionalProperties": false
+    },
+    "test_vectors": {
+      "type": "array",
+      "description": "Optional minimal fact patterns to sanity-check evaluation",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "facts": { "type": "object" },
+          "expected_applies": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": {
+    "RequirementNode": {
+      "type": "object",
+      "required": ["id", "label", "kind"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^R-[0-9]+(\.[0-9]+)*$" },
+        "label": { "type": "string", "description": "Human-readable short title for the node" },
+        "kind": {
+          "type": "string",
+          "enum": ["composite", "primitive", "exception"],
+          "description": "Node type: composite (logic), primitive (atomic check), exception (defeater)"
+        },
+        "operator": {
+          "type": "string",
+          "enum": ["allOf", "anyOf", "not", "xor"],
+          "description": "For composite nodes: Boolean operator over children"
+        },
+        "children": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^R-[0-9]+(\.[0-9]+)*$" },
+          "description": "Child node IDs"
+        },
+        "ref": {
+          "type": "string",
+          "description": "Shared primitive reference (e.g., qp:is_provider, qp:is_high_risk, sys:is_real_time_rbi)"
+        },
+        "context": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/ContextItem" }
+            },
+            "refs": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Optional references to PN-level or shared context items"
+            }
+          },
+          "additionalProperties": false
+        },
+        "question": {
+          "type": "object",
+          "properties": {
+            "prompt": { "type": "string" },
+            "answer_type": { "type": "string", "enum": ["boolean", "enum", "text", "number", "date"] },
+            "options": { "type": "array", "items": { "type": "string" } },
+            "help": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["article"],
+            "properties": {
+              "article": { "type": "integer" },
+              "paragraph": { "type": ["integer", "string"] },
+              "point": { "type": "string" },
+              "quote": { "type": "string" },
+              "quote_hash": { "type": "string", "description": "SHA-256 of normalised quote" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "notes": { "type": "string" },
+        "ui": {
+          "type": "object",
+          "properties": {
+            "display_order": { "type": "number" },
+            "info_required": { "type": "boolean", "description": "If true, evaluator should collect info even when outcome is inferred" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "composite" } } },
+          "then": { "required": ["operator", "children"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "primitive" } } },
+          "then": { "required": ["ref"], "properties": { "children": { "maxItems": 0 } } }
+        }
+      ]
+    },
+    "ContextItem": {
+      "type": "object",
+      "required": ["label"],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "kind": { "type": "string", "enum": ["definition", "factor", "guidance", "note"], "default": "definition" },
+        "text": { "type": "string" },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["article"],
+            "properties": {
+              "article": { "type": "integer" },
+              "paragraph": { "type": ["integer", "string"] },
+              "point": { "type": "string" },
+              "quote": { "type": "string" },
+              "quote_hash": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

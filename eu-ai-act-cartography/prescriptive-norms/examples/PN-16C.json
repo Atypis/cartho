@@ -1,0 +1,75 @@
+{
+  "id": "PN-16C",
+  "title": "Quality management system for providers of high-risk AI systems",
+  "type": "duty",
+  "article_refs": [
+    { "article": 16, "point": "(c)", "quote": "have a quality management system in place which complies with Article 17;" },
+    { "article": 17, "quote": "Providers of high-risk AI systems shall put a quality management system in place that ensures compliance with this Regulation." }
+  ],
+  "legal_consequence": {
+    "verbatim": "Providers of high-risk AI systems shall put a quality management system in place that ensures compliance with this Regulation (Article 17)."
+  },
+  "side_info": {
+    "effective_from": "2026-08-02"
+  },
+  "applicability": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "All gates must hold",
+        "kind": "composite",
+        "operator": "allOf",
+        "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4"]
+      },
+      {
+        "id": "R-1.1",
+        "label": "Global scope gate (Art. 2)",
+        "kind": "primitive",
+        "ref": "qp:in_scope_art2",
+        "sources": [ { "article": 2 } ],
+        "question": { "prompt": "Does Art. 2 scope apply and no exclusion?", "answer_type": "boolean" }
+      },
+      {
+        "id": "R-1.2",
+        "label": "Actor is provider",
+        "kind": "primitive",
+        "ref": "qp:is_provider",
+        "sources": [ { "article": 3, "paragraph": 2, "quote": "‘provider’ means a natural or legal person..." } ],
+        "question": { "prompt": "Is the actor a provider per Art. 3(2)?", "answer_type": "boolean", "help": "Develops or has developed AI system/model and places/puts into service under own name/mark." }
+      },
+      {
+        "id": "R-1.3",
+        "label": "System is high-risk (Art. 6)",
+        "kind": "primitive",
+        "ref": "qp:is_high_risk",
+        "sources": [ { "article": 6 } ],
+        "question": { "prompt": "Is the AI system high-risk under Art. 6?", "answer_type": "boolean" }
+      },
+      {
+        "id": "R-1.4",
+        "label": "Not product-safety carve-out (Art. 2(2))",
+        "kind": "composite",
+        "operator": "not",
+        "children": ["R-1.4.1"],
+        "notes": "For Annex I Section B product pathway under Art. 6(1), Chapter III obligations may not apply per Art. 2(2)."
+      },
+      {
+        "id": "R-1.4.1",
+        "label": "Product-safety pathway exclusion",
+        "kind": "primitive",
+        "ref": "ex:art2_2_product_safety_pathway",
+        "sources": [ { "article": 2, "paragraph": 2, "quote": "only Article 6(1), Articles 102 to 109 and Article 112 apply" } ],
+        "question": { "prompt": "Is the system high-risk solely via Art. 6(1) and related to Annex I Section B product safety legislation?", "answer_type": "boolean" }
+      }
+    ]
+  },
+  "shared_refs": [
+    "qp:in_scope_art2",
+    "qp:is_provider",
+    "qp:is_high_risk",
+    "ex:art2_2_product_safety_pathway"
+  ],
+  "metadata": { "version": "1.0", "status": "draft" }
+}
+

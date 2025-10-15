@@ -1,0 +1,70 @@
+{
+  "id": "PN-05E",
+  "title": "Ban on untargeted scraping to build facial recognition databases",
+  "type": "prohibition",
+  "article_refs": [
+    { "article": 5, "paragraph": 1, "point": "(e)", "quote": "the placing on the market, the putting into service for this specific purpose, or the use of AI systems that create or expand facial recognition databases through the untargeted scraping of facial images from the internet or CCTV footage;" }
+  ],
+  "legal_consequence": {
+    "verbatim": "Do not place, put into service for this specific purpose, or use AI systems that create or expand facial recognition databases through untargeted scraping of facial images from the internet or CCTV footage."
+  },
+  "applicability": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "All gates must hold",
+        "kind": "composite",
+        "operator": "allOf",
+        "children": ["R-1.1", "R-1.2", "R-1.3"]
+      },
+      {
+        "id": "R-1.1",
+        "label": "Global scope gate (Art. 2)",
+        "kind": "primitive",
+        "ref": "qp:in_scope_art2",
+        "sources": [ { "article": 2 } ],
+        "question": { "prompt": "Does Art. 2 scope apply and no exclusion?", "answer_type": "boolean" }
+      },
+      {
+        "id": "R-1.2",
+        "label": "System is AI",
+        "kind": "primitive",
+        "ref": "qp:is_ai_system",
+        "sources": [ { "article": 3, "quote": "‘AI system’ means..." } ],
+        "question": { "prompt": "Is the system an AI system under Art. 3?", "answer_type": "boolean" }
+      },
+      {
+        "id": "R-1.3",
+        "label": "Practice = untargeted scraping creating/expanding facial recognition DB",
+        "kind": "composite",
+        "operator": "allOf",
+        "children": ["R-1.3.1", "R-1.3.2"]
+      },
+      {
+        "id": "R-1.3.1",
+        "label": "Untargeted scraping from internet or CCTV",
+        "kind": "primitive",
+        "ref": "sys:is_untargeted_scraping_faces",
+        "sources": [ { "article": 5, "paragraph": 1, "point": "(e)" } ],
+        "question": { "prompt": "Does the system scrape facial images untargetedly from internet or CCTV?", "answer_type": "boolean" }
+      },
+      {
+        "id": "R-1.3.2",
+        "label": "Creates or expands a facial recognition database",
+        "kind": "primitive",
+        "ref": "sys:is_facial_recognition_db_creation",
+        "sources": [ { "article": 5, "paragraph": 1, "point": "(e)" } ],
+        "question": { "prompt": "Does the system create or expand a facial recognition database?", "answer_type": "boolean" }
+      }
+    ]
+  },
+  "shared_refs": [
+    "qp:in_scope_art2",
+    "qp:is_ai_system",
+    "sys:is_untargeted_scraping_faces",
+    "sys:is_facial_recognition_db_creation"
+  ],
+  "metadata": { "version": "1.0", "status": "draft" }
+}
+

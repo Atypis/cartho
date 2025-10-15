@@ -1,0 +1,94 @@
+{
+  "id": "ai-system",
+  "article": "3(1)",
+  "title": "AI system",
+  "definition": "A machine-based system that is designed to operate with varying levels of autonomy and that may exhibit adaptiveness after deployment, and that, for explicit or implicit objectives, infers, from the input it receives, how to generate outputs such as predictions, content, recommendations, or decisions that can influence physical or virtual environments",
+  "type": "foundational_definition",
+  "confidence": "HIGH",
+  "cumulative_elements": {
+    "description": "ALL elements must be satisfied",
+    "operator": "AND",
+    "elements": [
+      {
+        "id": "machine-based",
+        "text": "machine-based system",
+        "confidence": "HIGH",
+        "note": "Not purely human decision-making"
+      },
+      {
+        "id": "designed-autonomy",
+        "text": "designed to operate with varying levels of autonomy",
+        "confidence": "MEDIUM",
+        "flag": "LOW_CONFIDENCE: 'varying levels of autonomy' - spectrum includes fully automated to human-in-the-loop. What minimum autonomy threshold?",
+        "llm_evaluation_needed": true,
+        "note": "Autonomy is spectrum not binary"
+      },
+      {
+        "id": "may-exhibit-adaptiveness",
+        "text": "may exhibit adaptiveness after deployment",
+        "confidence": "HIGH",
+        "note": "MAY not MUST - adaptiveness optional",
+        "interpretation": "Includes both adaptive and non-adaptive systems"
+      },
+      {
+        "id": "for-objectives",
+        "text": "for explicit or implicit objectives",
+        "confidence": "HIGH",
+        "operator": "OR",
+        "note": "Purpose-driven, whether stated or implied"
+      },
+      {
+        "id": "infers",
+        "text": "infers, from the input it receives, how to generate outputs",
+        "confidence": "MEDIUM-HIGH",
+        "note": "'Infers' suggests some form of computation/processing beyond pure rule execution",
+        "flag": "MEDIUM_CONFIDENCE: Does simple if-then logic constitute 'inference'? Or requires statistical/ML inference?",
+        "critical_question": "Boundary between traditional software and AI system unclear"
+      },
+      {
+        "id": "outputs",
+        "text": "outputs such as predictions, content, recommendations, or decisions",
+        "confidence": "HIGH",
+        "operator": "OR",
+        "note": "Non-exhaustive list ('such as')",
+        "examples": ["predictions", "content", "recommendations", "decisions"]
+      },
+      {
+        "id": "influence-environments",
+        "text": "can influence physical or virtual environments",
+        "confidence": "MEDIUM-HIGH",
+        "operator": "OR",
+        "flag": "MEDIUM_CONFIDENCE: 'can influence' - potential vs. actual influence? Trivial vs. material influence?",
+        "note": "Very broad - almost all software influences virtual environments"
+      }
+    ]
+  },
+  "critical_interpretative_questions": [
+    "What distinguishes AI system from traditional algorithmic software?",
+    "Does simple automation (rule-based) count as 'inference'?",
+    "What minimum level of autonomy required?",
+    "Does 'can influence' include trivial/indirect influence?",
+    "How to handle edge cases: calculators, compilers, database queries?"
+  ],
+  "dependencies": {
+    "definitions_referenced": [],
+    "concepts_undefined_but_used": [
+      "autonomy (undefined)",
+      "adaptiveness (undefined)",
+      "inference (undefined)",
+      "influence (undefined)"
+    ]
+  },
+  "used_by": "All provisions - determines material scope",
+  "confidence_assessment": {
+    "overall": "MEDIUM-HIGH",
+    "definitional_clarity": "MEDIUM - boundary cases require interpretation",
+    "practical_application": "MEDIUM - will require case-by-case LLM evaluation for edge cases"
+  },
+  "metadata": {
+    "foundational": true,
+    "shared_node": true,
+    "created": "2025-10-08",
+    "status": "complete"
+  }
+}
