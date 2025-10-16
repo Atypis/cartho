@@ -7,6 +7,7 @@
  * Handles status visualization, numbering, and interaction
  */
 
+import { useState } from 'react';
 import type { RequirementNode, EvaluationState, NodeStatus, EvaluationResult } from '@/lib/evaluation/types';
 import { shouldSkipNode } from '@/lib/evaluation/skip-logic';
 
@@ -31,6 +32,7 @@ export function RequirementBlock({
   depth,
   selectedNodeId,
 }: RequirementBlockProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const state = evaluationStates.find(s => s.nodeId === node.id);
   const status = state?.status || 'pending';
   const result = state?.result;
@@ -38,26 +40,39 @@ export function RequirementBlock({
   const isSkipped = shouldSkipNode(node.id, allNodes, evaluationStates);
   const isSelected = selectedNodeId === node.id;
 
+  // Show detail panel if there's content to show
+  const hasDetails = (node.kind === 'primitive' && node.question) ||
+                     (node.context?.items && node.context.items.length > 0) ||
+                     (status === 'completed' && result);
+
   return (
     <div className="space-y-3">
       {/* Main Card */}
       <div
         className={`
-          bg-white border rounded-lg p-4 cursor-pointer
-          transition-all duration-200
+          bg-white border rounded-lg overflow-hidden
+          transition-all duration-300 ease-in-out
           ${isSkipped ? 'opacity-60' : 'opacity-100'}
           ${getStatusBorderClass(status, result, isSelected)}
-          hover:shadow-md
+          ${isExpanded ? 'shadow-lg ring-2 ring-blue-500 ring-opacity-50' : 'hover:shadow-md'}
         `}
-        onClick={() => onNodeClick(node.id)}
       >
+        <div
+          className="p-4 cursor-pointer group"
+          onClick={() => {
+            if (hasDetails) {
+              setIsExpanded(!isExpanded);
+            }
+            onNodeClick(node.id);
+          }}
+        >
         {/* Number + Label */}
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 text-xs font-mono text-neutral-400 w-8 mt-0.5">
             {numberPrefix}.
           </div>
           <div className="flex-1 min-w-0">
-            <div className="font-medium text-sm text-neutral-900 leading-snug">
+            <div className="font-medium text-sm text-neutral-900 leading-snug group-hover:text-neutral-700 transition-colors">
               {node.label}
             </div>
             {/* Operator Badge for Composites */}
@@ -69,8 +84,25 @@ export function RequirementBlock({
               </div>
             )}
           </div>
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 flex items-center gap-2">
             {getStatusIcon(status, result, isSkipped)}
+            {hasDetails && (
+              <svg
+                className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${
+                  isExpanded ? 'rotate-180' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            )}
           </div>
         </div>
 
@@ -79,6 +111,81 @@ export function RequirementBlock({
           <div className="mt-3 flex items-center gap-1.5 text-xs text-neutral-600">
             <div className="w-1 h-1 rounded-full bg-neutral-400" />
             {(result.confidence * 100).toFixed(0)}% confidence
+          </div>
+        )}
+        </div>
+
+        {/* Expandable Detail Panel */}
+        {isExpanded && hasDetails && (
+          <div className="border-t border-neutral-200 bg-gradient-to-b from-neutral-50 to-white p-5 animate-in slide-in-from-top-2 fade-in duration-300">
+            {/* Question (for primitive nodes) */}
+            {node.kind === 'primitive' && node.question && (
+              <div className="mb-4">
+                <div className="text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2">
+                  Question
+                </div>
+                <div className="text-sm text-neutral-900 leading-relaxed">
+                  {node.question.prompt}
+                </div>
+                {node.question.help && (
+                  <div className="mt-2 text-xs text-neutral-600 bg-white rounded p-3 leading-relaxed">
+                    <span className="font-medium">Guidance:</span> {node.question.help}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Legal Context */}
+            {node.context?.items && node.context.items.length > 0 && (
+              <div className="mb-4">
+                <div className="text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2">
+                  Legal Context
+                </div>
+                <div className="space-y-3">
+                  {node.context.items.map((item, idx) => (
+                    <div key={idx} className="pl-3 border-l-2 border-neutral-300">
+                      <div className="text-xs font-medium text-neutral-700 mb-1">
+                        {item.label}
+                      </div>
+                      <div className="text-xs text-neutral-600 leading-relaxed">
+                        {item.text}
+                      </div>
+                      {item.sources?.[0] && (
+                        <div className="mt-1 text-xs font-mono text-neutral-500">
+                          Art. {item.sources[0].article}
+                          {item.sources[0].paragraph && `(${item.sources[0].paragraph})`}
+                          {item.sources[0].point && ` pt. ${item.sources[0].point}`}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Evaluation Result */}
+            {status === 'completed' && result && (
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2">
+                  Evaluation Result
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-bold ${
+                      result.decision ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {result.decision ? 'YES ✓' : 'NO ✗'}
+                    </span>
+                    <span className="text-xs text-neutral-600">
+                      {(result.confidence * 100).toFixed(0)}% confidence
+                    </span>
+                  </div>
+                  <div className="text-xs text-neutral-700 bg-white rounded p-3 leading-relaxed">
+                    {result.reasoning}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

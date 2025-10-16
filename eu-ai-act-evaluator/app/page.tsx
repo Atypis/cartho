@@ -394,16 +394,6 @@ export default function Home() {
                 selectedNodeId={selectedNodeId}
               />
             </div>
-
-            {selectedNodeId && (evaluationData as any).nodes && (
-              <div className="bg-white border-t border-neutral-200 p-6 max-h-[400px] overflow-y-auto">
-                <DetailPanel
-                  node={(evaluationData as any).nodes.find((n: RequirementNode) => n.id === selectedNodeId)!}
-                  state={(evaluationData as any).evaluationStates?.find((s: EvaluationState) => s.nodeId === selectedNodeId)}
-                  onClose={() => setSelectedNodeId(null)}
-                />
-              </div>
-            )}
           </>
         )}
 

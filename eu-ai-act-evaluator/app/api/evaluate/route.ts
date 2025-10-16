@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   try {
     console.log('📥 [API] Received evaluation request');
 
-    const { prescriptiveNorm, sharedPrimitives, caseInput } = await req.json();
+    const { prescriptiveNorm, sharedPrimitives, caseInput, evaluationId } = await req.json();
 
     if (!prescriptiveNorm || !caseInput) {
       console.log('❌ [API] Missing required fields');
@@ -30,11 +30,25 @@ export async function POST(req: NextRequest) {
     console.log(`📋 [API] Evaluating PN: ${prescriptiveNorm.id}`);
     console.log(`📄 [API] Case input length: ${caseInput.length} chars`);
 
-    // Create evaluation engine
-    const engine = new EvaluationEngine(
-      prescriptiveNorm as PrescriptiveNorm,
-      sharedPrimitives as SharedPrimitive[] || []
-    );
+    // Create a stream for progress updates
+    const encoder = new TextEncoder();
+    const stream = new TransformStream();
+    const writer = stream.writable.getWriter();
+
+    // Start evaluation in background
+    (async () => {
+      try {
+        // Create evaluation engine with progress callback
+        const engine = new EvaluationEngine(
+          prescriptiveNorm as PrescriptiveNorm,
+          sharedPrimitives as SharedPrimitive[] || [],
+          async (states) => {
+            // Stream progress update
+            await writer.write(
+              encoder.encode(`data: ${JSON.stringify({ type: 'progress', states })}\n\n`)
+            );
+          }
+        );
 
     console.log(`🔧 [API] Engine created, starting evaluation...`);
 
@@ -72,27 +86,45 @@ export async function POST(req: NextRequest) {
       return parsed;
     };
 
-    // Run evaluation
-    console.log(`⚙️  [ENGINE] Starting tree traversal...`);
-    const result = await engine.evaluate(caseInput, evaluateWithGPT5);
+        // Run evaluation
+        console.log(`⚙️  [ENGINE] Starting tree traversal...`);
+        const result = await engine.evaluate(caseInput, evaluateWithGPT5);
 
-    console.log(`🎯 [API] Evaluation complete!`);
-    console.log(`   Total GPT-5 requests: ${requestCount}`);
-    console.log(`   Final verdict: ${result.compliant ? 'COMPLIANT ✓' : 'NON-COMPLIANT ✗'}`);
-    console.log(`   Evaluated nodes: ${result.states.length}`);
+        console.log(`🎯 [API] Evaluation complete!`);
+        console.log(`   Total GPT-5 requests: ${requestCount}`);
+        console.log(`   Final verdict: ${result.compliant ? 'COMPLIANT ✓' : 'NON-COMPLIANT ✗'}`);
+        console.log(`   Evaluated nodes: ${result.states.length}`);
 
-    return new Response(
-      JSON.stringify({
-        compliant: result.compliant,
-        states: result.states,
-      }),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        // Send final result
+        await writer.write(
+          encoder.encode(`data: ${JSON.stringify({ type: 'complete', result })}\n\n`)
+        );
+        await writer.close();
+      } catch (error) {
+        console.error('❌ [API] Evaluation error:', error);
+        await writer.write(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              type: 'error',
+              error: error instanceof Error ? error.message : 'Unknown error',
+            })}\n\n`
+          )
+        );
+        await writer.close();
       }
-    );
+    })();
+
+    // Return streaming response
+    return new Response(stream.readable, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
   } catch (error) {
-    console.error('❌ [API] Evaluation error:', error);
+    console.error('❌ [API] Setup error:', error);
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : 'Unknown error',
