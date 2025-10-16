@@ -167,14 +167,18 @@ export function EvaluationProgress({
               ))}
             </div>
 
-            {/* Cancel Button */}
-            {isRunning && onCancel && (
+            {/* Action Button */}
+            {onCancel && (
               <div className="border-t border-neutral-200 p-3">
                 <button
                   onClick={onCancel}
-                  className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isRunning
+                      ? 'bg-red-600 hover:bg-red-700 text-white'
+                      : 'bg-neutral-600 hover:bg-neutral-700 text-white'
+                  }`}
                 >
-                  Cancel Evaluation
+                  {isRunning ? 'Cancel Evaluation' : 'Close'}
                 </button>
               </div>
             )}

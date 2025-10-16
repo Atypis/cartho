@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { RequirementsGrid } from '@/components/evaluation/RequirementsGrid';
 import { DetailPanel } from '@/components/evaluation/DetailPanel';
+import { EvaluationProgress } from '@/components/evaluation/EvaluationProgress';
 import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/types';
 import type { PrescriptiveNorm, SharedPrimitive, EvaluationState, RequirementNode } from '@/lib/evaluation/types';
@@ -38,6 +39,12 @@ export default function Home() {
   const [canvasView, setCanvasView] = useState<'welcome' | 'evaluation' | 'summary'>('welcome');
   const [evaluationData, setEvaluationData] = useState<EvaluationResult | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  // Evaluation progress state
+  const [runningEvaluationId, setRunningEvaluationId] = useState<string | null>(null);
+  const [evaluationStates, setEvaluationStates] = useState<EvaluationState[]>([]);
+  const [totalNodes, setTotalNodes] = useState(0);
+  const [isEvaluationComplete, setIsEvaluationComplete] = useState(false);
 
   // Load chat sessions on mount and create default if none exist
   useEffect(() => {
@@ -191,6 +198,128 @@ export default function Home() {
       evaluationStates,
     } as any);
     setCanvasView('evaluation');
+  };
+
+  const runEvaluation = async (evaluationId: string, useCaseId: string, pnIds: string[]) => {
+    try {
+      setRunningEvaluationId(evaluationId);
+      setEvaluationStates([]);
+      setIsEvaluationComplete(false);
+
+      // Load use case description
+      const { data: useCase } = await supabase
+        .from('use_cases')
+        .select('*')
+        .eq('id', useCaseId)
+        .single();
+
+      if (!useCase) throw new Error('Use case not found');
+
+      // Load PN and shared primitives
+      const pnDataList: PrescriptiveNorm[] = [];
+      const sharedPrimitiveIds = new Set<string>();
+
+      for (const pnId of pnIds) {
+        const response = await fetch(`/data/prescriptive-norms/${pnId}.json`);
+        if (response.ok) {
+          const pnData: PrescriptiveNorm = await response.json();
+          pnDataList.push(pnData);
+          if (pnData.shared_refs) {
+            pnData.shared_refs.forEach(id => sharedPrimitiveIds.add(id));
+          }
+        }
+      }
+
+      const sharedPrimitives: SharedPrimitive[] = [];
+      for (const spId of Array.from(sharedPrimitiveIds)) {
+        const spFileName = spId.replace(':', '-');
+        const response = await fetch(`/data/prescriptive-norms/shared-primitives/${spFileName}.json`);
+        if (response.ok) {
+          const spData = await response.json();
+          sharedPrimitives.push(spData);
+        }
+      }
+
+      // Count total nodes for progress
+      let totalNodeCount = 0;
+      for (const pnData of pnDataList) {
+        const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
+        totalNodeCount += expandedNodes.length;
+      }
+      setTotalNodes(totalNodeCount);
+
+      // Start SSE stream
+      const response = await fetch('/api/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          evaluationId,
+          prescriptiveNorm: pnDataList[0], // For now, just first PN
+          sharedPrimitives,
+          caseInput: `${useCase.title}\n\n${useCase.description}`,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Evaluation failed');
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) throw new Error('No response body');
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = JSON.parse(line.slice(6));
+
+            if (data.type === 'progress') {
+              setEvaluationStates(data.states);
+              // Also update the grid view in real-time
+              setEvaluationData((prev: any) => {
+                if (prev && prev.evaluation?.id === evaluationId) {
+                  return {
+                    ...prev,
+                    evaluationStates: data.states,
+                  };
+                }
+                return prev;
+              });
+            } else if (data.type === 'complete') {
+              // Save results to Supabase
+              await supabase.from('evaluations').update({ status: 'completed' }).eq('id', evaluationId);
+
+              for (const state of data.result.states) {
+                if (state.result) {
+                  await supabase.from('evaluation_results').insert({
+                    evaluation_id: evaluationId,
+                    node_id: state.nodeId,
+                    decision: state.result.decision,
+                    confidence: state.result.confidence,
+                    reasoning: state.result.reasoning,
+                    citations: state.result.citations || [],
+                  });
+                }
+              }
+
+              setIsEvaluationComplete(true);
+              loadEvaluationResults(evaluationId);
+            } else if (data.type === 'error') {
+              throw new Error(data.error);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Evaluation error:', error);
+      setIsEvaluationComplete(true);
+      await supabase.from('evaluations').update({ status: 'failed' }).eq('id', evaluationId);
+    }
   };
 
   const handleSelectUseCase = (useCaseId: string) => {
@@ -368,11 +497,12 @@ export default function Home() {
 
         {canvasView === 'evaluation' && evaluationData && (
           <>
-            <div className="bg-white border-b border-neutral-200 p-8">
-              <h2 className="text-xl font-semibold text-neutral-900 mb-2">
-                Evaluation: {(evaluationData as any).evaluation?.pn_ids?.join(', ')}
+            {/* Compact header */}
+            <div className="bg-white border-b border-neutral-200 px-8 py-4 flex items-center gap-4">
+              <h2 className="text-lg font-semibold text-neutral-900">
+                {(evaluationData as any).evaluation?.pn_ids?.join(', ')}
               </h2>
-              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+              <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
                 (evaluationData as any).evaluation?.status === 'completed'
                   ? 'bg-green-100 text-green-800'
                   : (evaluationData as any).evaluation?.status === 'running'
@@ -389,9 +519,16 @@ export default function Home() {
               <RequirementsGrid
                 nodes={(evaluationData as any).nodes || []}
                 rootId={(evaluationData as any).rootId || ''}
-                evaluationStates={(evaluationData as any).evaluationStates || []}
+                evaluationStates={
+                  // Use live states if we have them for this evaluation, otherwise use stored states
+                  evaluationStates.length > 0 && (evaluationData as any).evaluation?.id
+                    ? evaluationStates
+                    : (evaluationData as any).evaluationStates || []
+                }
                 onNodeClick={setSelectedNodeId}
                 selectedNodeId={selectedNodeId}
+                isRunning={runningEvaluationId === (evaluationData as any).evaluation?.id && !isEvaluationComplete}
+                totalNodes={totalNodes}
               />
             </div>
           </>
@@ -415,6 +552,21 @@ export default function Home() {
           useCaseId={selectedUseCaseId}
           onClose={() => setShowUseCaseModal(false)}
           onSelectEvaluation={handleSelectEvaluation}
+          onRunEvaluation={runEvaluation}
+        />
+      )}
+
+      {/* Evaluation Progress */}
+      {runningEvaluationId && (
+        <EvaluationProgress
+          evaluationId={runningEvaluationId}
+          states={evaluationStates}
+          totalNodes={totalNodes}
+          isRunning={!isEvaluationComplete}
+          onCancel={() => {
+            // Just close the progress card, don't clear states
+            setRunningEvaluationId(null);
+          }}
         />
       )}
     </div>
@@ -426,10 +578,12 @@ function UseCaseModal({
   useCaseId,
   onClose,
   onSelectEvaluation,
+  onRunEvaluation,
 }: {
   useCaseId: string;
   onClose: () => void;
   onSelectEvaluation: (id: string) => void;
+  onRunEvaluation: (evaluationId: string, useCaseId: string, pnIds: string[]) => void;
 }) {
   const [useCase, setUseCase] = useState<UseCase | null>(null);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
@@ -481,6 +635,8 @@ function UseCaseModal({
 
     if (!error && data) {
       setSelectedPNs([]);
+      // Run the evaluation with progress tracking
+      onRunEvaluation(data.id, useCaseId, selectedPNs);
       // Immediately show the evaluation in the canvas
       onSelectEvaluation(data.id);
     }

@@ -54,13 +54,13 @@ export async function POST(req: NextRequest) {
 
     let requestCount = 0;
 
-    // Define evaluation function that calls GPT-5
+    // Define evaluation function that calls GPT-5-mini
     const evaluateWithGPT5 = async (prompt: string): Promise<EvaluationResult> => {
       requestCount++;
-      console.log(`🤖 [GPT-5] Request #${requestCount} - Sending to OpenAI...`);
+      console.log(`🤖 [GPT-5-mini] Request #${requestCount} - Sending to OpenAI...`);
 
       const response = await openai.chat.completions.create({
-        model: 'gpt-5',
+        model: 'gpt-5-mini',
         messages: [
           {
             role: 'system',
@@ -72,12 +72,12 @@ export async function POST(req: NextRequest) {
           },
         ],
         reasoning_effort: 'high', // Use high reasoning for complex legal analysis
-        // Note: GPT-5 only supports temperature=1.0 (default)
+        // Note: GPT-5 models only support temperature=1.0 (default)
       });
 
       const content = response.choices[0].message.content || '';
 
-      console.log(`✅ [GPT-5] Response #${requestCount} received (${content.length} chars)`);
+      console.log(`✅ [GPT-5-mini] Response #${requestCount} received (${content.length} chars)`);
 
       // Parse the response (expecting structured format)
       const parsed = parseEvaluationResponse(content);
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
         const result = await engine.evaluate(caseInput, evaluateWithGPT5);
 
         console.log(`🎯 [API] Evaluation complete!`);
-        console.log(`   Total GPT-5 requests: ${requestCount}`);
+        console.log(`   Total GPT-5-mini requests: ${requestCount}`);
         console.log(`   Final verdict: ${result.compliant ? 'COMPLIANT ✓' : 'NON-COMPLIANT ✗'}`);
         console.log(`   Evaluated nodes: ${result.states.length}`);
 

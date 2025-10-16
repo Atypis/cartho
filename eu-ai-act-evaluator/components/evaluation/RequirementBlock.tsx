@@ -7,7 +7,7 @@
  * Handles status visualization, numbering, and interaction
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { RequirementNode, EvaluationState, NodeStatus, EvaluationResult } from '@/lib/evaluation/types';
 import { shouldSkipNode } from '@/lib/evaluation/skip-logic';
 
@@ -37,6 +37,13 @@ export function RequirementBlock({
   const status = state?.status || 'pending';
   const result = state?.result;
 
+  // Auto-expand when result is available
+  useEffect(() => {
+    if (status === 'completed' && result && !isExpanded) {
+      setIsExpanded(true);
+    }
+  }, [status, result]);
+
   const isSkipped = shouldSkipNode(node.id, allNodes, evaluationStates);
   const isSelected = selectedNodeId === node.id;
 
@@ -55,6 +62,7 @@ export function RequirementBlock({
           ${isSkipped ? 'opacity-60' : 'opacity-100'}
           ${getStatusBorderClass(status, result, isSelected)}
           ${isExpanded ? 'shadow-lg ring-2 ring-blue-500 ring-opacity-50' : 'hover:shadow-md'}
+          ${status === 'evaluating' ? 'animate-pulse' : ''}
         `}
       >
         <div
@@ -106,11 +114,30 @@ export function RequirementBlock({
           </div>
         </div>
 
+        {/* Status Badge */}
+        {status === 'evaluating' && !isSkipped && (
+          <div className="mt-3 flex items-center gap-2 text-xs text-blue-700 bg-blue-50 rounded px-2 py-1 w-fit">
+            <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <span className="font-medium">Analyzing with AI...</span>
+          </div>
+        )}
+
         {/* Confidence Badge (if completed) */}
         {status === 'completed' && result && !isSkipped && (
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-neutral-600">
-            <div className="w-1 h-1 rounded-full bg-neutral-400" />
-            {(result.confidence * 100).toFixed(0)}% confidence
+          <div className="mt-3 flex items-center gap-2">
+            <div className={`flex items-center gap-1.5 text-xs font-semibold ${
+              result.decision ? 'text-green-700' : 'text-red-700'
+            }`}>
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                result.decision ? 'bg-green-100' : 'bg-red-100'
+              }`}>
+                {result.decision ? '✓' : '✗'}
+              </div>
+              {result.decision ? 'PASSED' : 'FAILED'}
+            </div>
+            <div className="text-xs text-neutral-500">
+              • {(result.confidence * 100).toFixed(0)}% confidence
+            </div>
           </div>
         )}
         </div>
