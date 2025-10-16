@@ -277,9 +277,9 @@ function TreeNode({
   // ONLY primitives get the full "AI thinking" treatment!
   const isActiveSubsumption = isEvaluating && isPrimitive;
 
-  // Auto-expand when evaluating or completed
+  // Auto-expand ONLY when completed (not when evaluating - keeps focus tight!)
   useEffect(() => {
-    if ((status === 'evaluating' || status === 'completed') && !isExpanded && hasChildren) {
+    if (status === 'completed' && !isExpanded && hasChildren) {
       setIsExpanded(true);
     }
   }, [status, isExpanded, hasChildren]);
