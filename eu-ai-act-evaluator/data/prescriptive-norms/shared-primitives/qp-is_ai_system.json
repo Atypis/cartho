@@ -1,0 +1,33 @@
+{
+  "id": "qp:is_ai_system",
+  "title": "AI system (Art. 3) — Definition Gate",
+  "namespace": "qp",
+  "article_refs": [ { "article": 3 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "Meets Art. 3 AI system definition",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Does the system meet the Art. 3 definition of an AI system?",
+          "answer_type": "boolean",
+          "help": "Confirm the artefact matches the legal definition (e.g., machine-based system with varying levels of autonomy, that for explicit or implicit objectives infers, from the input it receives, how to generate outputs such as predictions, content, recommendations, or decisions influencing physical or virtual environments)."
+        },
+        "sources": [ { "article": 3 } ],
+        "context": {
+          "items": [
+            {
+              "label": "AI system definition — context",
+              "kind": "definition",
+              "text": "Use the official Art. 3 definition. Consider borderline cases carefully (e.g., purely deterministic software without inference may fall outside)."
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-10" }
+}
+

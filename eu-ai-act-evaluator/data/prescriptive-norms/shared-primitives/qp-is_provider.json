@@ -1,0 +1,21 @@
+{
+  "id": "qp:is_provider",
+  "title": "Provider (Art. 3(2)) — Role Gate",
+  "namespace": "qp",
+  "article_refs": [ { "article": 3, "paragraph": 2 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      { "id": "R-1", "label": "All provider elements hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3"] },
+      { "id": "R-1.1", "label": "Entity type", "kind": "primitive", "question": { "prompt": "Is the entity a natural or legal person, public authority, agency or other body?", "answer_type": "boolean" }, "sources": [ { "article": 3, "paragraph": 2 } ] },
+      { "id": "R-1.2", "label": "Activity — develops OR has developed", "kind": "composite", "operator": "anyOf", "children": ["R-1.2.1", "R-1.2.2"], "sources": [ { "article": 3, "paragraph": 2 } ] },
+      { "id": "R-1.2.1", "label": "Develops an AI system or GPAI model", "kind": "primitive", "question": { "prompt": "Does the entity develop an AI system or a GPAI model?", "answer_type": "boolean" }, "sources": [ { "article": 3, "paragraph": 2 } ] },
+      { "id": "R-1.2.2", "label": "Has an AI system or GPAI model developed", "kind": "primitive", "question": { "prompt": "Has the entity commissioned an AI system or a GPAI model to be developed?", "answer_type": "boolean" }, "sources": [ { "article": 3, "paragraph": 2 } ] },
+      { "id": "R-1.3", "label": "Placement — places on market OR puts into service under own name/mark", "kind": "composite", "operator": "anyOf", "children": ["R-1.3.1", "R-1.3.2"], "sources": [ { "article": 3, "paragraph": 2 } ] },
+      { "id": "R-1.3.1", "label": "Places on the market under own name/trademark", "kind": "primitive", "question": { "prompt": "Does the entity place the AI system/model on the Union market under its own name or trademark?", "answer_type": "boolean" }, "sources": [ { "article": 3, "paragraph": 2 } ] },
+      { "id": "R-1.3.2", "label": "Puts into service under own name/trademark", "kind": "primitive", "question": { "prompt": "Does the entity put the AI system/model into service under its own name or trademark?", "answer_type": "boolean" }, "sources": [ { "article": 3, "paragraph": 2 } ] }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-10" }
+}
+

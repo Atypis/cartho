@@ -1,0 +1,58 @@
+{
+  "id": "qp:in_scope_art2",
+  "title": "Regulatory Scope (Art. 2) — In Scope",
+  "namespace": "qp",
+  "article_refs": [ { "article": 2 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "Scope applies and no exclusions",
+        "kind": "composite",
+        "operator": "allOf",
+        "children": ["R-1.1", "R-1.2"]
+      },
+      {
+        "id": "R-1.1",
+        "label": "Any in-scope trigger (Art. 2(1))",
+        "kind": "composite",
+        "operator": "anyOf",
+        "children": ["R-1.1.1", "R-1.1.2", "R-1.1.3", "R-1.1.4", "R-1.1.5", "R-1.1.6", "R-1.1.7"],
+        "sources": [ { "article": 2, "paragraph": 1 } ],
+        "context": {
+          "items": [
+            { "label": "Third-country output used in the Union", "kind": "guidance", "text": "Art. 2(1)(c) brings into scope providers/deployers located in a third country where the output is used in the Union.", "sources": [ { "article": 2, "paragraph": 1 } ] }
+          ]
+        }
+      },
+      { "id": "R-1.1.1", "label": "Provider places/puts AI system on market/in service in the Union", "kind": "primitive", "question": { "prompt": "Does a provider place on the market or put into service an AI system in the Union?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 1 } ] },
+      { "id": "R-1.1.2", "label": "Provider places GPAI model on the Union market", "kind": "primitive", "question": { "prompt": "Does a provider place a GPAI model on the Union market?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 1 } ] },
+      { "id": "R-1.1.3", "label": "Deployer established/located in Union", "kind": "primitive", "question": { "prompt": "Is the deployer established or located within the Union?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 1 } ] },
+      { "id": "R-1.1.4", "label": "Third-country provider/deployer with output used in Union", "kind": "primitive", "question": { "prompt": "Is the provider/deployer in a third country with output used in the Union?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 1 } ] },
+      { "id": "R-1.1.5", "label": "Importer of AI systems", "kind": "primitive", "question": { "prompt": "Is the actor an importer of AI systems?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 1 } ] },
+      { "id": "R-1.1.6", "label": "Distributor of AI systems", "kind": "primitive", "question": { "prompt": "Is the actor a distributor of AI systems?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 1 } ] },
+      { "id": "R-1.1.7", "label": "Product manufacturer placing AI system with product under own name/mark", "kind": "primitive", "question": { "prompt": "Is a product manufacturer placing/putting into service an AI system with the product under their name/mark?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 1 } ] },
+      {
+        "id": "R-1.2",
+        "label": "No exclusions",
+        "kind": "composite",
+        "operator": "not",
+        "children": ["R-1.2.0"]
+      },
+      {
+        "id": "R-1.2.0",
+        "label": "Any exclusion applies",
+        "kind": "composite",
+        "operator": "anyOf",
+        "children": ["R-1.2.1", "R-1.2.2", "R-1.2.3", "R-1.2.4" ]
+      },
+      { "id": "R-1.2.1", "label": "Outside Union law / national security competences", "kind": "primitive", "question": { "prompt": "Is the situation outside Union law or within Member State national security competences?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 3 } ] },
+      { "id": "R-1.2.2", "label": "Military/defence/national security exclusive purposes", "kind": "primitive", "question": { "prompt": "Is the AI used exclusively for military, defence or national security purposes?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 3 } ] },
+      { "id": "R-1.2.3", "label": "International cooperation for LE/judicial with adequate safeguards", "kind": "primitive", "question": { "prompt": "Is it an international cooperation use (LE/judicial) by third‑country public authorities or international organisations with adequate safeguards?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 4 } ] },
+      { "id": "R-1.2.4", "label": "Sole purpose scientific research and development / pre‑market R&D (excluding real‑world testing)", "kind": "primitive", "question": { "prompt": "Is it solely for scientific R&D, or pre‑market R&D (excluding real‑world testing under Art. 60)?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 6 }, { "article": 2, "paragraph": 8 } ], "context": { "items": [ { "label": "Real‑world testing not excluded", "kind": "guidance", "text": "Art. 2(8): testing in real world conditions is not covered by the exclusion and is regulated by Art. 60.", "sources": [ { "article": 2, "paragraph": 8 } ] } ] } }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-10" }
+}
+
