@@ -133,9 +133,9 @@ export default function Home() {
           const pnData: PrescriptiveNorm = await response.json();
           pnDataList.push(pnData);
 
-          // Collect shared primitive IDs from shared_primitives field
-          if (pnData.shared_primitives) {
-            pnData.shared_primitives.forEach(id => sharedPrimitiveIds.add(id));
+          // Collect shared primitive IDs from shared_refs field
+          if (pnData.shared_refs) {
+            pnData.shared_refs.forEach(id => sharedPrimitiveIds.add(id));
           }
 
           if (pnIds.length === 1) {
@@ -163,10 +163,13 @@ export default function Home() {
     }
 
     // Now expand each PN's nodes with the shared primitives
+    console.log('Loaded shared primitives:', sharedPrimitives.map(sp => sp.id));
     for (const pnData of pnDataList) {
       const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
+      console.log(`Expanded ${pnData.requirements.nodes.length} nodes to ${expandedNodes.length} nodes`);
       allNodes.push(...expandedNodes);
     }
+    console.log('Total nodes after expansion:', allNodes.length);
 
     // Convert results to EvaluationState format
     const evaluationStates: EvaluationState[] = (results || []).map((result: any) => ({
