@@ -271,7 +271,11 @@ function TreeNode({
   const result = state?.result;
   const isSelected = selectedNodeId === node.id;
   const isEvaluating = status === 'evaluating';
+  const isPrimitive = node.kind === 'primitive';
   const hasChildren = node.kind === 'composite' && node.children && node.children.length > 0;
+
+  // ONLY primitives get the full "AI thinking" treatment!
+  const isActiveSubsumption = isEvaluating && isPrimitive;
 
   // Auto-expand when evaluating or completed
   useEffect(() => {
@@ -280,29 +284,29 @@ function TreeNode({
     }
   }, [status, isExpanded, hasChildren]);
 
-  // Auto-show details when evaluating (FOLLOW THE AI!)
+  // Auto-show details ONLY for primitive nodes being evaluated (actual subsumption)
   useEffect(() => {
-    if (isEvaluating && !showDetails) {
+    if (isActiveSubsumption && !showDetails) {
       setShowDetails(true);
     }
-  }, [isEvaluating, showDetails]);
+  }, [isActiveSubsumption, showDetails]);
 
-  // Auto-select when evaluating (highlight it!)
+  // Auto-select ONLY when evaluating primitive nodes
   useEffect(() => {
-    if (isEvaluating && selectedNodeId !== node.id) {
+    if (isActiveSubsumption && selectedNodeId !== node.id) {
       onNodeClick(node.id);
     }
-  }, [isEvaluating, selectedNodeId, node.id, onNodeClick]);
+  }, [isActiveSubsumption, selectedNodeId, node.id, onNodeClick]);
 
-  // Auto-scroll to evaluating node (FOLLOW THE AI IN REAL-TIME!)
+  // Auto-scroll ONLY to primitive nodes being evaluated
   useEffect(() => {
-    if (isEvaluating && nodeRef.current) {
+    if (isActiveSubsumption && nodeRef.current) {
       nodeRef.current.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
       });
     }
-  }, [isEvaluating]);
+  }, [isActiveSubsumption]);
 
   // Calculate child stats for composite nodes
   const childStats = hasChildren && node.children ? {
@@ -326,8 +330,11 @@ function TreeNode({
       <div
         ref={nodeRef}
         className={`group relative transition-all duration-200 ${
-          isEvaluating ? 'bg-blue-50 ring-2 ring-blue-400 ring-inset animate-pulse shadow-lg z-10' :
-          isSelected ? 'bg-blue-50/50' : ''
+          isActiveSubsumption
+            ? 'bg-blue-50 ring-2 ring-blue-400 ring-inset animate-pulse shadow-lg z-10'
+            : isSelected
+            ? 'bg-blue-50/50'
+            : ''
         } ${
           status === 'completed' && result?.decision ? 'bg-green-50/30' : ''
         } ${status === 'completed' && !result?.decision ? 'bg-red-50/30' : ''}`}
@@ -335,7 +342,7 @@ function TreeNode({
         {/* Main Row */}
         <div
           className={`flex items-center gap-2 px-3 py-2 hover:bg-neutral-100/50 border-b border-neutral-100 cursor-pointer transition-all ${
-            isEvaluating
+            isActiveSubsumption
               ? 'border-l-4 border-l-blue-600 shadow-md bg-gradient-to-r from-blue-100 to-transparent'
               : isSelected
               ? 'border-l-4 border-l-blue-500 shadow-sm'
@@ -493,8 +500,8 @@ function TreeNode({
           <div className="bg-gradient-to-b from-neutral-50 to-white border-b border-neutral-200 px-6 py-3 text-xs animate-in slide-in-from-top-2 fade-in duration-200"
                style={{ paddingLeft: `${depth * 20 + 60}px` }}>
 
-            {/* AI Thinking Indicator */}
-            {isEvaluating && (
+            {/* AI Thinking Indicator - ONLY for primitives */}
+            {isActiveSubsumption && (
               <div className="mb-3 p-3 bg-blue-50 border-l-4 border-blue-500 rounded animate-pulse">
                 <div className="flex items-center gap-2">
                   <div className="relative">
@@ -505,7 +512,7 @@ function TreeNode({
                   </span>
                 </div>
                 <div className="mt-2 text-blue-700 italic">
-                  Reviewing legal context, applying reasoning, and determining compliance
+                  Evaluating compliance based on legal context and case facts
                 </div>
               </div>
             )}
