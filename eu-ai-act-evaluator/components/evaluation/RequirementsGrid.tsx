@@ -319,68 +319,14 @@ export function RequirementsGrid({
                 </div>
               )}
 
-              {isEvaluationFinished && complianceStatus === 'non-compliant' && (
-                <div className="bg-red-50 border-l-4 border-red-600 rounded-r-lg p-4">
-                  <div className="font-bold text-red-900 mb-2 text-xs uppercase tracking-wide">
-                    Non-Compliance Detected
+              {isEvaluationFinished && applicabilityStatus === 'does-not-apply' && (
+                <div className="bg-neutral-50 border-l-4 border-neutral-400 rounded-r-lg p-4">
+                  <div className="font-bold text-neutral-900 mb-2 text-xs uppercase tracking-wide">
+                    ✗ This Obligation Does Not Apply
                   </div>
-                  <div className="text-red-900 text-sm leading-relaxed mb-4">
-                    Your AI system fails to meet the requirements for Article 4. <strong>This obligation does not apply</strong> based on the evaluation,
-                    but you should verify this assessment.
-                  </div>
-                  <div className="space-y-2">
-                    <div className="font-bold text-red-900 text-xs uppercase tracking-wide">If Obligation Applies - Required Actions:</div>
-                    <ul className="space-y-2 text-red-900 text-sm">
-                      <li className="flex items-start gap-2">
-                        <span className="flex-shrink-0 font-bold">1.</span>
-                        <span>Develop comprehensive AI literacy training programs tailored to staff roles and technical expertise</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="flex-shrink-0 font-bold">2.</span>
-                        <span>Document training materials covering AI system operation, limitations, and appropriate use</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="flex-shrink-0 font-bold">3.</span>
-                        <span>Establish procedures to assess and track AI literacy levels across all relevant personnel</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="flex-shrink-0 font-bold">4.</span>
-                        <span>Consider the context of AI system use and the impact on affected persons/groups when designing training</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              )}
-
-              {isEvaluationFinished && complianceStatus === 'partial' && (
-                <div className="bg-yellow-50 border-l-4 border-yellow-600 rounded-r-lg p-4">
-                  <div className="font-bold text-yellow-900 mb-2 text-xs uppercase tracking-wide">
-                    Partial Compliance
-                  </div>
-                  <div className="text-yellow-900 text-sm leading-relaxed mb-4">
-                    Your system meets some but not all requirements for Article 4. <strong>This obligation partially applies.</strong>
-                    Review failed requirements and address gaps.
-                  </div>
-                  <div className="space-y-2">
-                    <div className="font-bold text-yellow-900 text-xs uppercase tracking-wide">Recommended Actions:</div>
-                    <ul className="space-y-2 text-yellow-900 text-sm">
-                      <li className="flex items-start gap-2">
-                        <span className="flex-shrink-0">•</span>
-                        <span>Review the specific failed requirements in the tree below</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="flex-shrink-0">•</span>
-                        <span>Enhance training programs to address identified gaps</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="flex-shrink-0">•</span>
-                        <span>Verify that training materials adequately cover all relevant aspects of AI system operation</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="flex-shrink-0">•</span>
-                        <span>Re-evaluate after implementing improvements</span>
-                      </li>
-                    </ul>
+                  <div className="text-neutral-900 text-sm leading-relaxed">
+                    Based on the evaluation, <strong>Article 4 AI Literacy obligations do not apply to your AI system.</strong>
+                    You are not required to implement AI literacy measures under this specific obligation.
                   </div>
                 </div>
               )}
@@ -392,8 +338,8 @@ export function RequirementsGrid({
                     Evaluation In Progress
                   </div>
                   <div className="text-blue-900 text-sm leading-relaxed">
-                    AI is currently analyzing your system's compliance with Article 4 requirements.
-                    The applicability of this obligation will be determined once the evaluation is complete.
+                    AI is currently evaluating whether Article 4 obligations apply to your AI system.
+                    The result will be determined once the evaluation is complete.
                   </div>
                 </div>
               )}
