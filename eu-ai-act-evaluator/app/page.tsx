@@ -66,20 +66,27 @@ export default function Home() {
   }, [selectedEvaluationId]);
 
   const loadChatSessions = async () => {
-    const { data, error } = await supabase
-      .from('chat_sessions')
-      .select('*')
-      .eq('is_active', true)
-      .order('updated_at', { ascending: false })
-      .limit(10);
+    console.log('📂 [Sessions] Loading chat sessions...');
+    try {
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .eq('is_active', true)
+        .order('updated_at', { ascending: false })
+        .limit(10);
 
-    if (error) {
-      console.error('Error loading chat sessions:', error);
-    } else {
-      setChatSessions(data || []);
-      if (data && data.length > 0 && !activeSessionId) {
-        setActiveSessionId(data[0].id);
+      if (error) {
+        console.error('❌ [Sessions] Error loading chat sessions:', error);
+        // Don't throw - allow app to continue even if sessions fail to load
+      } else {
+        console.log(`✅ [Sessions] Loaded ${data?.length || 0} sessions`);
+        setChatSessions(data || []);
+        if (data && data.length > 0 && !activeSessionId) {
+          setActiveSessionId(data[0].id);
+        }
       }
+    } catch (error) {
+      console.error('❌ [Sessions] Exception loading chat sessions:', error);
     }
   };
 
@@ -101,6 +108,8 @@ export default function Home() {
   };
 
   const loadEvaluationResults = async (evaluationId: string) => {
+    console.log(`📊 [Load] Loading evaluation ${evaluationId}...`);
+
     // First get the evaluation metadata
     const { data: evaluation, error: evalError } = await supabase
       .from('evaluations')
@@ -109,10 +118,12 @@ export default function Home() {
       .single();
 
     if (evalError) {
-      console.error('Error loading evaluation:', evalError);
+      console.error('❌ [Load] Error loading evaluation:', evalError);
       setCanvasView('welcome');
       return;
     }
+
+    console.log(`✅ [Load] Evaluation metadata loaded (status: ${evaluation.status})`);
 
     // Then get the results (may not exist yet if evaluation is pending)
     const { data: results, error: resultsError } = await supabase
@@ -121,7 +132,9 @@ export default function Home() {
       .eq('evaluation_id', evaluationId);
 
     if (resultsError) {
-      console.error('Error loading evaluation results:', resultsError);
+      console.error('❌ [Load] Error loading evaluation results:', resultsError);
+    } else {
+      console.log(`✅ [Load] Loaded ${results?.length || 0} evaluation results`);
     }
 
     // Load PN data and expand shared requirements
@@ -190,6 +203,16 @@ export default function Home() {
       },
     }));
 
+    // Count total primitive nodes (only primitives get evaluated)
+    const primitiveCount = allNodes.filter(node => node.kind === 'primitive').length;
+    setTotalNodes(primitiveCount);
+    console.log(`📊 [Load] Total primitives: ${primitiveCount}, Results: ${evaluationStates.length}`);
+
+    // Mark as complete if we have results (this is a loaded evaluation, not running)
+    setRunningEvaluationId(null);
+    setIsEvaluationComplete(evaluationStates.length > 0);
+    console.log(`✅ [Load] Evaluation state: complete=${evaluationStates.length > 0}, running=null`);
+
     // Show evaluation view
     setEvaluationData({
       evaluation,
@@ -198,6 +221,7 @@ export default function Home() {
       evaluationStates,
     } as any);
     setCanvasView('evaluation');
+    console.log('✅ [Load] Evaluation loaded successfully');
   };
 
   const runEvaluation = async (evaluationId: string, useCaseId: string, pnIds: string[]) => {
@@ -240,13 +264,14 @@ export default function Home() {
         }
       }
 
-      // Count total nodes for progress
+      // Count total PRIMITIVE nodes for progress (only primitives get evaluated)
       let totalNodeCount = 0;
       for (const pnData of pnDataList) {
         const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
-        totalNodeCount += expandedNodes.length;
+        totalNodeCount += expandedNodes.filter(n => n.kind === 'primitive').length;
       }
       setTotalNodes(totalNodeCount);
+      console.log(`📊 Total primitive nodes to evaluate: ${totalNodeCount}`);
 
       // Start SSE stream
       const response = await fetch('/api/evaluate', {
@@ -291,6 +316,8 @@ export default function Home() {
                 return prev;
               });
             } else if (data.type === 'complete') {
+              console.log('✅ [Evaluation] Complete! Saving results...');
+
               // Save results to Supabase
               await supabase.from('evaluations').update({ status: 'completed' }).eq('id', evaluationId);
 
@@ -307,7 +334,9 @@ export default function Home() {
                 }
               }
 
+              console.log('✅ [Evaluation] Results saved. Marking as complete.');
               setIsEvaluationComplete(true);
+              setRunningEvaluationId(null); // Clear running state
               loadEvaluationResults(evaluationId);
             } else if (data.type === 'error') {
               throw new Error(data.error);
@@ -316,8 +345,10 @@ export default function Home() {
         }
       }
     } catch (error) {
-      console.error('Evaluation error:', error);
-      setIsEvaluationComplete(true);
+      console.error('❌ [Evaluation] Error:', error);
+      setIsEvaluationComplete(false);
+      setRunningEvaluationId(null);
+      alert('Evaluation failed: ' + (error as Error).message);
       await supabase.from('evaluations').update({ status: 'failed' }).eq('id', evaluationId);
     }
   };

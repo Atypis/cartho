@@ -34,6 +34,7 @@ export function RequirementsGrid({
   totalNodes = 0,
 }: RequirementsGridProps) {
   const [progressExpanded, setProgressExpanded] = useState(true);
+  const [summaryExpanded, setSummaryExpanded] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'tree'>('tree'); // TREE IS DEFAULT 🌲
   const nodeMap = new Map(nodes.map(n => [n.id, n]));
   const root = nodeMap.get(rootId);
@@ -67,6 +68,20 @@ export function RequirementsGrid({
 
   // Show progress header if evaluation is running or has results
   const showProgress = isRunning || completed > 0;
+
+  // Calculate compliance status for Article 4
+  const hasResults = completed > 0;
+  const allCompleted = completed === totalNodes && totalNodes > 0;
+  const isEvaluationFinished = allCompleted && !isRunning;
+
+  // Always show summary once evaluation has started (has any results or is running)
+  const showSummary = hasResults || isRunning;
+
+  // Only reveal final compliance status when evaluation is complete
+  const complianceStatus = !hasResults ? 'pending' :
+    (isRunning || !allCompleted) ? 'evaluating' :
+    failed === 0 ? 'compliant' :
+    passed === 0 ? 'non-compliant' : 'partial';
 
   return (
     <div className="space-y-4">
@@ -164,6 +179,171 @@ export function RequirementsGrid({
                   <span className="ml-2 text-neutral-900">{progress.toFixed(0)}%</span>
                 </div>
               </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Article 4 Obligation Summary Card */}
+      {showSummary && (
+        <div className="bg-white rounded-lg border-2 border-neutral-300 overflow-hidden shadow-sm">
+          {/* Header */}
+          <div className="px-5 py-3 flex items-center justify-between gap-4 bg-neutral-100 border-b-2 border-neutral-300">
+            <div className="flex items-center gap-3 flex-1">
+              {/* Title */}
+              <h4 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">
+                Article 4: AI Literacy Obligation
+              </h4>
+
+              {/* Status Badge - Only show final status when complete */}
+              {isEvaluationFinished && (
+                <div className={`ml-auto flex items-center gap-2 px-3 py-1 rounded text-xs font-bold ${
+                  complianceStatus === 'compliant' ? 'bg-green-500 text-white' :
+                  complianceStatus === 'non-compliant' ? 'bg-red-500 text-white' :
+                  complianceStatus === 'partial' ? 'bg-yellow-500 text-white' :
+                  'bg-neutral-400 text-white'
+                }`}>
+                  {complianceStatus === 'compliant' ? 'REQUIREMENT APPLIES' :
+                   complianceStatus === 'non-compliant' ? 'REQUIREMENT DOES NOT APPLY' :
+                   complianceStatus === 'partial' ? 'PARTIALLY APPLIES' :
+                   'PENDING'}
+                </div>
+              )}
+
+              {(isRunning || !isEvaluationFinished) && hasResults && (
+                <div className="ml-auto flex items-center gap-2 px-3 py-1 rounded text-xs font-bold bg-blue-500 text-white">
+                  <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  EVALUATION IN PROGRESS
+                </div>
+              )}
+            </div>
+
+            {/* Expand Button */}
+            <button
+              onClick={() => setSummaryExpanded(!summaryExpanded)}
+              className="p-1.5 hover:bg-neutral-200 rounded transition-colors flex-shrink-0"
+            >
+              <svg
+                className={`w-4 h-4 text-neutral-700 transition-transform duration-200 ${
+                  summaryExpanded ? 'rotate-180' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Expanded Content */}
+          {summaryExpanded && (
+            <div className="px-5 py-4 space-y-4 text-sm">
+              {/* Obligation Overview - Always visible */}
+              <div>
+                <div className="font-bold text-neutral-900 mb-2 text-xs uppercase tracking-wide">
+                  Legal Obligation Under EU AI Act
+                </div>
+                <div className="text-neutral-700 text-sm leading-relaxed bg-neutral-50 rounded-lg p-4 border border-neutral-200">
+                  Providers and deployers of AI systems shall take measures to ensure, to their best extent,
+                  a <strong>sufficient level of AI literacy</strong> of their staff and other persons dealing
+                  with the operation and use of AI systems on their behalf, taking into account their technical
+                  knowledge, experience, education and training and the context the AI systems are to be used in,
+                  and considering the persons or groups of persons on whom the AI systems are to be used.
+                </div>
+              </div>
+
+              {/* Compliance Status Explanation - Only show when complete */}
+              {isEvaluationFinished && complianceStatus === 'compliant' && (
+                <div className="bg-green-50 border-l-4 border-green-600 rounded-r-lg p-4">
+                  <div className="font-bold text-green-900 mb-2 text-xs uppercase tracking-wide">
+                    Compliance Confirmed
+                  </div>
+                  <div className="text-green-900 text-sm leading-relaxed">
+                    Your AI system meets all requirements for Article 4. You have demonstrated appropriate measures
+                    to ensure AI literacy among staff and users. <strong>This obligation applies to your system.</strong>
+                  </div>
+                </div>
+              )}
+
+              {isEvaluationFinished && complianceStatus === 'non-compliant' && (
+                <div className="bg-red-50 border-l-4 border-red-600 rounded-r-lg p-4">
+                  <div className="font-bold text-red-900 mb-2 text-xs uppercase tracking-wide">
+                    Non-Compliance Detected
+                  </div>
+                  <div className="text-red-900 text-sm leading-relaxed mb-4">
+                    Your AI system fails to meet the requirements for Article 4. <strong>This obligation does not apply</strong> based on the evaluation,
+                    but you should verify this assessment.
+                  </div>
+                  <div className="space-y-2">
+                    <div className="font-bold text-red-900 text-xs uppercase tracking-wide">If Obligation Applies - Required Actions:</div>
+                    <ul className="space-y-2 text-red-900 text-sm">
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0 font-bold">1.</span>
+                        <span>Develop comprehensive AI literacy training programs tailored to staff roles and technical expertise</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0 font-bold">2.</span>
+                        <span>Document training materials covering AI system operation, limitations, and appropriate use</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0 font-bold">3.</span>
+                        <span>Establish procedures to assess and track AI literacy levels across all relevant personnel</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0 font-bold">4.</span>
+                        <span>Consider the context of AI system use and the impact on affected persons/groups when designing training</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {isEvaluationFinished && complianceStatus === 'partial' && (
+                <div className="bg-yellow-50 border-l-4 border-yellow-600 rounded-r-lg p-4">
+                  <div className="font-bold text-yellow-900 mb-2 text-xs uppercase tracking-wide">
+                    Partial Compliance
+                  </div>
+                  <div className="text-yellow-900 text-sm leading-relaxed mb-4">
+                    Your system meets some but not all requirements for Article 4. <strong>This obligation partially applies.</strong>
+                    Review failed requirements and address gaps.
+                  </div>
+                  <div className="space-y-2">
+                    <div className="font-bold text-yellow-900 text-xs uppercase tracking-wide">Recommended Actions:</div>
+                    <ul className="space-y-2 text-yellow-900 text-sm">
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0">•</span>
+                        <span>Review the specific failed requirements in the tree below</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0">•</span>
+                        <span>Enhance training programs to address identified gaps</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0">•</span>
+                        <span>Verify that training materials adequately cover all relevant aspects of AI system operation</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="flex-shrink-0">•</span>
+                        <span>Re-evaluate after implementing improvements</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {!isEvaluationFinished && (isRunning || hasResults) && (
+                <div className="bg-blue-50 border-l-4 border-blue-600 rounded-r-lg p-4">
+                  <div className="font-bold text-blue-900 mb-2 text-xs uppercase tracking-wide flex items-center gap-2">
+                    <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    Evaluation In Progress
+                  </div>
+                  <div className="text-blue-900 text-sm leading-relaxed">
+                    AI is currently analyzing your system's compliance with Article 4 requirements.
+                    The applicability of this obligation will be determined once the evaluation is complete.
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
