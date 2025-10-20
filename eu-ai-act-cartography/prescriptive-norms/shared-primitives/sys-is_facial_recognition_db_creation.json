@@ -1,0 +1,24 @@
+{
+  "id": "sys:is_facial_recognition_db_creation",
+  "title": "Creates or expands facial recognition database (Art. 5(1)(e))",
+  "namespace": "sys",
+  "article_refs": [ { "article": 5, "paragraph": 1, "point": "(e)" } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "Creates or expands a facial recognition database",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Does the system create or expand a facial recognition database?",
+          "answer_type": "boolean",
+          "help": "A facial recognition database stores biometric templates or facial images for recognition/matching. Expansion includes enlarging an existing database with new entries or images."
+        },
+        "sources": [ { "article": 5, "paragraph": 1, "point": "(e)" } ]
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

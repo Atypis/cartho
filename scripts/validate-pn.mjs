@@ -133,7 +133,7 @@ async function main() {
         console.error(`❌ [SP] Root not found: ${rootId} (${fp})`);
         continue;
       }
-      const errors = [] as string[];
+      const errors = [];
       nodes.forEach((n) => checkChildrenExist(n, map, errors));
       if (errors.length) {
         errorCount += errors.length;
@@ -182,7 +182,7 @@ async function main() {
         console.error(`❌ [PN] Root not found: ${rootId} (${fp})`);
         continue;
       }
-      const errors = [] as string[];
+      const errors = [];
       nodes.forEach((n) => checkChildrenExist(n, map, errors));
       if (errors.length) {
         errorCount += errors.length;
@@ -241,4 +241,3 @@ main().catch((e) => {
   console.error('Validator crashed:', e);
   process.exit(1);
 });
-

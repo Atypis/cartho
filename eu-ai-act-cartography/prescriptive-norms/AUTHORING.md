@@ -88,8 +88,15 @@ SPs are small trees with clear per-node questions and sources. Keep them reusabl
 - Bundle API (in evaluator): `/api/catalog`, `/api/prescriptive/bundle?pnIds=...`
   - Evaluator consumes this; authors don’t need to copy files to the UI.
 
+## Ground Truth (Legal Text)
+
+- Primary source: `ai-act-source/EU_AI_Act.md` (full consolidated text). Use this to:
+  - Copy exact `legal_consequence.verbatim` for PNs (operative text).
+  - Anchor nodes with `sources` (article, paragraph, point) and include short quotes where helpful.
+  - Pull recital context where it clarifies intent (e.g., Recital (43) for Article 5(1)(e)).
+  - Prefer the consolidated HTML (`OJ…TXT.html`) when checking formatting nuances; keep verbatim faithful to the Markdown source.
+
 ## Templates
 
 - PN: `eu-ai-act-cartography/prescriptive-norms/templates/PN.template.json`
 - SP: `eu-ai-act-cartography/prescriptive-norms/templates/SP.template.json`
-

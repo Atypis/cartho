@@ -1,0 +1,34 @@
+{
+  "id": "sys:is_untargeted_scraping_faces",
+  "title": "Untargeted scraping of facial images (Art. 5(1)(e))",
+  "namespace": "sys",
+  "article_refs": [ { "article": 5, "paragraph": 1, "point": "(e)" } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "Untargeted scraping of facial images from internet or CCTV",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Does the practice involve untargeted scraping of facial images from the internet or CCTV footage?",
+          "answer_type": "boolean",
+          "help": "Untargeted = broad, non-individualised harvesting without specific data subjects or cases; as opposed to case-specific or consented collection. Consider sources: public web, platforms, data brokers, or CCTV streams."
+        },
+        "sources": [ { "article": 5, "paragraph": 1, "point": "(e)" } ],
+        "context": {
+          "items": [
+            {
+              "label": "Recital context",
+              "kind": "guidance",
+              "text": "Recital (43): practice adds to the feeling of mass surveillance and can lead to gross violations of fundamental rights, including privacy.",
+              "sources": [ { "article": 0, "quote": "Recital (43)" } ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

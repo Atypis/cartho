@@ -1,0 +1,66 @@
+{
+  "id": "PN-05E",
+  "title": "Prohibition: untargeted scraping to build facial recognition databases",
+  "type": "prohibition",
+  "article_refs": [
+    {
+      "article": 5,
+      "paragraph": 1,
+      "point": "(e)",
+      "quote": "the placing on the market, the putting into service for this specific purpose, or the use of AI systems that create or expand facial recognition databases through the untargeted scraping of facial images from the internet or CCTV footage;"
+    }
+  ],
+  "legal_consequence": {
+    "verbatim": "The placing on the market, the putting into service for this specific purpose, or the use of AI systems that create or expand facial recognition databases through the untargeted scraping of facial images from the internet or CCTV footage is prohibited.",
+    "notes": "Applies to AI systems that create or expand FR databases via untargeted facial image scraping from internet or CCTV.",
+    "context": {
+      "items": [
+        {
+          "label": "Recital (43) — context",
+          "kind": "guidance",
+          "text": "Recital (43): Such practices add to the feeling of mass surveillance and can lead to gross violations of fundamental rights, including privacy.",
+          "sources": [ { "article": 0, "quote": "Recital (43)" } ]
+        }
+      ]
+    }
+  },
+  "side_info": {
+    "effective_from": "2025-02-02"
+  },
+  "requirements": {
+    "root": "R-1",
+    "nodes": [
+      { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3"] },
+      { "id": "R-1.1", "label": "Global scope gate (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2", "sources": [ { "article": 2 } ], "question": { "prompt": "Does Article 2 scope apply (and no exclusion)?", "answer_type": "boolean" } },
+      { "id": "R-1.2", "label": "System is AI (Art. 3)", "kind": "primitive", "ref": "qp:is_ai_system", "sources": [ { "article": 3 } ], "question": { "prompt": "Does the system meet the Art. 3 definition of an AI system?", "answer_type": "boolean" } },
+      { "id": "R-1.3", "label": "Practice = FR DB via untargeted scraping", "kind": "composite", "operator": "allOf", "children": ["R-1.3.1", "R-1.3.2"] },
+      { "id": "R-1.3.1", "label": "Untargeted scraping of facial images from internet/CCTV", "kind": "primitive", "ref": "sys:is_untargeted_scraping_faces", "sources": [ { "article": 5, "paragraph": 1, "point": "(e)" } ], "question": { "prompt": "Does the practice involve untargeted scraping of facial images from the internet or CCTV footage?", "answer_type": "boolean" } },
+      { "id": "R-1.3.2", "label": "Creates or expands a facial recognition database", "kind": "primitive", "ref": "sys:is_facial_recognition_db_creation", "sources": [ { "article": 5, "paragraph": 1, "point": "(e)" } ], "question": { "prompt": "Does the system create or expand a facial recognition database?", "answer_type": "boolean" } }
+    ]
+  },
+  "shared_refs": [
+    "qp:in_scope_art2",
+    "qp:is_ai_system",
+    "sys:is_untargeted_scraping_faces",
+    "sys:is_facial_recognition_db_creation"
+  ],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
+  "test_vectors": [
+    {
+      "id": "tv1-true",
+      "facts": "Provider deploys a crawler to automatically harvest facial images at scale from social media and public CCTV streams to populate and enlarge a searchable facial recognition database offered to clients.",
+      "expected_root_decision": true
+    },
+    {
+      "id": "tv2-false-targeted",
+      "facts": "Research project with consented participants uploads their images to a closed dataset; no automated bulk scraping from the internet or CCTV; database is limited to the study and not used for recognition against the public.",
+      "expected_root_decision": false
+    },
+    {
+      "id": "tv3-false-no-db",
+      "facts": "An AI system detects faces on a device to unlock the screen; it does not create or expand a facial recognition database and does not scrape images from the internet or CCTV.",
+      "expected_root_decision": false
+    }
+  ]
+}
+
