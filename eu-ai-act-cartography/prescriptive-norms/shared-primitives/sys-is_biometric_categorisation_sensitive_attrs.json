@@ -6,8 +6,9 @@
   "logic": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "Categorises individuals based on biometric data to infer sensitive attributes", "kind": "primitive",
       "question": { "prompt": "Does the system categorise individuals based on biometric data to deduce or infer sensitive attributes (race, political opinions, trade union membership, religious/philosophical beliefs, sex life, sexual orientation)?", "answer_type": "boolean" },
-      "sources": [ { "article": 5, "paragraph": 1, "point": "(g)" } ] }
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(g)" } ],
+      "context": { "items": [ { "label": "Recital (30)", "kind": "guidance", "text": "Biometric categorisation deducing sensitive attributes should be prohibited; lawful labelling/filtering of biometric datasets (e.g., sorting by hair/eye colour) is not covered.", "sources": [ { "article": 0, "quote": "Recital (30)" } ] } ] }
+    }
   ] },
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
 }
-

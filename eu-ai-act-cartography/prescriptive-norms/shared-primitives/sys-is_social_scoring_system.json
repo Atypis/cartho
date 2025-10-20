@@ -6,8 +6,9 @@
   "logic": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "AI used for social scoring of natural persons", "kind": "primitive",
       "question": { "prompt": "Is the AI system used for social scoring of natural persons?", "answer_type": "boolean" },
-      "sources": [ { "article": 5, "paragraph": 1, "point": "(c)" } ] }
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(c)" } ],
+      "context": { "items": [ { "label": "Recital (31)", "kind": "guidance", "text": "Social scoring may lead to discrimination and exclusion; prohibition targets detrimental outcomes in unrelated contexts or unjustified/disproportionate treatment.", "sources": [ { "article": 0, "quote": "Recital (31)" } ] } ] }
+    }
   ] },
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
 }
-

@@ -5,7 +5,10 @@
   "article_refs": [
     { "article": 5, "paragraph": 1, "point": "(b)", "quote": "the placing on the market, the putting into service or the use of an AI system that exploits any of the vulnerabilities of a natural person or a specific group of persons due to their age, disability or a specific social or economic situation, with the objective, or the effect, of materially distorting the behaviour of that person or a person belonging to that group in a manner that causes or is reasonably likely to cause that person or another person significant harm;" }
   ],
-  "legal_consequence": { "verbatim": "Prohibited: AI systems exploiting vulnerabilities due to age, disability, or specific social/economic situation, leading to material distortion causing or likely causing significant harm.", "context": { "items": [] } },
+  "legal_consequence": { "verbatim": "Prohibited: AI systems exploiting vulnerabilities due to age, disability, or specific social/economic situation, leading to material distortion causing or likely causing significant harm.", "context": { "items": [
+    { "label": "Recital (28) — manipulative/exploitative practices", "kind": "guidance", "text": "AI misuse can include exploitative practices; such practices should be prohibited due to fundamental rights concerns.", "sources": [ { "article": 0, "quote": "Recital (28)" } ] },
+    { "label": "Recital (29) — exploiting vulnerabilities", "kind": "guidance", "text": "Exploitation of vulnerabilities due to age, disability, or a specific social/economic situation (e.g., extreme poverty, minorities) may materially distort behaviour and cause significant harms without requiring intent.", "sources": [ { "article": 0, "quote": "Recital (29)" } ] }
+  ] } },
   "side_info": { "effective_from": "2025-02-02" },
   "requirements": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3"] },
@@ -27,4 +30,3 @@
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
   "test_vectors": []
 }
-

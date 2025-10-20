@@ -6,7 +6,13 @@
     { "article": 5, "paragraph": 1, "point": "(h)", "quote": "Prohibit ‘real‑time’ remote biometric identification in publicly accessible spaces for law enforcement, except for narrowly defined objectives ..." },
     { "article": 5, "paragraph": 2, "quote": "... shall be deployed ... only to confirm the identity of the specifically targeted individual ..." }
   ],
-  "legal_consequence": { "verbatim": "Prohibited: placing/putting/using 'real-time' remote biometric identification systems in publicly accessible spaces for law enforcement, except for narrowly defined objectives and subject to strict safeguards and authorisations.", "context": { "items": [] } },
+  "legal_consequence": { "verbatim": "Prohibited: placing/putting/using 'real-time' remote biometric identification systems in publicly accessible spaces for law enforcement, except for narrowly defined objectives and subject to strict safeguards and authorisations.", "context": { "items": [
+    { "label": "Recital (17) — RBI definition and 'real-time'", "kind": "definition", "text": "RBI identifies persons without active involvement; 'real-time' means capture, comparison, and identification without significant delay (no circumvention by minor delays).", "sources": [ { "article": 0, "quote": "Recital (17)" } ] },
+    { "label": "Recital (19) — publicly accessible space", "kind": "definition", "text": "Any physical space accessible to an undetermined number of persons, irrespective of ownership/use (e.g., roads, transport hubs, parks, shops).", "sources": [ { "article": 0, "quote": "Recital (19)" } ] },
+    { "label": "Recital (32) — intrusiveness and risks", "kind": "guidance", "text": "Real-time RBI for LE is particularly intrusive, risks biased/discriminatory effects, and carries heightened risks due to immediacy and limited opportunity for correction.", "sources": [ { "article": 0, "quote": "Recital (32)" } ] },
+    { "label": "Recital (33) — exhaustively listed exceptions", "kind": "guidance", "text": "Use should be prohibited except in exhaustively listed, narrowly defined situations where strictly necessary to achieve substantial public interest that outweighs risks.", "sources": [ { "article": 0, "quote": "Recital (33)" } ] },
+    { "label": "Recital (34) — identity only and strict limits", "kind": "guidance", "text": "Deployment only to confirm the specifically targeted individual's identity and limited to what is strictly necessary in time, geography, and personal scope; authorities consider the nature of the situation and rights impacts.", "sources": [ { "article": 0, "quote": "Recital (34)" } ] }
+  ] } },
   "side_info": { "effective_from": "2025-02-02" },
   "requirements": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4", "R-1.5"] },
@@ -23,4 +29,3 @@
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
   "test_vectors": []
 }
-

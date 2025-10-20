@@ -85,7 +85,10 @@ export function RequirementsGrid({
     isRunning,
   });
 
-  const progress = totalNodes > 0 ? (completed / totalNodes) * 100 : 0;
+  // Progress calculation: If evaluation is complete, show 100% (handles short-circuit skips)
+  // Otherwise calculate based on actually completed nodes
+  const progress = (evaluationStatus === 'completed' && totalNodes > 0) ? 100 :
+                   (totalNodes > 0 ? (completed / totalNodes) * 100 : 0);
   const currentNode = primitiveStates.find(s => s.status === 'evaluating');
 
   // Show progress header if evaluation is running or has results
@@ -153,7 +156,7 @@ export function RequirementsGrid({
                   <div className="w-2.5 h-2.5 bg-green-500 rounded-full" />
                 )}
                 <span className="text-xs font-semibold text-neutral-700">
-                  {completed}/{totalNodes}
+                  {evaluationStatus === 'completed' ? totalNodes : completed}/{totalNodes}
                 </span>
               </div>
 

@@ -5,7 +5,9 @@
   "article_refs": [
     { "article": 5, "paragraph": 1, "point": "(g)", "quote": "the placing on the market, the putting into service for this specific purpose, or the use of biometric categorisation systems that categorise individually natural persons based on their biometric data to deduce or infer their race, political opinions, trade union membership, religious or philosophical beliefs, sex life or sexual orientation; this prohibition does not cover any labelling or filtering of lawfully acquired biometric datasets, such as images, based on biometric data or categorizing of biometric data in the area of law enforcement;" }
   ],
-  "legal_consequence": { "verbatim": "Prohibited: biometric categorisation systems deducing/infering sensitive attributes. Not covered: labelling/filtering of lawfully acquired biometric datasets or categorising biometric data in law enforcement area.", "context": { "items": [] } },
+  "legal_consequence": { "verbatim": "Prohibited: biometric categorisation systems deducing/infering sensitive attributes. Not covered: labelling/filtering of lawfully acquired biometric datasets or categorising biometric data in law enforcement area.", "context": { "items": [
+    { "label": "Recital (30) — biometric categorisation", "kind": "guidance", "text": "Biometric categorisation to deduce or infer sensitive attributes (e.g., political opinions, beliefs, sexual orientation) should be prohibited. Lawful labelling/filtering (e.g., sorting by hair/eye colour) is not covered and may be used, including in law enforcement.", "sources": [ { "article": 0, "quote": "Recital (30)" } ] }
+  ] } },
   "side_info": { "effective_from": "2025-02-02" },
   "requirements": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4"] },
@@ -21,4 +23,3 @@
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
   "test_vectors": []
 }
-

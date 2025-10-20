@@ -5,7 +5,10 @@
   "article_refs": [
     { "article": 5, "paragraph": 1, "point": "(f)", "quote": "the placing on the market, the putting into service for this specific purpose, or the use of AI systems to infer emotions of a natural person in the areas of workplace and education institutions, except where the use of the AI system is intended to be put in place or into the market for medical or safety reasons;" }
   ],
-  "legal_consequence": { "verbatim": "Prohibited: AI systems to infer emotions in workplace or education institutions, except if intended for medical or safety reasons.", "context": { "items": [] } },
+  "legal_consequence": { "verbatim": "Prohibited: AI systems to infer emotions in workplace or education institutions, except if intended for medical or safety reasons.", "context": { "items": [
+    { "label": "Recital (18) — definition of emotion recognition", "kind": "definition", "text": "Emotion recognition = identifying or inferring emotions or intentions from biometric data; excludes physical states (e.g., fatigue) and mere detection of expressions unless used to infer emotions.", "sources": [ { "article": 0, "quote": "Recital (18)" } ] },
+    { "label": "Recital (44) — concerns and prohibition", "kind": "guidance", "text": "Serious concerns about scientific basis, reliability, specificity, and generalisability; risks of discrimination and intrusiveness, especially given workplace/education power imbalances; therefore prohibited in those areas, except for strictly medical or safety reasons.", "sources": [ { "article": 0, "quote": "Recital (44)" } ] }
+  ] } },
   "side_info": { "effective_from": "2025-02-02" },
   "requirements": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4"] },
@@ -23,4 +26,3 @@
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
   "test_vectors": []
 }
-

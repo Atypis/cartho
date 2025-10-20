@@ -5,7 +5,9 @@
   "article_refs": [
     { "article": 5, "paragraph": 1, "point": "(c)", "quote": "social scoring ... leading to (i) detrimental or unfavourable treatment in unrelated social contexts; or (ii) detrimental or unfavourable treatment that is unjustified or disproportionate to the behaviour or its gravity" }
   ],
-  "legal_consequence": { "verbatim": "Prohibited: placing/putting/using AI systems for social scoring of natural persons leading to detrimental or unfavourable treatment in unrelated social contexts or that is unjustified or disproportionate.", "context": { "items": [] } },
+  "legal_consequence": { "verbatim": "Prohibited: placing/putting/using AI systems for social scoring of natural persons leading to detrimental or unfavourable treatment in unrelated social contexts or that is unjustified or disproportionate.", "context": { "items": [
+    { "label": "Recital (31) — social scoring", "kind": "guidance", "text": "Social scoring by public or private actors can lead to discrimination and exclusion; when it results in detrimental treatment in unrelated contexts or unjustified/disproportionate treatment, it should be prohibited.", "sources": [ { "article": 0, "quote": "Recital (31)" } ] }
+  ] } },
   "side_info": { "effective_from": "2025-02-02" },
   "requirements": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3"] },
@@ -21,4 +23,3 @@
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
   "test_vectors": []
 }
-

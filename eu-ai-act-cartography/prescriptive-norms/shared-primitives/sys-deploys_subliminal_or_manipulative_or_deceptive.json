@@ -14,10 +14,12 @@
           "prompt": "Does the AI system deploy subliminal techniques beyond a person's consciousness or purposefully manipulative or deceptive techniques?",
           "answer_type": "boolean"
         },
-        "sources": [ { "article": 5, "paragraph": 1, "point": "(a)" } ]
+        "sources": [ { "article": 5, "paragraph": 1, "point": "(a)" } ],
+        "context": { "items": [
+          { "label": "Recital (29)", "kind": "guidance", "text": "Subliminal components and manipulative or deceptive techniques that subvert autonomy and decision-making, leading to significant harms, should be prohibited.", "sources": [ { "article": 0, "quote": "Recital (29)" } ] }
+        ] }
       }
     ]
   },
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
 }
-

@@ -7,7 +7,10 @@
   ],
   "legal_consequence": {
     "verbatim": "Prohibited: placing on the market, putting into service or use of an AI system that deploys subliminal, purposefully manipulative or deceptive techniques with the objective or effect of materially distorting behaviour by appreciably impairing informed decision-making, thereby causing a decision that would not otherwise be taken and causing or likely causing significant harm.",
-    "context": { "items": [] }
+    "context": { "items": [
+      { "label": "Recital (28) — manipulative/exploitative practices", "kind": "guidance", "text": "AI can be misused for manipulative, exploitative and social control practices that contradict Union values and fundamental rights; such practices should be prohibited.", "sources": [ { "article": 0, "quote": "Recital (28)" } ] },
+      { "label": "Recital (29) — subliminal/manipulative/deceptive techniques", "kind": "guidance", "text": "Subliminal components and manipulative or deceptive techniques that appreciably impair autonomy and decision-making, leading to significant harms, should be prohibited. No intent to cause harm is required if harms result from the practices.", "sources": [ { "article": 0, "quote": "Recital (29)" } ] }
+    ] }
   },
   "side_info": { "effective_from": "2025-02-02" },
   "requirements": {
@@ -34,4 +37,3 @@
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
   "test_vectors": []
 }
-

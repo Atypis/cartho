@@ -6,8 +6,12 @@
   "logic": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "AI used to infer emotions of a natural person", "kind": "primitive",
       "question": { "prompt": "Is the AI system used to infer emotions of a natural person?", "answer_type": "boolean" },
-      "sources": [ { "article": 5, "paragraph": 1, "point": "(f)" } ] }
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(f)" } ],
+      "context": { "items": [
+        { "label": "Recital (18)", "kind": "definition", "text": "Defines emotion recognition and clarifies exclusions (physical states like fatigue; mere detection of expressions unless used to infer emotions).", "sources": [ { "article": 0, "quote": "Recital (18)" } ] },
+        { "label": "Recital (44)", "kind": "guidance", "text": "Serious concerns about reliability and generalisability; intrusive nature can lead to discrimination, especially given workplace/education power imbalances.", "sources": [ { "article": 0, "quote": "Recital (44)" } ] }
+      ] }
+    }
   ] },
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
 }
-
