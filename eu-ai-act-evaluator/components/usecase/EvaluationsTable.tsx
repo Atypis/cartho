@@ -121,13 +121,13 @@ export function EvaluationsTable({
     }
   };
 
-  const filteredEvaluations = evaluations.filter(eval => {
+  const filteredEvaluations = evaluations.filter(evaluation => {
     if (filter === 'all') return true;
 
     // Check if currently running in frontend
-    if (filter === 'running' && runningEvaluations.has(eval.id)) return true;
+    if (filter === 'running' && runningEvaluations.has(evaluation.id)) return true;
 
-    return eval.status === filter;
+    return evaluation.status === filter;
   });
 
   const stats = {
