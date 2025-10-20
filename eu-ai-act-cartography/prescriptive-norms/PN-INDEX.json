@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2025-10-20T00:00:00Z",
+  "generated_at": "2025-10-20T12:52:13.527Z",
   "schema_version": "2025-10-10",
   "prescriptive_norms": [
     {
@@ -13,6 +13,18 @@
         "qp:is_deployer"
       ],
       "status": "review"
+    },
+    {
+      "id": "PN-05E",
+      "title": "Prohibition: untargeted scraping to build facial recognition databases",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-05E.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_ai_system",
+        "sys:is_untargeted_scraping_faces",
+        "sys:is_facial_recognition_db_creation"
+      ],
+      "status": "draft"
     }
   ],
   "shared_primitives": [
@@ -22,15 +34,29 @@
       "status": "draft"
     },
     {
-      "id": "qp:is_provider",
-      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_provider.json",
+      "id": "qp:is_ai_system",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_ai_system.json",
       "status": "draft"
     },
     {
       "id": "qp:is_deployer",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_deployer.json",
       "status": "draft"
+    },
+    {
+      "id": "qp:is_provider",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_provider.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:is_facial_recognition_db_creation",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_facial_recognition_db_creation.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:is_untargeted_scraping_faces",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_untargeted_scraping_faces.json",
+      "status": "draft"
     }
   ]
 }
-
