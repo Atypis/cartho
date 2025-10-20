@@ -5,6 +5,7 @@
  */
 
 import { OpenAI } from 'openai';
+import crypto from 'crypto';
 import { EvaluationEngine } from '@/lib/evaluation/engine';
 import type { PrescriptiveNorm, SharedPrimitive, EvaluationResult } from '@/lib/evaluation/types';
 import { NextRequest } from 'next/server';
@@ -12,6 +13,13 @@ import { NextRequest } from 'next/server';
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+// Simple in-memory cache for node evaluations within the process
+const evalCache = new Map<string, EvaluationResult>();
+
+function sha256(s: string) {
+  return crypto.createHash('sha256').update(s).digest('hex');
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -57,6 +65,13 @@ export async function POST(req: NextRequest) {
     // Define evaluation function that calls GPT-5-mini
     const evaluateWithGPT5 = async (prompt: string): Promise<EvaluationResult> => {
       requestCount++;
+      const key = sha256(prompt);
+      const cached = evalCache.get(key);
+      if (cached) {
+        console.log(`⚡ [Cache] Hit for request #${requestCount}`);
+        return cached;
+      }
+
       console.log(`🤖 [GPT-5-mini] Request #${requestCount} - Sending to OpenAI...`);
 
       const response = await openai.chat.completions.create({
@@ -64,25 +79,41 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: 'You are a legal expert evaluating compliance with the EU AI Act. Analyze the case facts carefully and provide precise, well-reasoned decisions.',
+            content:
+              'You are a legal expert evaluating compliance with the EU AI Act. Respond ONLY with a single JSON object: {"decision":boolean,"confidence":number,"reasoning":string}. Confidence in [0,1].',
           },
           {
             role: 'user',
-            content: prompt,
+            content: prompt + '\n\nReturn JSON only with keys: decision, confidence, reasoning.',
           },
         ],
-        reasoning_effort: 'high', // Use high reasoning for complex legal analysis
-        // Note: GPT-5 models only support temperature=1.0 (default)
+        reasoning_effort: 'high',
+        response_format: { type: 'json_object' } as any,
       });
 
       const content = response.choices[0].message.content || '';
-
       console.log(`✅ [GPT-5-mini] Response #${requestCount} received (${content.length} chars)`);
 
-      // Parse the response (expecting structured format)
-      const parsed = parseEvaluationResponse(content);
-      console.log(`   Decision: ${parsed.decision ? 'YES ✓' : 'NO ✗'} (confidence: ${(parsed.confidence * 100).toFixed(0)}%)`);
+      // Prefer JSON parse
+      let parsed: EvaluationResult;
+      try {
+        const obj = JSON.parse(content);
+        parsed = {
+          nodeId: '',
+          decision: !!obj.decision,
+          confidence: Math.max(0, Math.min(1, Number(obj.confidence) || 0.5)),
+          reasoning: String(obj.reasoning || ''),
+        };
+      } catch {
+        // Fallback to legacy parser
+        parsed = parseEvaluationResponse(content);
+      }
 
+      console.log(
+        `   Decision: ${parsed.decision ? 'YES ✓' : 'NO ✗'} (confidence: ${(parsed.confidence * 100).toFixed(0)}%)`
+      );
+
+      evalCache.set(key, parsed);
       return parsed;
     };
 

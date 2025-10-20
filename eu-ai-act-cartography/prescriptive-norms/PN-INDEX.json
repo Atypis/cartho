@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "generated_at": "2025-10-20T00:00:00Z",
+  "schema_version": "2025-10-10",
+  "prescriptive_norms": [
+    {
+      "id": "PN-04",
+      "title": "AI literacy duty for providers and deployers",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-04.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_deployer"
+      ],
+      "status": "review"
+    }
+  ],
+  "shared_primitives": [
+    {
+      "id": "qp:in_scope_art2",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-in_scope_art2.json",
+      "status": "draft"
+    },
+    {
+      "id": "qp:is_provider",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_provider.json",
+      "status": "draft"
+    },
+    {
+      "id": "qp:is_deployer",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_deployer.json",
+      "status": "draft"
+    }
+  ]
+}
+

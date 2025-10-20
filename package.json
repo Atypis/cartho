@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "scrape:react-flow": "node scripts/scrape-react-flow-docs.js",
-    "split:ai-sdk": "node scripts/split-ai-sdk-docs.js"
+    "split:ai-sdk": "node scripts/split-ai-sdk-docs.js",
+    "validate:pn": "node scripts/validate-pn.mjs"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "jsdom": "^25.0.0",
     "shadcn": "^3.4.2",
     "turndown": "^7.2.0"

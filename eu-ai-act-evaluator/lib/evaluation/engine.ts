@@ -196,6 +196,13 @@ export class EvaluationEngine {
       reasoning = decision
         ? 'The negated condition was satisfied (child was false).'
         : 'The negated condition was not satisfied (child was true).';
+    } else if (node.operator === 'xor') {
+      // XOR: exactly one child true
+      const trueCount = childResults.filter(Boolean).length;
+      decision = trueCount === 1;
+      reasoning = decision
+        ? 'Exactly one of the conditions was satisfied.'
+        : 'XOR requires exactly one true; this condition did not meet that.';
     } else {
       throw new Error(`Unknown operator: ${node.operator}`);
     }

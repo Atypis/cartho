@@ -46,6 +46,24 @@ export default function Home() {
   const [totalNodes, setTotalNodes] = useState(0);
   const [isEvaluationComplete, setIsEvaluationComplete] = useState(false);
 
+  // Available Prescriptive Norms (from catalog)
+  const [availablePNs, setAvailablePNs] = useState<string[]>([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/catalog');
+        if (res.ok) {
+          const data = await res.json();
+          const ids = (data?.prescriptive_norms || []).map((p: any) => p.id);
+          setAvailablePNs(ids);
+        }
+      } catch (e) {
+        console.warn('[Catalog] Failed to load PN-INDEX via API, falling back to default');
+        setAvailablePNs(['PN-04']);
+      }
+    })();
+  }, []);
+
   // Restore persisted state on mount
   useEffect(() => {
     console.log('🔄 [Persistence] Restoring state from localStorage...');
@@ -184,44 +202,15 @@ export default function Home() {
     const allNodes: RequirementNode[] = [];
     let rootId = '';
 
-    // First, collect all shared primitive IDs needed
-    const sharedPrimitiveIds = new Set<string>();
-    const pnDataList: PrescriptiveNorm[] = [];
+    // Load bundle from API (single source of truth)
+    const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnIds.join(','))}`);
+    if (!bundleRes.ok) throw new Error('Failed to load PN bundle');
+    const bundle = await bundleRes.json();
+    const pnDataList: PrescriptiveNorm[] = bundle.pns || [];
+    const sharedPrimitives: SharedPrimitive[] = bundle.sharedPrimitives || [];
 
-    for (const pnId of pnIds) {
-      try {
-        const response = await fetch(`/data/prescriptive-norms/${pnId}.json`);
-        if (response.ok) {
-          const pnData: PrescriptiveNorm = await response.json();
-          pnDataList.push(pnData);
-
-          // Collect shared primitive IDs from shared_refs field
-          if (pnData.shared_refs) {
-            pnData.shared_refs.forEach(id => sharedPrimitiveIds.add(id));
-          }
-
-          if (pnIds.length === 1) {
-            rootId = pnData.requirements.root;
-          }
-        }
-      } catch (error) {
-        console.error(`Error loading ${pnId}:`, error);
-      }
-    }
-
-    // Load all shared primitives
-    const sharedPrimitives: SharedPrimitive[] = [];
-    for (const spId of Array.from(sharedPrimitiveIds)) {
-      try {
-        const spFileName = spId.replace(':', '-'); // qp:is_deployer -> qp-is_deployer
-        const response = await fetch(`/data/prescriptive-norms/shared-primitives/${spFileName}.json`);
-        if (response.ok) {
-          const spData: SharedPrimitive = await response.json();
-          sharedPrimitives.push(spData);
-        }
-      } catch (error) {
-        console.error(`Error loading shared primitive ${spId}:`, error);
-      }
+    if (pnIds.length === 1 && pnDataList[0]) {
+      rootId = pnDataList[0].requirements.root;
     }
 
     // Now expand each PN's nodes with the shared primitives
@@ -281,30 +270,12 @@ export default function Home() {
 
       if (!useCase) throw new Error('Use case not found');
 
-      // Load PN and shared primitives
-      const pnDataList: PrescriptiveNorm[] = [];
-      const sharedPrimitiveIds = new Set<string>();
-
-      for (const pnId of pnIds) {
-        const response = await fetch(`/data/prescriptive-norms/${pnId}.json`);
-        if (response.ok) {
-          const pnData: PrescriptiveNorm = await response.json();
-          pnDataList.push(pnData);
-          if (pnData.shared_refs) {
-            pnData.shared_refs.forEach(id => sharedPrimitiveIds.add(id));
-          }
-        }
-      }
-
-      const sharedPrimitives: SharedPrimitive[] = [];
-      for (const spId of Array.from(sharedPrimitiveIds)) {
-        const spFileName = spId.replace(':', '-');
-        const response = await fetch(`/data/prescriptive-norms/shared-primitives/${spFileName}.json`);
-        if (response.ok) {
-          const spData = await response.json();
-          sharedPrimitives.push(spData);
-        }
-      }
+      // Load PN bundle via API
+      const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnIds.join(','))}`);
+      if (!bundleRes.ok) throw new Error('Failed to load PN bundle');
+      const bundle = await bundleRes.json();
+      const pnDataList: PrescriptiveNorm[] = bundle.pns || [];
+      const sharedPrimitives: SharedPrimitive[] = bundle.sharedPrimitives || [];
 
       // Count total PRIMITIVE nodes for progress (only primitives get evaluated)
       let totalNodeCount = 0;
@@ -626,6 +597,7 @@ export default function Home() {
           onClose={() => setShowUseCaseModal(false)}
           onSelectEvaluation={handleSelectEvaluation}
           onRunEvaluation={runEvaluation}
+          availablePNs={availablePNs}
         />
       )}
 
@@ -652,15 +624,17 @@ function UseCaseModal({
   onClose,
   onSelectEvaluation,
   onRunEvaluation,
+  availablePNs,
 }: {
   useCaseId: string;
   onClose: () => void;
   onSelectEvaluation: (id: string) => void;
   onRunEvaluation: (evaluationId: string, useCaseId: string, pnIds: string[]) => void;
+  availablePNs: string[];
 }) {
   const [useCase, setUseCase] = useState<UseCase | null>(null);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-  const [availablePNs] = useState(['PN-04', 'PN-05', 'PN-06']); // TODO: Load from DB
+  // availablePNs now loaded from catalog API
   const [selectedPNs, setSelectedPNs] = useState<string[]>([]);
   const [triggering, setTriggering] = useState(false);
 
