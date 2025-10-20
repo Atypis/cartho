@@ -88,6 +88,17 @@ SPs are small trees with clear per-node questions and sources. Keep them reusabl
 - Bundle API (in evaluator): `/api/catalog`, `/api/prescriptive/bundle?pnIds=...`
   - Evaluator consumes this; authors don’t need to copy files to the UI.
 
+## Shared Consequences (penalties, standard notes)
+
+- Location: `prescriptive-norms/shared-consequences/`
+- Schema: `shared-consequences/schema/shared-consequence.schema.json`
+- Purpose: centralise reusable legal consequence fragments (e.g., penalties under Article 99) to avoid duplication and ensure consistency.
+- Referencing: add IDs under `legal_consequence.context.refs` in PN JSONs. Example:
+  - Prohibitions (Art. 5): `cons:penalty_art99_prohibitions` (Art. 99(3) — €35M or 7%)
+  - General requirements/obligations: `cons:penalty_art99_requirements` (Art. 99(2) — €15M or 3%)
+
+Note: The evaluator does not yet load shared consequences; they are used for authoring consistency and can be surfaced in UI later.
+
 ## Ground Truth (Legal Text)
 
 - Primary source: `ai-act-source/EU_AI_Act.md` (full consolidated text). Use this to:
@@ -95,6 +106,7 @@ SPs are small trees with clear per-node questions and sources. Keep them reusabl
   - Anchor nodes with `sources` (article, paragraph, point) and include short quotes where helpful.
   - Pull recital context where it clarifies intent (e.g., Recital (43) for Article 5(1)(e)).
   - Prefer the consolidated HTML (`OJ…TXT.html`) when checking formatting nuances; keep verbatim faithful to the Markdown source.
+  - Add Recitals as non-gating context where they clarify scope, definitions, or proportionality (e.g., Recitals (20), (28)-(31), (43), (17), (19), (32)-(34)).
 
 ## Templates
 

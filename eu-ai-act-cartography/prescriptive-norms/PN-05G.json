@@ -7,7 +7,7 @@
   ],
   "legal_consequence": { "verbatim": "Prohibited: biometric categorisation systems deducing/infering sensitive attributes. Not covered: labelling/filtering of lawfully acquired biometric datasets or categorising biometric data in law enforcement area.", "context": { "items": [
     { "label": "Recital (30) — biometric categorisation", "kind": "guidance", "text": "Biometric categorisation to deduce or infer sensitive attributes (e.g., political opinions, beliefs, sexual orientation) should be prohibited. Lawful labelling/filtering (e.g., sorting by hair/eye colour) is not covered and may be used, including in law enforcement.", "sources": [ { "article": 0, "quote": "Recital (30)" } ] }
-  ] } },
+  ], "refs": ["cons:penalty_art99_prohibitions"] } },
   "side_info": { "effective_from": "2025-02-02" },
   "requirements": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4"] },

@@ -22,7 +22,9 @@
         "sources": [ { "article": 2, "paragraph": 1 } ],
         "context": {
           "items": [
-            { "label": "Third-country output used in the Union", "kind": "guidance", "text": "Art. 2(1)(c) brings into scope providers/deployers located in a third country where the output is used in the Union.", "sources": [ { "article": 2, "paragraph": 1 } ] }
+            { "label": "Third-country output used in the Union", "kind": "guidance", "text": "Art. 2(1)(c) brings into scope providers/deployers located in a third country where the output is used in the Union.", "sources": [ { "article": 2, "paragraph": 1 } ] },
+            { "label": "Recital (21) — non-discriminatory scope", "kind": "guidance", "text": "Rules apply irrespective of whether providers are established in the Union or in a third country; deployers established in the Union are within scope.", "sources": [ { "article": 0, "quote": "Recital (21)" } ] },
+            { "label": "Recital (22) — outputs used in the Union", "kind": "guidance", "text": "Applies to providers and deployers in a third country where the output is intended to be used in the Union; excludes public authorities of a third country/international organisations acting under cooperation agreements with adequate safeguards.", "sources": [ { "article": 0, "quote": "Recital (22)" } ] }
           ]
         }
       },
@@ -50,9 +52,8 @@
       { "id": "R-1.2.1", "label": "Outside Union law / national security competences", "kind": "primitive", "question": { "prompt": "Is the situation outside Union law or within Member State national security competences?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 3 } ] },
       { "id": "R-1.2.2", "label": "Military/defence/national security exclusive purposes", "kind": "primitive", "question": { "prompt": "Is the AI used exclusively for military, defence or national security purposes?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 3 } ] },
       { "id": "R-1.2.3", "label": "International cooperation for LE/judicial with adequate safeguards", "kind": "primitive", "question": { "prompt": "Is it an international cooperation use (LE/judicial) by third‑country public authorities or international organisations with adequate safeguards?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 4 } ] },
-      { "id": "R-1.2.4", "label": "Sole purpose scientific research and development / pre‑market R&D (excluding real‑world testing)", "kind": "primitive", "question": { "prompt": "Is it solely for scientific R&D, or pre‑market R&D (excluding real‑world testing under Art. 60)?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 6 }, { "article": 2, "paragraph": 8 } ], "context": { "items": [ { "label": "Real‑world testing not excluded", "kind": "guidance", "text": "Art. 2(8): testing in real world conditions is not covered by the exclusion and is regulated by Art. 60.", "sources": [ { "article": 2, "paragraph": 8 } ] } ] } }
+      { "id": "R-1.2.4", "label": "Sole purpose scientific research and development / pre‑market R&D (excluding real‑world testing)", "kind": "primitive", "question": { "prompt": "Is it solely for scientific R&D, or pre‑market R&D (excluding real‑world testing under Art. 60)?", "answer_type": "boolean" }, "sources": [ { "article": 2, "paragraph": 6 }, { "article": 2, "paragraph": 8 } ], "context": { "items": [ { "label": "Real‑world testing not excluded", "kind": "guidance", "text": "Art. 2(8): testing in real world conditions is not covered by the exclusion and is regulated by Art. 60.", "sources": [ { "article": 2, "paragraph": 8 } ] }, { "label": "Recital (25) — R&D exclusion and sandbox", "kind": "guidance", "text": "Excludes AI specifically developed and put into service solely for scientific R&D; product-oriented R&D before placing/putting into service is excluded; real-world testing and sandboxes remain applicable.", "sources": [ { "article": 0, "quote": "Recital (25)" } ] } ] } }
     ]
   },
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-10" }
 }
-

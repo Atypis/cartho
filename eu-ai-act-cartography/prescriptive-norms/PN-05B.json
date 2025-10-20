@@ -8,7 +8,7 @@
   "legal_consequence": { "verbatim": "Prohibited: AI systems exploiting vulnerabilities due to age, disability, or specific social/economic situation, leading to material distortion causing or likely causing significant harm.", "context": { "items": [
     { "label": "Recital (28) — manipulative/exploitative practices", "kind": "guidance", "text": "AI misuse can include exploitative practices; such practices should be prohibited due to fundamental rights concerns.", "sources": [ { "article": 0, "quote": "Recital (28)" } ] },
     { "label": "Recital (29) — exploiting vulnerabilities", "kind": "guidance", "text": "Exploitation of vulnerabilities due to age, disability, or a specific social/economic situation (e.g., extreme poverty, minorities) may materially distort behaviour and cause significant harms without requiring intent.", "sources": [ { "article": 0, "quote": "Recital (29)" } ] }
-  ] } },
+  ], "refs": ["cons:penalty_art99_prohibitions"] } },
   "side_info": { "effective_from": "2025-02-02" },
   "requirements": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3"] },

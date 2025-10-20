@@ -29,9 +29,22 @@
           "kind": "guidance",
           "text": "Target: staff and other persons dealing with operation and use of AI systems on the actor’s behalf. Factors: technical knowledge, experience, education, training, context of use, and persons/groups on whom the AI systems are to be used.",
           "sources": [ { "article": 4 } ]
+        },
+        {
+          "label": "Recital (20) — AI literacy purpose",
+          "kind": "guidance",
+          "text": "AI literacy equips providers, deployers and affected persons to make informed decisions; notions vary by context and include interpreting outputs and understanding obligations. Commission/Board promote AI literacy tools and codes of conduct.",
+          "sources": [ { "article": 0, "quote": "Recital (20)" } ]
+        },
+        {
+          "label": "Recital (91) — deployers’ competence",
+          "kind": "guidance",
+          "text": "Deployers should ensure persons implementing instructions for use and human oversight have the necessary competence, including adequate AI literacy, training and authority.",
+          "sources": [ { "article": 0, "quote": "Recital (91)" } ]
         }
       ]
-    }
+    },
+    "refs": ["cons:penalty_art99_requirements"]
   },
   "side_info": {
     "effective_from": "2025-02-02"

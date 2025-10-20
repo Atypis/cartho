@@ -1,0 +1,12 @@
+{
+  "id": "cons:penalty_art99_prohibitions",
+  "title": "Penalties — Prohibited AI practices (Art. 99(3))",
+  "article_refs": [ { "article": 99, "paragraph": 3, "quote": "... administrative fines of up to EUR 35 000 000 or, if the offender is an undertaking, up to 7 % of its total worldwide annual turnover for the preceding financial year, whichever is higher ..." } ],
+  "content": {
+    "text": "Violations of Article 5 prohibited AI practices are subject to fines up to EUR 35,000,000 or 7% of total worldwide annual turnover (whichever is higher), per Article 99(3).",
+    "penalty_tier": "€35M or 7%",
+    "notes": "Specific national enforcement and proportionality rules apply; see full Article 99 for details and other tiers."
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/shared-consequence.schema.json",
+  "title": "Shared Legal Consequence (EU AI Act)",
+  "type": "object",
+  "required": ["id", "title", "article_refs", "content"],
+  "properties": {
+    "id": { "type": "string", "description": "Namespaced id (e.g., cons:penalty_art99_prohibitions)" },
+    "title": { "type": "string" },
+    "article_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["article"],
+        "properties": {
+          "article": { "type": "integer" },
+          "paragraph": { "type": ["integer", "string"] },
+          "point": { "type": "string" },
+          "quote": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "content": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string" },
+        "penalty_tier": { "type": "string", "description": "Human-readable penalty tier (e.g., '€35M or 7%')" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {\n+        "version": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "review", "final"] },
+        "extraction_date": { "type": "string", "format": "date" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
+

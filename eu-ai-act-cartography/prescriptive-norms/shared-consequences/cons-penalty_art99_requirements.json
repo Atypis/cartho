@@ -1,0 +1,12 @@
+{
+  "id": "cons:penalty_art99_requirements",
+  "title": "Penalties — Requirements and obligations (Art. 99(2))",
+  "article_refs": [ { "article": 99, "paragraph": 2, "quote": "... administrative fines of up to EUR 15 000 000 or, if the offender is an undertaking, up to 3 % of its total worldwide annual turnover for the preceding financial year, whichever is higher ..." } ],
+  "content": {
+    "text": "Violations of obligations and requirements (other than the Article 5 prohibitions) are generally subject to fines up to EUR 15,000,000 or 3% of total worldwide annual turnover (whichever is higher), per Article 99(2).",
+    "penalty_tier": "€15M or 3%",
+    "notes": "See Article 99 for additional tiers (e.g., 1.5% for incorrect information) and national enforcement provisions."
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+
