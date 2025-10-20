@@ -1,0 +1,34 @@
+{
+  "id": "PN-XX",
+  "title": "<Concise title>",
+  "type": "duty",
+  "article_refs": [
+    { "article": 0, "paragraph": 0, "quote": "<Exact operative text or fragment>" }
+  ],
+  "legal_consequence": {
+    "verbatim": "<Exact operative text>",
+    "notes": "",
+    "context": { "items": [] }
+  },
+  "side_info": {
+    "effective_from": "YYYY-MM-DD"
+  },
+  "requirements": {
+    "root": "R-1",
+    "nodes": [
+      { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2"] },
+      { "id": "R-1.1", "label": "Global scope gate (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2", "sources": [ { "article": 2 } ], "question": { "prompt": "Does Article 2 scope apply (and no exclusion)?", "answer_type": "boolean" } },
+      { "id": "R-1.2", "label": "Actor gate(s)", "kind": "composite", "operator": "anyOf", "children": ["R-1.2.1", "R-1.2.2"] },
+      { "id": "R-1.2.1", "label": "Actor is provider", "kind": "primitive", "ref": "qp:is_provider", "sources": [ { "article": 3, "paragraph": 2 } ], "question": { "prompt": "Is the actor a provider per Art. 3(2)?", "answer_type": "boolean" } },
+      { "id": "R-1.2.2", "label": "Actor is deployer", "kind": "primitive", "ref": "qp:is_deployer", "sources": [ { "article": 3, "paragraph": 4 } ], "question": { "prompt": "Is the actor a deployer per Art. 3(4)?", "answer_type": "boolean" } }
+    ]
+  },
+  "shared_refs": [
+    "qp:in_scope_art2",
+    "qp:is_provider",
+    "qp:is_deployer"
+  ],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "YYYY-MM-DD" },
+  "test_vectors": []
+}
+

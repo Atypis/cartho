@@ -22,6 +22,7 @@ interface RequirementsGridProps {
   selectedNodeId?: string | null;
   isRunning?: boolean;
   totalNodes?: number;
+  evaluationStatus?: string;
 }
 
 export function RequirementsGrid({
@@ -32,6 +33,7 @@ export function RequirementsGrid({
   selectedNodeId,
   isRunning = false,
   totalNodes = 0,
+  evaluationStatus,
 }: RequirementsGridProps) {
   const [progressExpanded, setProgressExpanded] = useState(true);
   const [summaryExpanded, setSummaryExpanded] = useState(true);
@@ -91,8 +93,18 @@ export function RequirementsGrid({
 
   // Calculate compliance status for Article 4
   const hasResults = completed > 0;
-  const allCompleted = completed === totalNodes && totalNodes > 0;
+  // Check BOTH database status AND completion count (handles short-circuit optimization)
+  const allCompleted = (evaluationStatus === 'completed') || (completed === totalNodes && totalNodes > 0);
   const isEvaluationFinished = allCompleted && !isRunning;
+
+  console.log('🎯 [Completion Check]', {
+    evaluationStatus,
+    completed,
+    totalNodes,
+    allCompleted,
+    isRunning,
+    isEvaluationFinished
+  });
 
   // Always show summary once evaluation has started (has any results or is running)
   const showSummary = hasResults || isRunning;

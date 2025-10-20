@@ -1,0 +1,20 @@
+{
+  "id": "qp:predicate_name",
+  "title": "<Title> — <Short purpose>",
+  "namespace": "qp",
+  "article_refs": [ { "article": 0 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "<Describe the gate>",
+        "kind": "primitive",
+        "question": { "prompt": "<Ask a decidable question>", "answer_type": "boolean" },
+        "sources": [ { "article": 0 } ]
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "YYYY-MM-DD" }
+}
+

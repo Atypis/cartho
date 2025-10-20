@@ -573,6 +573,7 @@ export default function Home() {
                 selectedNodeId={selectedNodeId}
                 isRunning={runningEvaluationId === (evaluationData as any).evaluation?.id && !isEvaluationComplete}
                 totalNodes={totalNodes}
+                evaluationStatus={(evaluationData as any).evaluation?.status}
               />
             </div>
           </>
