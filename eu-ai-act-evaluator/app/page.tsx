@@ -46,6 +46,27 @@ export default function Home() {
   const [totalNodes, setTotalNodes] = useState(0);
   const [isEvaluationComplete, setIsEvaluationComplete] = useState(false);
 
+  // Restore persisted state on mount
+  useEffect(() => {
+    console.log('🔄 [Persistence] Restoring state from localStorage...');
+    try {
+      const persistedEvaluationId = localStorage.getItem('selectedEvaluationId');
+      const persistedUseCaseId = localStorage.getItem('selectedUseCaseId');
+
+      if (persistedEvaluationId) {
+        console.log(`✅ [Persistence] Restored evaluation: ${persistedEvaluationId}`);
+        setSelectedEvaluationId(persistedEvaluationId);
+      }
+
+      if (persistedUseCaseId) {
+        console.log(`✅ [Persistence] Restored use case: ${persistedUseCaseId}`);
+        setSelectedUseCaseId(persistedUseCaseId);
+      }
+    } catch (error) {
+      console.error('❌ [Persistence] Error restoring state:', error);
+    }
+  }, []);
+
   // Load chat sessions on mount and create default if none exist
   useEffect(() => {
     loadChatSessions();
@@ -57,6 +78,25 @@ export default function Home() {
       createNewSession();
     }
   }, [chatSessions.length]);
+
+  // Persist selectedUseCaseId to localStorage
+  useEffect(() => {
+    if (selectedUseCaseId) {
+      console.log(`💾 [Persistence] Saving use case: ${selectedUseCaseId}`);
+      localStorage.setItem('selectedUseCaseId', selectedUseCaseId);
+    }
+  }, [selectedUseCaseId]);
+
+  // Persist selectedEvaluationId to localStorage
+  useEffect(() => {
+    if (selectedEvaluationId) {
+      console.log(`💾 [Persistence] Saving evaluation: ${selectedEvaluationId}`);
+      localStorage.setItem('selectedEvaluationId', selectedEvaluationId);
+    } else {
+      console.log('🗑️ [Persistence] Clearing evaluation from localStorage');
+      localStorage.removeItem('selectedEvaluationId');
+    }
+  }, [selectedEvaluationId]);
 
   // Load evaluation when selected
   useEffect(() => {
@@ -119,6 +159,8 @@ export default function Home() {
 
     if (evalError) {
       console.error('❌ [Load] Error loading evaluation:', evalError);
+      console.log('🗑️ [Load] Clearing invalid evaluation from state and localStorage');
+      setSelectedEvaluationId(null); // This will trigger localStorage clear
       setCanvasView('welcome');
       return;
     }
