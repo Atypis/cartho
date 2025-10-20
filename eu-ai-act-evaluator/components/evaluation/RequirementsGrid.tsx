@@ -36,6 +36,7 @@ export function RequirementsGrid({
   const [progressExpanded, setProgressExpanded] = useState(true);
   const [summaryExpanded, setSummaryExpanded] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'tree'>('tree'); // TREE IS DEFAULT 🌲
+  const summaryCardRef = useRef<HTMLDivElement>(null);
   const nodeMap = new Map(nodes.map(n => [n.id, n]));
   const root = nodeMap.get(rootId);
 
@@ -55,16 +56,35 @@ export function RequirementsGrid({
       ? root.children.map(id => nodeMap.get(id)).filter((n): n is RequirementNode => n !== undefined)
       : [root];
 
-  // Calculate stats
-  const completed = evaluationStates.filter(s => s.status === 'completed').length;
-  const evaluating = evaluationStates.filter(s => s.status === 'evaluating').length;
-  const errors = evaluationStates.filter(s => s.status === 'error').length;
-  const pending = evaluationStates.filter(s => s.status === 'pending').length;
-  const passed = evaluationStates.filter(s => s.status === 'completed' && s.result?.decision).length;
-  const failed = evaluationStates.filter(s => s.status === 'completed' && !s.result?.decision).length;
+  // Calculate stats - ONLY COUNT PRIMITIVE NODES (composites are structural, not evaluated by LLM)
+  const primitiveNodes = nodes.filter(n => n.kind === 'primitive');
+  const primitiveStates = evaluationStates.filter(s => {
+    const node = nodeMap.get(s.nodeId);
+    return node?.kind === 'primitive';
+  });
+
+  const completed = primitiveStates.filter(s => s.status === 'completed').length;
+  const evaluating = primitiveStates.filter(s => s.status === 'evaluating').length;
+  const errors = primitiveStates.filter(s => s.status === 'error').length;
+  const pending = primitiveStates.filter(s => s.status === 'pending').length;
+  const passed = primitiveStates.filter(s => s.status === 'completed' && s.result?.decision).length;
+  const failed = primitiveStates.filter(s => s.status === 'completed' && !s.result?.decision).length;
+
+  // Debug logging
+  console.log('📊 [Grid Stats]', {
+    totalNodes,
+    totalNodesInTree: nodes.length,
+    primitiveNodesInTree: primitiveNodes.length,
+    evaluationStatesCount: evaluationStates.length,
+    primitiveStatesCount: primitiveStates.length,
+    completed,
+    passed,
+    failed,
+    isRunning,
+  });
 
   const progress = totalNodes > 0 ? (completed / totalNodes) * 100 : 0;
-  const currentNode = evaluationStates.find(s => s.status === 'evaluating');
+  const currentNode = primitiveStates.find(s => s.status === 'evaluating');
 
   // Show progress header if evaluation is running or has results
   const showProgress = isRunning || completed > 0;
@@ -82,6 +102,19 @@ export function RequirementsGrid({
     (isRunning || !allCompleted) ? 'evaluating' :
     failed === 0 ? 'compliant' :
     passed === 0 ? 'non-compliant' : 'partial';
+
+  // Auto-scroll to summary card when evaluation completes
+  useEffect(() => {
+    if (isEvaluationFinished && summaryCardRef.current) {
+      console.log('📜 [Auto-scroll] Scrolling to summary card');
+      summaryCardRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+      // Also expand the card if it's collapsed
+      setSummaryExpanded(true);
+    }
+  }, [isEvaluationFinished]);
 
   return (
     <div className="space-y-4">
@@ -186,7 +219,7 @@ export function RequirementsGrid({
 
       {/* Article 4 Obligation Summary Card */}
       {showSummary && (
-        <div className="bg-white rounded-lg border-2 border-neutral-300 overflow-hidden shadow-sm">
+        <div ref={summaryCardRef} className="bg-white rounded-lg border-2 border-neutral-300 overflow-hidden shadow-sm">
           {/* Header */}
           <div className="px-5 py-3 flex items-center justify-between gap-4 bg-neutral-100 border-b-2 border-neutral-300">
             <div className="flex items-center gap-3 flex-1">
