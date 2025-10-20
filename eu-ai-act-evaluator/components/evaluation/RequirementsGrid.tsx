@@ -39,8 +39,31 @@ export function RequirementsGrid({
   const [summaryExpanded, setSummaryExpanded] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'tree'>('tree'); // TREE IS DEFAULT 🌲
   const summaryCardRef = useRef<HTMLDivElement>(null);
+
   const nodeMap = new Map(nodes.map(n => [n.id, n]));
   const root = nodeMap.get(rootId);
+
+  // Calculate evaluation completion status early (needed for useEffect hook)
+  const primitiveStatesForHook = evaluationStates.filter(s => {
+    const node = nodeMap.get(s.nodeId);
+    return node?.kind === 'primitive';
+  });
+  const completedForHook = primitiveStatesForHook.filter(s => s.status === 'completed').length;
+  const allCompletedForHook = (evaluationStatus === 'completed') || (completedForHook === totalNodes && totalNodes > 0);
+  const isEvaluationFinishedForHook = allCompletedForHook && !isRunning;
+
+  // Auto-scroll to summary card when evaluation completes (MUST be before early return!)
+  useEffect(() => {
+    if (isEvaluationFinishedForHook && summaryCardRef.current) {
+      console.log('📜 [Auto-scroll] Scrolling to summary card');
+      summaryCardRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+      // Also expand the card if it's collapsed
+      setSummaryExpanded(true);
+    }
+  }, [isEvaluationFinishedForHook]);
 
   if (!root) {
     return (
@@ -124,19 +147,6 @@ export function RequirementsGrid({
     rootDecision === true ? 'applies' :
     rootDecision === false ? 'does-not-apply' :
     'unknown';
-
-  // Auto-scroll to summary card when evaluation completes
-  useEffect(() => {
-    if (isEvaluationFinished && summaryCardRef.current) {
-      console.log('📜 [Auto-scroll] Scrolling to summary card');
-      summaryCardRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-      // Also expand the card if it's collapsed
-      setSummaryExpanded(true);
-    }
-  }, [isEvaluationFinished]);
 
   return (
     <div className="space-y-4">

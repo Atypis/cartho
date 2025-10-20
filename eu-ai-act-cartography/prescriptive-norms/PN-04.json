@@ -41,7 +41,8 @@
           "kind": "guidance",
           "text": "Deployers should ensure persons implementing instructions for use and human oversight have the necessary competence, including adequate AI literacy, training and authority.",
           "sources": [ { "article": 0, "quote": "Recital (91)" } ]
-        }
+        },
+        { "label": "Penalty and enforcement (Article 99)", "kind": "guidance", "text": "Obligation/requirement. Member States enforce with effective, proportionate and dissuasive measures. Administrative fines for non-compliance with obligations (other than Article 5 prohibitions) may be up to EUR 15,000,000 or 3% of worldwide turnover (whichever is higher), with SME caps; case-by-case factors and due process apply.", "sources": [ { "article": 99, "paragraph": 4 }, { "article": 99, "paragraph": 6 }, { "article": 99, "paragraph": 7 }, { "article": 99, "paragraph": 1 }, { "article": 99, "paragraph": 2 }, { "article": 99, "paragraph": 9 }, { "article": 99, "paragraph": 10 }, { "article": 99, "paragraph": 11 } ] }
       ]
     },
     "refs": ["cons:penalty_art99_requirements"]
