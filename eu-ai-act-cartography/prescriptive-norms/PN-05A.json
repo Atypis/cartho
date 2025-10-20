@@ -1,0 +1,37 @@
+{
+  "id": "PN-05A",
+  "title": "Prohibition: subliminal/manipulative/deceptive techniques causing significant harm",
+  "type": "prohibition",
+  "article_refs": [
+    { "article": 5, "paragraph": 1, "point": "(a)", "quote": "the placing on the market, the putting into service or the use of an AI system that deploys subliminal techniques beyond a person's consciousness or purposefully manipulative or deceptive techniques, with the objective, or the effect of materially distorting the behaviour of a person or a group of persons by appreciably impairing their ability to make an informed decision, thereby causing them to take a decision that they would not have otherwise taken in a manner that causes or is reasonably likely to cause that person, another person or group of persons significant harm;" }
+  ],
+  "legal_consequence": {
+    "verbatim": "Prohibited: placing on the market, putting into service or use of an AI system that deploys subliminal, purposefully manipulative or deceptive techniques with the objective or effect of materially distorting behaviour by appreciably impairing informed decision-making, thereby causing a decision that would not otherwise be taken and causing or likely causing significant harm.",
+    "context": { "items": [] }
+  },
+  "side_info": { "effective_from": "2025-02-02" },
+  "requirements": {
+    "root": "R-1",
+    "nodes": [
+      { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3"] },
+      { "id": "R-1.1", "label": "Global scope gate (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2", "sources": [ { "article": 2 } ], "question": { "prompt": "Does Article 2 scope apply (and no exclusion)?", "answer_type": "boolean" } },
+      { "id": "R-1.2", "label": "System is AI (Art. 3)", "kind": "primitive", "ref": "qp:is_ai_system", "sources": [ { "article": 3 } ], "question": { "prompt": "Is it an AI system under Art. 3?", "answer_type": "boolean" } },
+      { "id": "R-1.3", "label": "Practice and effects", "kind": "composite", "operator": "allOf", "children": ["R-1.3.1", "R-1.3.2", "R-1.3.3", "R-1.3.4"] },
+      { "id": "R-1.3.1", "label": "Deploys subliminal/manipulative/deceptive techniques", "kind": "primitive", "ref": "sys:deploys_subliminal_or_manipulative_or_deceptive", "sources": [ { "article": 5, "paragraph": 1, "point": "(a)" } ], "question": { "prompt": "Does the system deploy subliminal/manipulative/deceptive techniques?", "answer_type": "boolean" } },
+      { "id": "R-1.3.2", "label": "Appreciably impairs informed decision-making", "kind": "primitive", "ref": "sys:appreciably_impairs_informed_decision_making", "sources": [ { "article": 5, "paragraph": 1 } ], "question": { "prompt": "Does it appreciably impair informed decision-making?", "answer_type": "boolean" } },
+      { "id": "R-1.3.3", "label": "Caused decision not otherwise taken", "kind": "primitive", "ref": "sys:caused_decision_not_taken_otherwise", "sources": [ { "article": 5, "paragraph": 1 } ], "question": { "prompt": "Did it cause a decision not otherwise taken?", "answer_type": "boolean" } },
+      { "id": "R-1.3.4", "label": "Causes or likely causes significant harm", "kind": "primitive", "ref": "sys:causes_or_likely_causes_significant_harm", "sources": [ { "article": 5, "paragraph": 1 } ], "question": { "prompt": "Does it cause or is reasonably likely to cause significant harm?", "answer_type": "boolean" } }
+    ]
+  },
+  "shared_refs": [
+    "qp:in_scope_art2",
+    "qp:is_ai_system",
+    "sys:deploys_subliminal_or_manipulative_or_deceptive",
+    "sys:appreciably_impairs_informed_decision_making",
+    "sys:caused_decision_not_taken_otherwise",
+    "sys:causes_or_likely_causes_significant_harm"
+  ],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
+  "test_vectors": []
+}
+

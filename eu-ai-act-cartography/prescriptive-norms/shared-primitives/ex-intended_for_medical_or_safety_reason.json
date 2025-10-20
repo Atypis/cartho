@@ -1,0 +1,13 @@
+{
+  "id": "ex:intended_for_medical_or_safety_reason",
+  "title": "Use intended for medical or safety reasons (Art. 5(1)(f) exception)",
+  "namespace": "ex",
+  "article_refs": [ { "article": 5, "paragraph": 1, "point": "(f)" } ],
+  "logic": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "Medical or safety reason intent", "kind": "primitive",
+      "question": { "prompt": "Is the use intended to be put in place or on the market for medical or safety reasons?", "answer_type": "boolean" },
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(f)" } ] }
+  ] },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

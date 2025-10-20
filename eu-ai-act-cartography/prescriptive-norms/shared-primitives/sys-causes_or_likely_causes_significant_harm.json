@@ -1,0 +1,13 @@
+{
+  "id": "sys:causes_or_likely_causes_significant_harm",
+  "title": "Causes or likely to cause significant harm (Art. 5(1)(a),(b))",
+  "namespace": "sys",
+  "article_refs": [ { "article": 5, "paragraph": 1 } ],
+  "logic": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "Significant harm (caused or reasonably likely)", "kind": "primitive",
+      "question": { "prompt": "Does the practice cause, or is it reasonably likely to cause, significant harm to a person or group?", "answer_type": "boolean" },
+      "sources": [ { "article": 5, "paragraph": 1 } ] }
+  ] },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

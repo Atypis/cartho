@@ -1,0 +1,13 @@
+{
+  "id": "sys:unrelated_context_detrimental_treatment",
+  "title": "Detrimental/unfavourable treatment in unrelated contexts (Art. 5(1)(c)(i))",
+  "namespace": "sys",
+  "article_refs": [ { "article": 5, "paragraph": 1 } ],
+  "logic": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "Unrelated context detrimental treatment", "kind": "primitive",
+      "question": { "prompt": "Does the social scoring result in detrimental or unfavourable treatment in social contexts unrelated to where the data was originally generated or collected?", "answer_type": "boolean" },
+      "sources": [ { "article": 5, "paragraph": 1 } ] }
+  ] },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

@@ -1,0 +1,13 @@
+{
+  "id": "sys:makes_risk_assessments_criminal_offence",
+  "title": "Makes risk assessments of natural persons to predict criminal offence (Art. 5(1)(d))",
+  "namespace": "sys",
+  "article_refs": [ { "article": 5, "paragraph": 1, "point": "(d)" } ],
+  "logic": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "Risk assessment for predicting criminal offence", "kind": "primitive",
+      "question": { "prompt": "Is the AI used to make risk assessments of natural persons to assess or predict the risk of committing a criminal offence?", "answer_type": "boolean" },
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(d)" } ] }
+  ] },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

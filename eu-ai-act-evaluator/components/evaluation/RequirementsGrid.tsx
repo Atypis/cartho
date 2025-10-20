@@ -91,29 +91,36 @@ export function RequirementsGrid({
   // Show progress header if evaluation is running or has results
   const showProgress = isRunning || completed > 0;
 
-  // Calculate compliance status for Article 4
+  // Calculate applicability status for Article 4
   const hasResults = completed > 0;
   // Check BOTH database status AND completion count (handles short-circuit optimization)
   const allCompleted = (evaluationStatus === 'completed') || (completed === totalNodes && totalNodes > 0);
   const isEvaluationFinished = allCompleted && !isRunning;
 
-  console.log('🎯 [Completion Check]', {
+  // Get ROOT node evaluation result - this determines if the norm APPLIES or NOT
+  const rootState = evaluationStates.find(s => s.nodeId === rootId);
+  const rootDecision = rootState?.result?.decision;
+
+  console.log('🎯 [Applicability Check]', {
     evaluationStatus,
     completed,
     totalNodes,
     allCompleted,
     isRunning,
-    isEvaluationFinished
+    isEvaluationFinished,
+    rootId,
+    rootDecision,
   });
 
   // Always show summary once evaluation has started (has any results or is running)
   const showSummary = hasResults || isRunning;
 
-  // Only reveal final compliance status when evaluation is complete
-  const complianceStatus = !hasResults ? 'pending' :
-    (isRunning || !allCompleted) ? 'evaluating' :
-    failed === 0 ? 'compliant' :
-    passed === 0 ? 'non-compliant' : 'partial';
+  // Determine if norm APPLIES (not compliance - that's a separate question!)
+  const applicabilityStatus = !hasResults ? 'pending' :
+    (isRunning || !isEvaluationFinished) ? 'evaluating' :
+    rootDecision === true ? 'applies' :
+    rootDecision === false ? 'does-not-apply' :
+    'unknown';
 
   // Auto-scroll to summary card when evaluation completes
   useEffect(() => {
@@ -243,15 +250,13 @@ export function RequirementsGrid({
               {/* Status Badge - Only show final status when complete */}
               {isEvaluationFinished && (
                 <div className={`ml-auto flex items-center gap-2 px-3 py-1 rounded text-xs font-bold ${
-                  complianceStatus === 'compliant' ? 'bg-green-500 text-white' :
-                  complianceStatus === 'non-compliant' ? 'bg-red-500 text-white' :
-                  complianceStatus === 'partial' ? 'bg-yellow-500 text-white' :
+                  applicabilityStatus === 'applies' ? 'bg-green-500 text-white' :
+                  applicabilityStatus === 'does-not-apply' ? 'bg-red-500 text-white' :
                   'bg-neutral-400 text-white'
                 }`}>
-                  {complianceStatus === 'compliant' ? 'REQUIREMENT APPLIES' :
-                   complianceStatus === 'non-compliant' ? 'REQUIREMENT DOES NOT APPLY' :
-                   complianceStatus === 'partial' ? 'PARTIALLY APPLIES' :
-                   'PENDING'}
+                  {applicabilityStatus === 'applies' ? 'REQUIREMENT APPLIES' :
+                   applicabilityStatus === 'does-not-apply' ? 'REQUIREMENT DOES NOT APPLY' :
+                   'UNKNOWN'}
                 </div>
               )}
 
@@ -298,15 +303,18 @@ export function RequirementsGrid({
                 </div>
               </div>
 
-              {/* Compliance Status Explanation - Only show when complete */}
-              {isEvaluationFinished && complianceStatus === 'compliant' && (
+              {/* Applicability Result - Only show when complete */}
+              {isEvaluationFinished && applicabilityStatus === 'applies' && (
                 <div className="bg-green-50 border-l-4 border-green-600 rounded-r-lg p-4">
                   <div className="font-bold text-green-900 mb-2 text-xs uppercase tracking-wide">
-                    Compliance Confirmed
+                    ✓ This Obligation Applies
+                  </div>
+                  <div className="text-green-900 text-sm leading-relaxed mb-3">
+                    Based on the evaluation, <strong>Article 4 AI Literacy obligations apply to your AI system.</strong>
                   </div>
                   <div className="text-green-900 text-sm leading-relaxed">
-                    Your AI system meets all requirements for Article 4. You have demonstrated appropriate measures
-                    to ensure AI literacy among staff and users. <strong>This obligation applies to your system.</strong>
+                    <strong>What this means:</strong> You must implement measures to ensure sufficient AI literacy
+                    among your staff and persons dealing with the operation and use of your AI system.
                   </div>
                 </div>
               )}

@@ -1,0 +1,30 @@
+{
+  "id": "PN-05D",
+  "title": "Prohibition: risk assessment to predict criminal offence based solely on profiling or personality traits",
+  "type": "prohibition",
+  "article_refs": [
+    { "article": 5, "paragraph": 1, "point": "(d)", "quote": "the placing on the market, the putting into service for this specific purpose, or the use of an AI system for making risk assessments of natural persons in order to assess or predict the risk of a natural person committing a criminal offence, when based solely on profiling or on assessing personality traits and characteristics; ... this prohibition shall not apply to AI systems used to support the human assessment ... based on objective and verifiable facts directly linked to a criminal activity;" }
+  ],
+  "legal_consequence": { "verbatim": "Prohibited: AI systems for risk assessment to assess/predict risk of committing a criminal offence when based solely on profiling or on assessing personality traits/characteristics. Exception for support to human assessment based on objective/verifiable facts directly linked to a criminal activity.", "context": { "items": [] } },
+  "side_info": { "effective_from": "2025-02-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4"] },
+    { "id": "R-1.1", "label": "Global scope gate (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2", "sources": [ { "article": 2 } ] },
+    { "id": "R-1.2", "label": "System is AI (Art. 3)", "kind": "primitive", "ref": "qp:is_ai_system", "sources": [ { "article": 3 } ] },
+    { "id": "R-1.3", "label": "Risk assessment practice", "kind": "composite", "operator": "allOf", "children": ["R-1.3.1", "R-1.3.2"] },
+    { "id": "R-1.3.1", "label": "Makes risk assessment for criminal offence", "kind": "primitive", "ref": "sys:makes_risk_assessments_criminal_offence", "sources": [ { "article": 5, "paragraph": 1, "point": "(d)" } ] },
+    { "id": "R-1.3.2", "label": "Based solely on profiling OR on personality traits", "kind": "composite", "operator": "anyOf", "children": ["R-1.3.2.1", "R-1.3.2.2"], "sources": [ { "article": 5, "paragraph": 1, "point": "(d)" } ] },
+    { "id": "R-1.3.2.1", "label": "Based solely on profiling", "kind": "primitive", "ref": "sys:based_solely_on_profiling", "sources": [ { "article": 5, "paragraph": 1, "point": "(d)" } ] },
+    { "id": "R-1.3.2.2", "label": "Based on personality traits/characteristics", "kind": "primitive", "ref": "sys:based_on_personality_traits", "sources": [ { "article": 5, "paragraph": 1, "point": "(d)" } ] },
+    { "id": "R-1.4", "label": "Not support to human assessment based on objective/verifiable facts", "kind": "composite", "operator": "not", "children": ["R-1.4.1"], "sources": [ { "article": 5, "paragraph": 1, "point": "(d)" } ] },
+    { "id": "R-1.4.1", "label": "Support to human assessment with objective facts", "kind": "primitive", "ref": "ex:supports_human_assessment_objective_facts", "sources": [ { "article": 5, "paragraph": 1, "point": "(d)" } ] }
+  ] },
+  "shared_refs": [
+    "qp:in_scope_art2", "qp:is_ai_system",
+    "sys:makes_risk_assessments_criminal_offence", "sys:based_solely_on_profiling", "sys:based_on_personality_traits",
+    "ex:supports_human_assessment_objective_facts"
+  ],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
+  "test_vectors": []
+}
+

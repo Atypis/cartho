@@ -1,0 +1,13 @@
+{
+  "id": "sys:is_social_scoring_system",
+  "title": "Social scoring system (Art. 5(1)(c))",
+  "namespace": "sys",
+  "article_refs": [ { "article": 5, "paragraph": 1, "point": "(c)" } ],
+  "logic": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "AI used for social scoring of natural persons", "kind": "primitive",
+      "question": { "prompt": "Is the AI system used for social scoring of natural persons?", "answer_type": "boolean" },
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(c)" } ] }
+  ] },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

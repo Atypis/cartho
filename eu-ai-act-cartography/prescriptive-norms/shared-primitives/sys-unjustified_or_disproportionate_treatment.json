@@ -1,0 +1,13 @@
+{
+  "id": "sys:unjustified_or_disproportionate_treatment",
+  "title": "Detrimental treatment unjustified or disproportionate (Art. 5(1)(c)(ii))",
+  "namespace": "sys",
+  "article_refs": [ { "article": 5, "paragraph": 1 } ],
+  "logic": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "Unjustified or disproportionate treatment", "kind": "primitive",
+      "question": { "prompt": "Does the social scoring result in detrimental or unfavourable treatment that is unjustified or disproportionate to the behaviour or its gravity?", "answer_type": "boolean" },
+      "sources": [ { "article": 5, "paragraph": 1 } ] }
+  ] },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

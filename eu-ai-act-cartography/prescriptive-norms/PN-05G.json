@@ -1,0 +1,24 @@
+{
+  "id": "PN-05G",
+  "title": "Prohibition: biometric categorisation deducing sensitive attributes",
+  "type": "prohibition",
+  "article_refs": [
+    { "article": 5, "paragraph": 1, "point": "(g)", "quote": "the placing on the market, the putting into service for this specific purpose, or the use of biometric categorisation systems that categorise individually natural persons based on their biometric data to deduce or infer their race, political opinions, trade union membership, religious or philosophical beliefs, sex life or sexual orientation; this prohibition does not cover any labelling or filtering of lawfully acquired biometric datasets, such as images, based on biometric data or categorizing of biometric data in the area of law enforcement;" }
+  ],
+  "legal_consequence": { "verbatim": "Prohibited: biometric categorisation systems deducing/infering sensitive attributes. Not covered: labelling/filtering of lawfully acquired biometric datasets or categorising biometric data in law enforcement area.", "context": { "items": [] } },
+  "side_info": { "effective_from": "2025-02-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4"] },
+    { "id": "R-1.1", "label": "Global scope gate (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2" },
+    { "id": "R-1.2", "label": "System is AI (Art. 3)", "kind": "primitive", "ref": "qp:is_ai_system" },
+    { "id": "R-1.3", "label": "Biometric categorisation deducing sensitive attributes", "kind": "primitive", "ref": "sys:is_biometric_categorisation_sensitive_attrs", "sources": [ { "article": 5, "paragraph": 1, "point": "(g)" } ] },
+    { "id": "R-1.4", "label": "Not carve-out (labelling/filtering lawful datasets or LE area)", "kind": "composite", "operator": "not", "children": ["R-1.4.0"], "sources": [ { "article": 5, "paragraph": 1, "point": "(g)" } ] },
+    { "id": "R-1.4.0", "label": "Any carve-out applies", "kind": "composite", "operator": "anyOf", "children": ["R-1.4.1", "R-1.4.2"] },
+    { "id": "R-1.4.1", "label": "Labelling/filtering lawful biometric datasets", "kind": "primitive", "ref": "ex:labelling_filtering_lawfully_acquired_biometric_datasets" },
+    { "id": "R-1.4.2", "label": "Categorising biometric data in LE area", "kind": "primitive", "ref": "ex:categorising_biometric_data_law_enforcement_area" }
+  ] },
+  "shared_refs": [ "qp:in_scope_art2", "qp:is_ai_system", "sys:is_biometric_categorisation_sensitive_attrs", "ex:labelling_filtering_lawfully_acquired_biometric_datasets", "ex:categorising_biometric_data_law_enforcement_area" ],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
+  "test_vectors": []
+}
+

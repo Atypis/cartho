@@ -1,0 +1,30 @@
+{
+  "id": "PN-05B",
+  "title": "Prohibition: exploiting vulnerabilities (age/disability/social-economic) causing significant harm",
+  "type": "prohibition",
+  "article_refs": [
+    { "article": 5, "paragraph": 1, "point": "(b)", "quote": "the placing on the market, the putting into service or the use of an AI system that exploits any of the vulnerabilities of a natural person or a specific group of persons due to their age, disability or a specific social or economic situation, with the objective, or the effect, of materially distorting the behaviour of that person or a person belonging to that group in a manner that causes or is reasonably likely to cause that person or another person significant harm;" }
+  ],
+  "legal_consequence": { "verbatim": "Prohibited: AI systems exploiting vulnerabilities due to age, disability, or specific social/economic situation, leading to material distortion causing or likely causing significant harm.", "context": { "items": [] } },
+  "side_info": { "effective_from": "2025-02-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3"] },
+    { "id": "R-1.1", "label": "Global scope gate (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2", "sources": [ { "article": 2 } ], "question": { "prompt": "Does Article 2 scope apply (and no exclusion)?", "answer_type": "boolean" } },
+    { "id": "R-1.2", "label": "System is AI (Art. 3)", "kind": "primitive", "ref": "qp:is_ai_system", "sources": [ { "article": 3 } ], "question": { "prompt": "Is it an AI system under Art. 3?", "answer_type": "boolean" } },
+    { "id": "R-1.3", "label": "Practice and effects", "kind": "composite", "operator": "allOf", "children": ["R-1.3.1", "R-1.3.2", "R-1.3.3", "R-1.3.4"] },
+    { "id": "R-1.3.1", "label": "Exploits vulnerabilities (age/disability/social-economic)", "kind": "primitive", "ref": "sys:exploits_vulnerabilities_age_disability_socioeconomic", "sources": [ { "article": 5, "paragraph": 1, "point": "(b)" } ], "question": { "prompt": "Does the system exploit such vulnerabilities?", "answer_type": "boolean" } },
+    { "id": "R-1.3.2", "label": "Appreciably impairs informed decision-making", "kind": "primitive", "ref": "sys:appreciably_impairs_informed_decision_making", "sources": [ { "article": 5, "paragraph": 1 } ] },
+    { "id": "R-1.3.3", "label": "Caused decision not otherwise taken", "kind": "primitive", "ref": "sys:caused_decision_not_taken_otherwise", "sources": [ { "article": 5, "paragraph": 1 } ] },
+    { "id": "R-1.3.4", "label": "Causes or likely causes significant harm", "kind": "primitive", "ref": "sys:causes_or_likely_causes_significant_harm", "sources": [ { "article": 5, "paragraph": 1 } ] }
+  ] },
+  "shared_refs": [
+    "qp:in_scope_art2", "qp:is_ai_system",
+    "sys:exploits_vulnerabilities_age_disability_socioeconomic",
+    "sys:appreciably_impairs_informed_decision_making",
+    "sys:caused_decision_not_taken_otherwise",
+    "sys:causes_or_likely_causes_significant_harm"
+  ],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
+  "test_vectors": []
+}
+

@@ -1,0 +1,23 @@
+{
+  "id": "sys:deploys_subliminal_or_manipulative_or_deceptive",
+  "title": "Deploys subliminal/manipulative/deceptive techniques (Art. 5(1)(a))",
+  "namespace": "sys",
+  "article_refs": [ { "article": 5, "paragraph": 1, "point": "(a)" } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "Subliminal, purposefully manipulative or deceptive techniques",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Does the AI system deploy subliminal techniques beyond a person's consciousness or purposefully manipulative or deceptive techniques?",
+          "answer_type": "boolean"
+        },
+        "sources": [ { "article": 5, "paragraph": 1, "point": "(a)" } ]
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

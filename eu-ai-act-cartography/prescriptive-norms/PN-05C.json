@@ -1,0 +1,24 @@
+{
+  "id": "PN-05C",
+  "title": "Prohibition: social scoring leading to detrimental/unfavourable treatment",
+  "type": "prohibition",
+  "article_refs": [
+    { "article": 5, "paragraph": 1, "point": "(c)", "quote": "social scoring ... leading to (i) detrimental or unfavourable treatment in unrelated social contexts; or (ii) detrimental or unfavourable treatment that is unjustified or disproportionate to the behaviour or its gravity" }
+  ],
+  "legal_consequence": { "verbatim": "Prohibited: placing/putting/using AI systems for social scoring of natural persons leading to detrimental or unfavourable treatment in unrelated social contexts or that is unjustified or disproportionate.", "context": { "items": [] } },
+  "side_info": { "effective_from": "2025-02-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3"] },
+    { "id": "R-1.1", "label": "Global scope gate (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2", "sources": [ { "article": 2 } ] },
+    { "id": "R-1.2", "label": "System is AI (Art. 3)", "kind": "primitive", "ref": "qp:is_ai_system", "sources": [ { "article": 3 } ] },
+    { "id": "R-1.3", "label": "Social scoring and effects", "kind": "composite", "operator": "allOf", "children": ["R-1.3.1", "R-1.3.2"] },
+    { "id": "R-1.3.1", "label": "AI used for social scoring", "kind": "primitive", "ref": "sys:is_social_scoring_system", "sources": [ { "article": 5, "paragraph": 1, "point": "(c)" } ] },
+    { "id": "R-1.3.2", "label": "Resulting detrimental treatment (i or ii)", "kind": "composite", "operator": "anyOf", "children": ["R-1.3.2.1", "R-1.3.2.2"], "sources": [ { "article": 5, "paragraph": 1 } ] },
+    { "id": "R-1.3.2.1", "label": "Unrelated social contexts (i)", "kind": "primitive", "ref": "sys:unrelated_context_detrimental_treatment", "sources": [ { "article": 5, "paragraph": 1 } ] },
+    { "id": "R-1.3.2.2", "label": "Unjustified or disproportionate (ii)", "kind": "primitive", "ref": "sys:unjustified_or_disproportionate_treatment", "sources": [ { "article": 5, "paragraph": 1 } ] }
+  ] },
+  "shared_refs": [ "qp:in_scope_art2", "qp:is_ai_system", "sys:is_social_scoring_system", "sys:unrelated_context_detrimental_treatment", "sys:unjustified_or_disproportionate_treatment" ],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
+  "test_vectors": []
+}
+

@@ -1,0 +1,26 @@
+{
+  "id": "PN-05F",
+  "title": "Prohibition: emotion inference in workplace/education (except medical/safety)",
+  "type": "prohibition",
+  "article_refs": [
+    { "article": 5, "paragraph": 1, "point": "(f)", "quote": "the placing on the market, the putting into service for this specific purpose, or the use of AI systems to infer emotions of a natural person in the areas of workplace and education institutions, except where the use of the AI system is intended to be put in place or into the market for medical or safety reasons;" }
+  ],
+  "legal_consequence": { "verbatim": "Prohibited: AI systems to infer emotions in workplace or education institutions, except if intended for medical or safety reasons.", "context": { "items": [] } },
+  "side_info": { "effective_from": "2025-02-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4"] },
+    { "id": "R-1.1", "label": "Global scope gate (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2" },
+    { "id": "R-1.2", "label": "System is AI (Art. 3)", "kind": "primitive", "ref": "qp:is_ai_system" },
+    { "id": "R-1.3", "label": "Emotion recognition in workplace or education", "kind": "composite", "operator": "allOf", "children": ["R-1.3.1", "R-1.3.2"] },
+    { "id": "R-1.3.1", "label": "Emotion recognition system", "kind": "primitive", "ref": "sys:is_emotion_recognition_system", "sources": [ { "article": 5, "paragraph": 1, "point": "(f)" } ] },
+    { "id": "R-1.3.2", "label": "Context is workplace or education", "kind": "composite", "operator": "anyOf", "children": ["R-1.3.2.1", "R-1.3.2.2"], "sources": [ { "article": 5, "paragraph": 1, "point": "(f)" } ] },
+    { "id": "R-1.3.2.1", "label": "Workplace", "kind": "primitive", "ref": "ctx:is_workplace" },
+    { "id": "R-1.3.2.2", "label": "Education", "kind": "primitive", "ref": "ctx:is_education" },
+    { "id": "R-1.4", "label": "Not intended for medical or safety reasons", "kind": "composite", "operator": "not", "children": ["R-1.4.1"], "sources": [ { "article": 5, "paragraph": 1, "point": "(f)" } ] },
+    { "id": "R-1.4.1", "label": "Medical or safety reason intent", "kind": "primitive", "ref": "ex:intended_for_medical_or_safety_reason" }
+  ] },
+  "shared_refs": [ "qp:in_scope_art2", "qp:is_ai_system", "sys:is_emotion_recognition_system", "ctx:is_workplace", "ctx:is_education", "ex:intended_for_medical_or_safety_reason" ],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
+  "test_vectors": []
+}
+

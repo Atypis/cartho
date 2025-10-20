@@ -1,0 +1,13 @@
+{
+  "id": "ctx:is_education",
+  "title": "Education context (Art. 5(1)(f))",
+  "namespace": "ctx",
+  "article_refs": [ { "article": 5, "paragraph": 1, "point": "(f)" } ],
+  "logic": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "Use in education context", "kind": "primitive",
+      "question": { "prompt": "Is the AI used in an education institution context?", "answer_type": "boolean" },
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(f)" } ] }
+  ] },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

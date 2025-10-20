@@ -1,0 +1,13 @@
+{
+  "id": "ex:labelling_filtering_lawfully_acquired_biometric_datasets",
+  "title": "Labelling/filtering of lawfully acquired biometric datasets (Art. 5(1)(g) carve-out)",
+  "namespace": "ex",
+  "article_refs": [ { "article": 5, "paragraph": 1, "point": "(g)" } ],
+  "logic": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "Lawfully acquired biometric datasets labelling/filtering", "kind": "primitive",
+      "question": { "prompt": "Is it merely labelling or filtering of lawfully acquired biometric datasets (e.g., images) based on biometric data?", "answer_type": "boolean" },
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(g)" } ] }
+  ] },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

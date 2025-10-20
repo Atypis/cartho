@@ -1,0 +1,13 @@
+{
+  "id": "sys:caused_decision_not_taken_otherwise",
+  "title": "Caused decision not otherwise taken (Art. 5(1)(a),(b))",
+  "namespace": "sys",
+  "article_refs": [ { "article": 5, "paragraph": 1 } ],
+  "logic": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "Decision caused that would not otherwise be taken", "kind": "primitive",
+      "question": { "prompt": "Did the impairment cause the person to take a decision they would not otherwise have taken?", "answer_type": "boolean" },
+      "sources": [ { "article": 5, "paragraph": 1 } ] }
+  ] },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

@@ -1,0 +1,13 @@
+{
+  "id": "ctx:is_law_enforcement_context",
+  "title": "Law enforcement context (Art. 5(1)(h))",
+  "namespace": "ctx",
+  "article_refs": [ { "article": 5, "paragraph": 1, "point": "(h)" } ],
+  "logic": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "Use for the purposes of law enforcement", "kind": "primitive",
+      "question": { "prompt": "Is the use for the purposes of law enforcement?", "answer_type": "boolean" },
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(h)" } ] }
+  ] },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

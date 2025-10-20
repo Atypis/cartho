@@ -1,0 +1,13 @@
+{
+  "id": "ex:categorising_biometric_data_law_enforcement_area",
+  "title": "Categorising biometric data in the area of law enforcement (Art. 5(1)(g) carve-out)",
+  "namespace": "ex",
+  "article_refs": [ { "article": 5, "paragraph": 1, "point": "(g)" } ],
+  "logic": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "Categorising biometric data in law enforcement area", "kind": "primitive",
+      "question": { "prompt": "Is it categorising biometric data in the area of law enforcement (not deducing sensitive attributes of individuals)?", "answer_type": "boolean" },
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(g)" } ] }
+  ] },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
+}
+

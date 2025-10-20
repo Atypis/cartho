@@ -1,0 +1,26 @@
+{
+  "id": "PN-05H",
+  "title": "Prohibition: 'real-time' remote biometric identification in publicly accessible spaces for law enforcement (with narrow exceptions)",
+  "type": "prohibition",
+  "article_refs": [
+    { "article": 5, "paragraph": 1, "point": "(h)", "quote": "Prohibit ‘real‑time’ remote biometric identification in publicly accessible spaces for law enforcement, except for narrowly defined objectives ..." },
+    { "article": 5, "paragraph": 2, "quote": "... shall be deployed ... only to confirm the identity of the specifically targeted individual ..." }
+  ],
+  "legal_consequence": { "verbatim": "Prohibited: placing/putting/using 'real-time' remote biometric identification systems in publicly accessible spaces for law enforcement, except for narrowly defined objectives and subject to strict safeguards and authorisations.", "context": { "items": [] } },
+  "side_info": { "effective_from": "2025-02-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4", "R-1.5"] },
+    { "id": "R-1.1", "label": "Global scope gate (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2" },
+    { "id": "R-1.2", "label": "System is AI (Art. 3)", "kind": "primitive", "ref": "qp:is_ai_system" },
+    { "id": "R-1.3", "label": "Real-time remote biometric identification", "kind": "primitive", "ref": "sys:is_real_time_rbi", "sources": [ { "article": 5, "paragraph": 1, "point": "(h)" } ] },
+    { "id": "R-1.4", "label": "Publicly accessible space and law enforcement context", "kind": "composite", "operator": "allOf", "children": ["R-1.4.1", "R-1.4.2"] },
+    { "id": "R-1.4.1", "label": "Publicly accessible space", "kind": "primitive", "ref": "ctx:is_publicly_accessible_space" },
+    { "id": "R-1.4.2", "label": "Law enforcement context", "kind": "primitive", "ref": "ctx:is_law_enforcement_context" },
+    { "id": "R-1.5", "label": "Not authorised under narrow exceptions", "kind": "composite", "operator": "not", "children": ["R-1.5.1"], "sources": [ { "article": 5, "paragraph": 1, "point": "(h)" }, { "article": 5, "paragraph": 2 } ] },
+    { "id": "R-1.5.1", "label": "LE authorised exception applies", "kind": "primitive", "ref": "ex:le_authorised_rbi_use" }
+  ] },
+  "shared_refs": [ "qp:in_scope_art2", "qp:is_ai_system", "sys:is_real_time_rbi", "ctx:is_publicly_accessible_space", "ctx:is_law_enforcement_context", "ex:le_authorised_rbi_use" ],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
+  "test_vectors": []
+}
+

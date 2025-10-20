@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2025-10-20T12:52:13.527Z",
+  "generated_at": "2025-10-20T13:09:33.280Z",
   "schema_version": "2025-10-10",
   "prescriptive_norms": [
     {
@@ -15,6 +15,61 @@
       "status": "review"
     },
     {
+      "id": "PN-05A",
+      "title": "Prohibition: subliminal/manipulative/deceptive techniques causing significant harm",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-05A.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_ai_system",
+        "sys:deploys_subliminal_or_manipulative_or_deceptive",
+        "sys:appreciably_impairs_informed_decision_making",
+        "sys:caused_decision_not_taken_otherwise",
+        "sys:causes_or_likely_causes_significant_harm"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-05B",
+      "title": "Prohibition: exploiting vulnerabilities (age/disability/social-economic) causing significant harm",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-05B.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_ai_system",
+        "sys:exploits_vulnerabilities_age_disability_socioeconomic",
+        "sys:appreciably_impairs_informed_decision_making",
+        "sys:caused_decision_not_taken_otherwise",
+        "sys:causes_or_likely_causes_significant_harm"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-05C",
+      "title": "Prohibition: social scoring leading to detrimental/unfavourable treatment",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-05C.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_ai_system",
+        "sys:is_social_scoring_system",
+        "sys:unrelated_context_detrimental_treatment",
+        "sys:unjustified_or_disproportionate_treatment"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-05D",
+      "title": "Prohibition: risk assessment to predict criminal offence based solely on profiling or personality traits",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-05D.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_ai_system",
+        "sys:makes_risk_assessments_criminal_offence",
+        "sys:based_solely_on_profiling",
+        "sys:based_on_personality_traits",
+        "ex:supports_human_assessment_objective_facts"
+      ],
+      "status": "draft"
+    },
+    {
       "id": "PN-05E",
       "title": "Prohibition: untargeted scraping to build facial recognition databases",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-05E.json",
@@ -25,9 +80,95 @@
         "sys:is_facial_recognition_db_creation"
       ],
       "status": "draft"
+    },
+    {
+      "id": "PN-05F",
+      "title": "Prohibition: emotion inference in workplace/education (except medical/safety)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-05F.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_ai_system",
+        "sys:is_emotion_recognition_system",
+        "ctx:is_workplace",
+        "ctx:is_education",
+        "ex:intended_for_medical_or_safety_reason"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-05G",
+      "title": "Prohibition: biometric categorisation deducing sensitive attributes",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-05G.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_ai_system",
+        "sys:is_biometric_categorisation_sensitive_attrs",
+        "ex:labelling_filtering_lawfully_acquired_biometric_datasets",
+        "ex:categorising_biometric_data_law_enforcement_area"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-05H",
+      "title": "Prohibition: 'real-time' remote biometric identification in publicly accessible spaces for law enforcement (with narrow exceptions)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-05H.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_ai_system",
+        "sys:is_real_time_rbi",
+        "ctx:is_publicly_accessible_space",
+        "ctx:is_law_enforcement_context",
+        "ex:le_authorised_rbi_use"
+      ],
+      "status": "draft"
     }
   ],
   "shared_primitives": [
+    {
+      "id": "ctx:is_education",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ctx-is_education.json",
+      "status": "draft"
+    },
+    {
+      "id": "ctx:is_law_enforcement_context",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ctx-is_law_enforcement_context.json",
+      "status": "draft"
+    },
+    {
+      "id": "ctx:is_publicly_accessible_space",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ctx-is_publicly_accessible_space.json",
+      "status": "draft"
+    },
+    {
+      "id": "ctx:is_workplace",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ctx-is_workplace.json",
+      "status": "draft"
+    },
+    {
+      "id": "ex:categorising_biometric_data_law_enforcement_area",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-categorising_biometric_data_law_enforcement_area.json",
+      "status": "draft"
+    },
+    {
+      "id": "ex:intended_for_medical_or_safety_reason",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-intended_for_medical_or_safety_reason.json",
+      "status": "draft"
+    },
+    {
+      "id": "ex:labelling_filtering_lawfully_acquired_biometric_datasets",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-labelling_filtering_lawfully_acquired_biometric_datasets.json",
+      "status": "draft"
+    },
+    {
+      "id": "ex:le_authorised_rbi_use",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-le_authorised_rbi_use.json",
+      "status": "draft"
+    },
+    {
+      "id": "ex:supports_human_assessment_objective_facts",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-supports_human_assessment_objective_facts.json",
+      "status": "draft"
+    },
     {
       "id": "qp:in_scope_art2",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-in_scope_art2.json",
@@ -49,13 +190,83 @@
       "status": "draft"
     },
     {
+      "id": "sys:appreciably_impairs_informed_decision_making",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-appreciably_impairs_informed_decision_making.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:based_on_personality_traits",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-based_on_personality_traits.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:based_solely_on_profiling",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-based_solely_on_profiling.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:caused_decision_not_taken_otherwise",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-caused_decision_not_taken_otherwise.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:causes_or_likely_causes_significant_harm",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-causes_or_likely_causes_significant_harm.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:deploys_subliminal_or_manipulative_or_deceptive",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-deploys_subliminal_or_manipulative_or_deceptive.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:exploits_vulnerabilities_age_disability_socioeconomic",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-exploits_vulnerabilities_age_disability_socioeconomic.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:is_biometric_categorisation_sensitive_attrs",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_biometric_categorisation_sensitive_attrs.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:is_emotion_recognition_system",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_emotion_recognition_system.json",
+      "status": "draft"
+    },
+    {
       "id": "sys:is_facial_recognition_db_creation",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_facial_recognition_db_creation.json",
       "status": "draft"
     },
     {
+      "id": "sys:is_real_time_rbi",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_real_time_rbi.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:is_social_scoring_system",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_social_scoring_system.json",
+      "status": "draft"
+    },
+    {
       "id": "sys:is_untargeted_scraping_faces",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_untargeted_scraping_faces.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:makes_risk_assessments_criminal_offence",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-makes_risk_assessments_criminal_offence.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:unjustified_or_disproportionate_treatment",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-unjustified_or_disproportionate_treatment.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:unrelated_context_detrimental_treatment",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-unrelated_context_detrimental_treatment.json",
       "status": "draft"
     }
   ]
