@@ -6,8 +6,9 @@
   "logic": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "Categorising biometric data in law enforcement area", "kind": "primitive",
       "question": { "prompt": "Is it categorising biometric data in the area of law enforcement (not deducing sensitive attributes of individuals)?", "answer_type": "boolean" },
-      "sources": [ { "article": 5, "paragraph": 1, "point": "(g)" } ] }
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(g)" } ],
+      "context": { "items": [ { "label": "Recital (30)", "kind": "guidance", "text": "Recital clarifies that categorising biometric data in law enforcement area is not covered by the prohibition on deducing sensitive attributes.", "sources": [ { "article": 0, "quote": "Recital (30)" } ] } ] }
+    }
   ] },
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
 }
-

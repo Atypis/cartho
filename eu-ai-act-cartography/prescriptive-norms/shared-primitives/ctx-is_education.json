@@ -6,8 +6,9 @@
   "logic": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "Use in education context", "kind": "primitive",
       "question": { "prompt": "Is the AI used in an education institution context?", "answer_type": "boolean" },
-      "sources": [ { "article": 5, "paragraph": 1, "point": "(f)" } ] }
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(f)" } ],
+      "context": { "items": [ { "label": "Recital (44)", "kind": "guidance", "text": "Emotion recognition systems in education contexts raise serious concerns (reliability, discrimination) and can lead to detrimental outcomes due to power imbalances.", "sources": [ { "article": 0, "quote": "Recital (44)" } ] } ] }
+    }
   ] },
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
 }
-

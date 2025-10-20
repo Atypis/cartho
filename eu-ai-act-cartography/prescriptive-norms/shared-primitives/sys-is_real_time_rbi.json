@@ -6,8 +6,9 @@
   "logic": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "Real-time remote biometric identification system", "kind": "primitive",
       "question": { "prompt": "Is the AI a 'real-time' remote biometric identification system?", "answer_type": "boolean", "help": "Real-time: identification occurs without significant delay during observation." },
-      "sources": [ { "article": 5, "paragraph": 1, "point": "(h)" } ] }
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(h)" } ],
+      "context": { "items": [ { "label": "Recital (17)", "kind": "definition", "text": "RBI = identification without active involvement; 'real-time' uses live or near-live material and occurs without a significant delay (no circumvention by minor delays).", "sources": [ { "article": 0, "quote": "Recital (17)" } ] } ] }
+    }
   ] },
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
 }
-

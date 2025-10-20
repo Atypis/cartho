@@ -6,8 +6,9 @@
   "logic": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "Use in publicly accessible space", "kind": "primitive",
       "question": { "prompt": "Is the system used in a publicly accessible space?", "answer_type": "boolean" },
-      "sources": [ { "article": 5, "paragraph": 1, "point": "(h)" } ] }
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(h)" } ],
+      "context": { "items": [ { "label": "Recital (19)", "kind": "definition", "text": "Publicly accessible space = any physical space accessible to an undetermined number of persons, regardless of ownership or activity (e.g., roads, parks, transport hubs, shops).", "sources": [ { "article": 0, "quote": "Recital (19)" } ] } ] }
+    }
   ] },
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
 }
-

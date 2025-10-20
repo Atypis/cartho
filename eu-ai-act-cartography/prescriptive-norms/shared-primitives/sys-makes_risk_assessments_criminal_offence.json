@@ -6,8 +6,9 @@
   "logic": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "Risk assessment for predicting criminal offence", "kind": "primitive",
       "question": { "prompt": "Is the AI used to make risk assessments of natural persons to assess or predict the risk of committing a criminal offence?", "answer_type": "boolean" },
-      "sources": [ { "article": 5, "paragraph": 1, "point": "(d)" } ] }
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(d)" } ],
+      "context": { "items": [ { "label": "Recital (3)", "kind": "guidance", "text": "Contains specific restrictions on the use of AI systems for risk assessments of natural persons for the purpose of law enforcement.", "sources": [ { "article": 0, "quote": "Recital (3)" } ] } ] }
+    }
   ] },
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
 }
-

@@ -6,8 +6,9 @@
   "logic": { "root": "R-1", "nodes": [
     { "id": "R-1", "label": "Based solely on profiling", "kind": "primitive",
       "question": { "prompt": "Is the risk assessment based solely on profiling?", "answer_type": "boolean" },
-      "sources": [ { "article": 5, "paragraph": 1, "point": "(d)" } ] }
+      "sources": [ { "article": 5, "paragraph": 1, "point": "(d)" } ],
+      "context": { "items": [ { "label": "Recital (10)", "kind": "guidance", "text": "Profiling and automated decision-making are governed by Union data protection law; this Regulation complements those protections.", "sources": [ { "article": 0, "quote": "Recital (10)" } ] } ] }
+    }
   ] },
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" }
 }
-
