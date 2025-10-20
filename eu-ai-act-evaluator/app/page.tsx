@@ -11,10 +11,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { ChatInterface } from '@/components/chat/ChatInterface';
 import { RequirementsGrid } from '@/components/evaluation/RequirementsGrid';
 import { Breadcrumb } from '@/components/navigation/Breadcrumb';
+import { UseCaseCockpit } from '@/components/usecase/UseCaseCockpit';
 import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/types';
 import type { PrescriptiveNorm, SharedPrimitive, EvaluationState, RequirementNode } from '@/lib/evaluation/types';
@@ -37,10 +37,11 @@ export default function Home() {
   const [useCases, setUseCases] = useState<UseCase[]>([]);
 
   // Canvas state
-  const [canvasView, setCanvasView] = useState<'welcome' | 'evaluation'>('welcome');
+  const [canvasView, setCanvasView] = useState<'welcome' | 'evaluation' | 'usecase-cockpit'>('welcome');
   const [evaluationData, setEvaluationData] = useState<EvaluationResult | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEvaluationId, setSelectedEvaluationId] = useState<string | null>(null);
+  const [selectedUseCaseId, setSelectedUseCaseId] = useState<string | null>(null);
 
   // NEW: Concurrent evaluation support with Map-based state
   const [runningEvaluations, setRunningEvaluations] = useState<Set<string>>(new Set());
@@ -493,7 +494,7 @@ export default function Home() {
             <div className="flex items-center gap-4">
               {canvasView === 'evaluation' ? (
                 <>
-                  {/* Back button */}
+                  {/* Back button from evaluation */}
                   <button
                     onClick={() => {
                       setCanvasView('welcome');
@@ -508,6 +509,25 @@ export default function Home() {
                     Back
                   </button>
                   <Breadcrumb items={getBreadcrumbItems()} />
+                </>
+              ) : canvasView === 'usecase-cockpit' ? (
+                <>
+                  {/* Back button from use case cockpit */}
+                  <button
+                    onClick={() => {
+                      setCanvasView('welcome');
+                      setSelectedUseCaseId(null);
+                    }}
+                    className="text-sm px-3 py-1.5 text-neutral-600 hover:text-neutral-900 transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back
+                  </button>
+                  <h3 className="text-sm font-semibold text-neutral-900">
+                    {useCases.find(uc => uc.id === selectedUseCaseId)?.title || 'Use Case Cockpit'}
+                  </h3>
                 </>
               ) : (
                 <h3 className="text-sm font-semibold text-neutral-900">
@@ -543,11 +563,14 @@ export default function Home() {
                       </div>
                     ) : (
                       useCases.map((useCase) => (
-                        <Link
+                        <button
                           key={useCase.id}
-                          href={`/usecase/${useCase.id}`}
-                          onClick={() => setShowUseCasesList(false)}
-                          className="block px-3 py-2 rounded hover:bg-neutral-50 transition-colors"
+                          onClick={() => {
+                            setSelectedUseCaseId(useCase.id);
+                            setCanvasView('usecase-cockpit');
+                            setShowUseCasesList(false);
+                          }}
+                          className="block w-full text-left px-3 py-2 rounded hover:bg-neutral-50 transition-colors"
                         >
                           <div className="text-sm font-medium text-neutral-900 mb-1">
                             {useCase.title}
@@ -555,7 +578,7 @@ export default function Home() {
                           <div className="text-xs text-neutral-500 line-clamp-2">
                             {useCase.description}
                           </div>
-                        </Link>
+                        </button>
                       ))
                     )}
                   </div>
@@ -638,6 +661,13 @@ export default function Home() {
               />
             </div>
           </>
+        )}
+
+        {canvasView === 'usecase-cockpit' && selectedUseCaseId && (
+          <UseCaseCockpit
+            useCaseId={selectedUseCaseId}
+            onTriggerEvaluation={runEvaluation}
+          />
         )}
       </div>
     </div>

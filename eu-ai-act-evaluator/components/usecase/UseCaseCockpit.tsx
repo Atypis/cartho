@@ -1,0 +1,640 @@
+'use client';
+
+/**
+ * Use Case Cockpit Component (PN-Centric View)
+ *
+ * Displays prescriptive norms categorized by applicability:
+ * - Which PNs APPLY (require action)
+ * - Which PNs DO NOT APPLY
+ * - Which PNs are PENDING evaluation
+ *
+ * Includes inline TREEMAXX expansion and evaluation history
+ */
+
+import { useState, useEffect } from 'react';
+import { RequirementsGrid } from '@/components/evaluation/RequirementsGrid';
+import { supabase } from '@/lib/supabase/client';
+import type { Database } from '@/lib/supabase/types';
+import type { EvaluationState } from '@/lib/evaluation/types';
+import { expandSharedRequirements } from '@/lib/evaluation/expand-shared';
+
+type UseCase = Database['public']['Tables']['use_cases']['Row'];
+type Evaluation = Database['public']['Tables']['evaluations']['Row'];
+
+interface PNStatus {
+  pnId: string;
+  article: string;
+  title: string;
+  status: 'applies' | 'not-applicable' | 'pending';
+  evaluationId?: string;
+  evaluatedAt?: string;
+  rootDecision?: boolean;
+  progressCurrent?: number;
+  progressTotal?: number;
+}
+
+interface UseCaseCockpitProps {
+  useCaseId: string;
+  onTriggerEvaluation: (evaluationId: string, useCaseId: string, pnIds: string[]) => void;
+}
+
+export function UseCaseCockpit({ useCaseId, onTriggerEvaluation }: UseCaseCockpitProps) {
+  const [useCase, setUseCase] = useState<UseCase | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // PN catalog and status
+  const [availablePNs, setAvailablePNs] = useState<any[]>([]);
+  const [pnStatuses, setPNStatuses] = useState<PNStatus[]>([]);
+  const [selectedPNs, setSelectedPNs] = useState<string[]>([]);
+  const [triggering, setTriggering] = useState(false);
+
+  // Expanded PN state
+  const [expandedPNId, setExpandedPNId] = useState<string | null>(null);
+  const [expandedPNData, setExpandedPNData] = useState<any>(null);
+
+  // Evaluation history
+  const [showHistory, setShowHistory] = useState(false);
+  const [evaluationHistory, setEvaluationHistory] = useState<Evaluation[]>([]);
+
+  // Load PN catalog
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/catalog');
+        if (res.ok) {
+          const data = await res.json();
+          const pns = data?.prescriptive_norms || [];
+          setAvailablePNs(pns);
+        }
+      } catch (e) {
+        console.warn('[Catalog] Failed to load PN catalog');
+        setAvailablePNs([{ id: 'PN-04', article: '4', title: 'AI Literacy' }]);
+      }
+    })();
+  }, []);
+
+  // Load use case and evaluations
+  useEffect(() => {
+    if (!useCaseId) return;
+    loadUseCaseAndEvaluations();
+
+    // Real-time subscription
+    const subscription = supabase
+      .channel(`usecase_cockpit_${useCaseId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'evaluations', filter: `use_case_id=eq.${useCaseId}` }, () => {
+        console.log('[Cockpit] Evaluation changed, reloading...');
+        loadUseCaseAndEvaluations();
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [useCaseId, availablePNs.length]); // Add availablePNs.length to re-trigger when catalog loads
+
+  const loadUseCaseAndEvaluations = async () => {
+    if (availablePNs.length === 0) {
+      // Wait for catalog to load
+      return;
+    }
+
+    setLoading(true);
+
+    // Load use case
+    const { data: useCaseData, error: ucError } = await supabase
+      .from('use_cases')
+      .select('*')
+      .eq('id', useCaseId)
+      .single();
+
+    if (ucError || !useCaseData) {
+      console.error('Error loading use case:', ucError);
+      setLoading(false);
+      return;
+    }
+    setUseCase(useCaseData);
+
+    // Load all evaluations for this use case
+    const { data: evaluations } = await supabase
+      .from('evaluations')
+      .select('*')
+      .eq('use_case_id', useCaseId)
+      .order('triggered_at', { ascending: false });
+
+    setEvaluationHistory(evaluations || []);
+
+    // Build PN status map (OPTIMIZED)
+    await buildPNStatusMapOptimized(evaluations || []);
+    setLoading(false);
+  };
+
+  const buildPNStatusMapOptimized = async (evaluations: Evaluation[]) => {
+    const statusMap = new Map<string, PNStatus>();
+
+    // Initialize all available PNs as pending
+    for (const pn of availablePNs) {
+      statusMap.set(pn.id, {
+        pnId: pn.id,
+        article: pn.article || pn.id.replace('PN-', ''),
+        title: pn.title || pn.id,
+        status: 'pending'
+      });
+    }
+
+    // Process only completed evaluations
+    const completedEvaluations = evaluations.filter(e => e.status === 'completed');
+
+    for (const evaluation of completedEvaluations) {
+      const pnIds = evaluation.pn_ids as string[];
+
+      // Load all results for this evaluation at once
+      const { data: results, error: resultsError } = await supabase
+        .from('evaluation_results')
+        .select('*')
+        .eq('evaluation_id', evaluation.id);
+
+      if (resultsError || !results || results.length === 0) {
+        console.warn(`[Cockpit] No results for evaluation ${evaluation.id}`);
+        continue;
+      }
+
+      // Load PN bundle for all PNs at once
+      try {
+        const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnIds.join(','))}`);
+        if (!bundleRes.ok) {
+          console.warn(`[Cockpit] Failed to load bundle for ${pnIds.join(',')}`);
+          continue;
+        }
+
+        const bundle = await bundleRes.json();
+        const pnDataList = bundle.pns || [];
+        const sharedPrimitives = bundle.sharedPrimitives || [];
+
+        // Process each PN
+        for (let i = 0; i < pnIds.length; i++) {
+          const pnId = pnIds[i];
+          const pnData = pnDataList[i];
+
+          if (!pnData) {
+            console.warn(`[Cockpit] No PN data for ${pnId}`);
+            continue;
+          }
+
+          const rootId = pnData.requirements.root;
+          const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
+
+          // Find root node result
+          const rootResult = results.find((r: any) => r.node_id === rootId);
+
+          if (rootResult) {
+            const primitiveCount = expandedNodes.filter((n: any) => n.kind === 'primitive').length;
+            const completedCount = results.filter((r: any) => {
+              const node = expandedNodes.find((n: any) => n.id === r.node_id);
+              return node?.kind === 'primitive';
+            }).length;
+
+            statusMap.set(pnId, {
+              pnId,
+              article: availablePNs.find(p => p.id === pnId)?.article || pnId.replace('PN-', ''),
+              title: availablePNs.find(p => p.id === pnId)?.title || pnId,
+              status: rootResult.decision ? 'applies' : 'not-applicable',
+              evaluationId: evaluation.id,
+              evaluatedAt: evaluation.triggered_at,
+              rootDecision: rootResult.decision,
+              progressCurrent: completedCount,
+              progressTotal: primitiveCount
+            });
+          } else {
+            console.warn(`[Cockpit] No root result for ${pnId} (root: ${rootId})`);
+          }
+        }
+      } catch (error) {
+        console.error('[Cockpit] Error processing evaluation:', error);
+      }
+    }
+
+    setPNStatuses(Array.from(statusMap.values()));
+  };
+
+  const triggerEvaluation = async () => {
+    if (selectedPNs.length === 0) return;
+    setTriggering(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('evaluations')
+        .insert({
+          use_case_id: useCaseId,
+          pn_ids: selectedPNs,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setSelectedPNs([]);
+        // Trigger evaluation via parent callback
+        onTriggerEvaluation(data.id, useCaseId, selectedPNs);
+      }
+    } catch (error) {
+      console.error('Failed to trigger evaluation:', error);
+      alert('Failed to trigger evaluation');
+    } finally {
+      setTriggering(false);
+    }
+  };
+
+  const evaluateAllPending = async () => {
+    const pendingPNs = pnStatuses.filter(p => p.status === 'pending').map(p => p.pnId);
+    if (pendingPNs.length === 0) return;
+
+    setSelectedPNs(pendingPNs);
+    setTimeout(() => triggerEvaluation(), 100);
+  };
+
+  const handleExpandPN = async (pnId: string) => {
+    if (expandedPNId === pnId) {
+      setExpandedPNId(null);
+      setExpandedPNData(null);
+      return;
+    }
+
+    const pnStatus = pnStatuses.find(p => p.pnId === pnId);
+    if (!pnStatus || !pnStatus.evaluationId) {
+      console.warn(`[Cockpit] Cannot expand ${pnId}: no evaluationId`);
+      return;
+    }
+
+    console.log(`[Cockpit] Expanding ${pnId}...`);
+
+    // Load full evaluation data
+    const { data: evaluation } = await supabase
+      .from('evaluations')
+      .select('*')
+      .eq('id', pnStatus.evaluationId)
+      .single();
+
+    const { data: results } = await supabase
+      .from('evaluation_results')
+      .select('*')
+      .eq('evaluation_id', pnStatus.evaluationId);
+
+    const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnId)}`);
+    const bundle = await bundleRes.json();
+    const pnData = bundle.pns[0];
+    const sharedPrimitives = bundle.sharedPrimitives || [];
+
+    const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
+    const evaluationStates: EvaluationState[] = (results || []).map((result: any) => ({
+      nodeId: result.node_id,
+      status: 'completed' as const,
+      result: {
+        nodeId: result.node_id,
+        decision: result.decision,
+        confidence: result.confidence || 0,
+        reasoning: result.reasoning || '',
+        citations: result.citations || [],
+      },
+    }));
+
+    setExpandedPNData({
+      evaluation,
+      nodes: expandedNodes,
+      rootId: pnData.requirements.root,
+      evaluationStates,
+    });
+    setExpandedPNId(pnId);
+    console.log(`[Cockpit] Expanded ${pnId} successfully`);
+  };
+
+  const appliesPNs = pnStatuses.filter(p => p.status === 'applies');
+  const notApplicablePNs = pnStatuses.filter(p => p.status === 'not-applicable');
+  const pendingPNs = pnStatuses.filter(p => p.status === 'pending');
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-neutral-500">Loading use case...</div>
+      </div>
+    );
+  }
+
+  if (!useCase) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-neutral-500">Use case not found</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-5xl mx-auto px-8 py-8 space-y-8">
+        {/* Use Case Header */}
+        <div className="bg-white rounded-lg border border-neutral-200 p-6">
+          <h1 className="text-xl font-bold text-neutral-900 mb-2">
+            {useCase.title}
+          </h1>
+          <p className="text-neutral-600 leading-relaxed">
+            {useCase.description}
+          </p>
+          {useCase.tags && useCase.tags.length > 0 && (
+            <div className="flex gap-2 mt-4">
+              {useCase.tags.map((tag, idx) => (
+                <span
+                  key={idx}
+                  className="text-xs px-3 py-1.5 bg-neutral-100 text-neutral-700 rounded-full font-medium"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Dashboard Stats */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+            <div className="text-xs text-green-700 uppercase tracking-wide mb-1">Obligations Apply</div>
+            <div className="text-2xl font-bold text-green-700">{appliesPNs.length}</div>
+          </div>
+          <div className="bg-neutral-50 rounded-lg border border-neutral-200 p-4">
+            <div className="text-xs text-neutral-500 uppercase tracking-wide mb-1">Not Applicable</div>
+            <div className="text-2xl font-bold text-neutral-700">{notApplicablePNs.length}</div>
+          </div>
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
+            <div className="text-xs text-blue-700 uppercase tracking-wide mb-1">Pending Evaluation</div>
+            <div className="text-2xl font-bold text-blue-700">{pendingPNs.length}</div>
+          </div>
+        </div>
+
+        {/* APPLIES Table */}
+        {appliesPNs.length > 0 && (
+          <PNTable
+            title="✓ OBLIGATIONS THAT APPLY - Action Required"
+            pns={appliesPNs}
+            expandedPNId={expandedPNId}
+            expandedPNData={expandedPNData}
+            onExpandPN={handleExpandPN}
+            type="applies"
+          />
+        )}
+
+        {/* NOT APPLICABLE Table */}
+        {notApplicablePNs.length > 0 && (
+          <PNTable
+            title="✗ OBLIGATIONS THAT DO NOT APPLY"
+            pns={notApplicablePNs}
+            expandedPNId={expandedPNId}
+            expandedPNData={expandedPNData}
+            onExpandPN={handleExpandPN}
+            type="not-applicable"
+          />
+        )}
+
+        {/* PENDING Table */}
+        {pendingPNs.length > 0 && (
+          <PNTable
+            title="○ PENDING EVALUATION"
+            pns={pendingPNs}
+            expandedPNId={expandedPNId}
+            expandedPNData={expandedPNData}
+            onExpandPN={handleExpandPN}
+            type="pending"
+          />
+        )}
+
+        {/* Trigger Evaluation Section */}
+        <div className="bg-white rounded-lg border border-neutral-200 p-6">
+          <h3 className="text-lg font-semibold text-neutral-900 mb-4">
+            Evaluate Prescriptive Norms
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-neutral-700 mb-3 block">
+                Select Prescriptive Norms to Evaluate:
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {availablePNs.map((pn) => (
+                  <button
+                    key={pn.id}
+                    onClick={() => {
+                      setSelectedPNs(prev =>
+                        prev.includes(pn.id)
+                          ? prev.filter(p => p !== pn.id)
+                          : [...prev, pn.id]
+                      );
+                    }}
+                    className={`text-sm px-4 py-2 rounded-lg border transition-all ${
+                      selectedPNs.includes(pn.id)
+                        ? 'bg-neutral-900 text-white border-neutral-900 shadow-sm'
+                        : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-900'
+                    }`}
+                  >
+                    {pn.id}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={triggerEvaluation}
+                disabled={selectedPNs.length === 0 || triggering}
+                className="px-6 py-3 bg-neutral-900 text-white rounded-lg text-sm font-semibold hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {triggering
+                  ? 'Triggering...'
+                  : `Trigger Selected ${selectedPNs.length > 0 ? `(${selectedPNs.length})` : ''}`}
+              </button>
+              {pendingPNs.length > 0 && (
+                <button
+                  onClick={evaluateAllPending}
+                  disabled={triggering}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Evaluate All Pending ({pendingPNs.length})
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Evaluation History */}
+        {evaluationHistory.length > 0 && (
+          <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="w-full px-6 py-4 flex items-center justify-between hover:bg-neutral-50 transition-colors"
+            >
+              <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-wide">
+                Evaluation History ({evaluationHistory.length} runs)
+              </h3>
+              <svg
+                className={`w-4 h-4 text-neutral-500 transition-transform ${showHistory ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {showHistory && (
+              <div className="border-t border-neutral-200 p-6">
+                <div className="space-y-2">
+                  {evaluationHistory.map((evaluation) => (
+                    <div
+                      key={evaluation.id}
+                      className="flex items-center justify-between p-3 rounded border border-neutral-200 hover:border-neutral-900 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-neutral-900">
+                          {(evaluation.pn_ids as string[]).join(', ')}
+                        </div>
+                        <div className="text-xs text-neutral-500">
+                          {new Date(evaluation.triggered_at).toLocaleString('en', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                      </div>
+                      <span className={`text-xs px-2 py-1 rounded font-medium ${
+                        evaluation.status === 'completed'
+                          ? 'bg-green-100 text-green-700'
+                          : evaluation.status === 'running'
+                          ? 'bg-blue-100 text-blue-700'
+                          : evaluation.status === 'failed'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-neutral-100 text-neutral-700'
+                      }`}>
+                        {evaluation.status.toUpperCase()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// PN Table Component
+function PNTable({
+  title,
+  pns,
+  expandedPNId,
+  expandedPNData,
+  onExpandPN,
+  type
+}: {
+  title: string;
+  pns: PNStatus[];
+  expandedPNId: string | null;
+  expandedPNData: any;
+  onExpandPN: (pnId: string) => void;
+  type: 'applies' | 'not-applicable' | 'pending';
+}) {
+  const getBorderColor = () => {
+    if (type === 'applies') return 'border-green-200';
+    if (type === 'not-applicable') return 'border-neutral-200';
+    return 'border-blue-200';
+  };
+
+  const getHeaderBg = () => {
+    if (type === 'applies') return 'bg-green-50';
+    if (type === 'not-applicable') return 'bg-neutral-50';
+    return 'bg-blue-50';
+  };
+
+  return (
+    <div className={`bg-white rounded-lg border ${getBorderColor()} overflow-hidden`}>
+      <div className={`px-6 py-3 ${getHeaderBg()} border-b ${getBorderColor()}`}>
+        <h3 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">
+          {title}
+        </h3>
+      </div>
+
+      <div className="divide-y divide-neutral-100">
+        {pns.map((pn) => {
+          const isExpanded = expandedPNId === pn.pnId;
+
+          return (
+            <div key={pn.pnId}>
+              {/* Row */}
+              <button
+                onClick={() => onExpandPN(pn.pnId)}
+                disabled={pn.status === 'pending'}
+                className="w-full px-6 py-4 flex items-center justify-between hover:bg-neutral-50 transition-colors text-left disabled:cursor-default disabled:hover:bg-transparent"
+              >
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="text-sm font-mono font-semibold text-neutral-900">
+                    {pn.pnId}
+                  </div>
+                  <div className="text-xs text-neutral-500">
+                    Art. {pn.article}
+                  </div>
+                  <div className="text-sm text-neutral-900 flex-1">
+                    {pn.title}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {pn.evaluatedAt && (
+                    <div className="text-xs text-neutral-500">
+                      {new Date(pn.evaluatedAt).toLocaleDateString('en', {
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </div>
+                  )}
+
+                  {pn.progressCurrent !== undefined && pn.progressTotal && (
+                    <div className="text-xs text-neutral-600">
+                      {pn.progressCurrent}/{pn.progressTotal}
+                    </div>
+                  )}
+
+                  {pn.status !== 'pending' && (
+                    <svg
+                      className={`w-4 h-4 text-neutral-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
+                </div>
+              </button>
+
+              {/* Expanded TREEMAXX View */}
+              {isExpanded && expandedPNData && (
+                <div className="border-t border-neutral-100 bg-neutral-50 px-6 py-6">
+                  <RequirementsGrid
+                    nodes={expandedPNData.nodes || []}
+                    rootId={expandedPNData.rootId || ''}
+                    evaluationStates={expandedPNData.evaluationStates || []}
+                    onNodeClick={() => {}}
+                    selectedNodeId={null}
+                    isRunning={false}
+                    totalNodes={expandedPNData.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
+                    evaluationStatus={expandedPNData.evaluation?.status}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
