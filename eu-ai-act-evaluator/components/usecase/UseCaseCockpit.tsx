@@ -415,13 +415,37 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     console.log(`[Cockpit] Expanded ${pnId} successfully`);
   };
 
-  // Separate grouped vs ungrouped PNs
-  const groupedPNIds = new Set(groups.flatMap(g => g.members));
-
+  // Calculate PN statuses
   const appliesPNs = pnStatuses.filter(p => p.status === 'applies');
   const notApplicablePNs = pnStatuses.filter(p => p.status === 'not-applicable');
   const pendingPNs = pnStatuses.filter(p => p.status === 'pending');
 
+  // Categorize groups and PNs by status
+  const groupedPNIds = new Set(groups.flatMap(g => g.members));
+
+  // Helper to determine group status
+  const getGroupStatus = (group: Group) => {
+    const groupPNStatuses = pnStatuses.filter(ps => group.members.includes(ps.pnId));
+    const pendingCount = groupPNStatuses.filter(ps => ps.status === 'pending').length;
+    const appliesCount = groupPNStatuses.filter(ps => ps.status === 'applies').length;
+    const notApplicableCount = groupPNStatuses.filter(ps => ps.status === 'not-applicable').length;
+
+    // If all pending or mixed, treat as pending
+    if (pendingCount > 0) return 'pending';
+    // If all apply
+    if (appliesCount === group.members.length) return 'applies';
+    // If all N/A
+    if (notApplicableCount === group.members.length) return 'not-applicable';
+    // Mixed evaluated states - treat as pending for now
+    return 'pending';
+  };
+
+  // Categorize groups
+  const appliesGroups = groups.filter(g => getGroupStatus(g) === 'applies');
+  const notApplicableGroups = groups.filter(g => getGroupStatus(g) === 'not-applicable');
+  const pendingGroups = groups.filter(g => getGroupStatus(g) === 'pending');
+
+  // Ungrouped PNs
   const ungroupedAppliesPNs = appliesPNs.filter(pn => !groupedPNIds.has(pn.pnId));
   const ungroupedNotApplicablePNs = notApplicablePNs.filter(pn => !groupedPNIds.has(pn.pnId));
   const ungroupedPendingPNs = pendingPNs.filter(pn => !groupedPNIds.has(pn.pnId));
@@ -444,168 +468,150 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-5xl mx-auto px-8 py-8 space-y-8">
-        {/* Use Case Header */}
-        <div className="bg-white rounded-lg border border-neutral-200 p-6">
-          <h1 className="text-xl font-bold text-neutral-900 mb-2">
+      <div className="max-w-5xl mx-auto px-6 py-4 space-y-4">
+        {/* Use Case Header with Inline Stats */}
+        <div className="bg-white rounded-lg border border-neutral-200 p-4">
+          <h1 className="text-base font-bold text-neutral-900 mb-1">
             {useCase.title}
           </h1>
-          <p className="text-neutral-600 leading-relaxed">
+          <p className="text-sm text-neutral-600 mb-3">
             {useCase.description}
           </p>
-          {useCase.tags && useCase.tags.length > 0 && (
-            <div className="flex gap-2 mt-4">
-              {useCase.tags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="text-xs px-3 py-1.5 bg-neutral-100 text-neutral-700 rounded-full font-medium"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Dashboard Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-green-50 rounded-lg border border-green-200 p-4">
-            <div className="text-xs text-green-700 uppercase tracking-wide mb-1">Obligations Apply</div>
-            <div className="text-2xl font-bold text-green-700">{appliesPNs.length}</div>
-          </div>
-          <div className="bg-neutral-50 rounded-lg border border-neutral-200 p-4">
-            <div className="text-xs text-neutral-500 uppercase tracking-wide mb-1">Not Applicable</div>
-            <div className="text-2xl font-bold text-neutral-700">{notApplicablePNs.length}</div>
-          </div>
-          <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
-            <div className="text-xs text-blue-700 uppercase tracking-wide mb-1">Pending Evaluation</div>
-            <div className="text-2xl font-bold text-blue-700">{pendingPNs.length}</div>
-          </div>
-        </div>
-
-        {/* Grouped Obligations */}
-        {groups.length > 0 && (
-          <div>
-            <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide mb-4">
-              Grouped Obligations
-            </h2>
-            <div className="space-y-4">
-              {groups.map(group => (
-                <GroupCard
-                  key={group.id}
-                  group={group}
-                  pnStatuses={pnStatuses}
-                  sharedPrimitives={sharedPrimitives}
-                  onEvaluateGroup={handleEvaluateGroup}
-                  onEvaluatePN={(pnId) => {
-                    setSelectedPNs([pnId]);
-                    setTimeout(() => triggerEvaluation(), 100);
-                  }}
-                  onViewPN={handleViewPN}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Individual Ungrouped Obligations */}
-        {(ungroupedAppliesPNs.length > 0 || ungroupedNotApplicablePNs.length > 0 || ungroupedPendingPNs.length > 0) && (
-          <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide mt-8">
-            Individual Obligations
-          </h2>
-        )}
-
-        {/* APPLIES Table */}
-        {ungroupedAppliesPNs.length > 0 && (
-          <PNTable
-            title="✓ OBLIGATIONS THAT APPLY - Action Required"
-            pns={ungroupedAppliesPNs}
-            expandedPNId={expandedPNId}
-            expandedPNData={expandedPNData}
-            onExpandPN={handleExpandPN}
-            type="applies"
-          />
-        )}
-
-        {/* NOT APPLICABLE Table */}
-        {ungroupedNotApplicablePNs.length > 0 && (
-          <PNTable
-            title="✗ OBLIGATIONS THAT DO NOT APPLY"
-            pns={ungroupedNotApplicablePNs}
-            expandedPNId={expandedPNId}
-            expandedPNData={expandedPNData}
-            onExpandPN={handleExpandPN}
-            type="not-applicable"
-          />
-        )}
-
-        {/* PENDING Table */}
-        {ungroupedPendingPNs.length > 0 && (
-          <PNTable
-            title="○ PENDING EVALUATION"
-            pns={ungroupedPendingPNs}
-            expandedPNId={expandedPNId}
-            expandedPNData={expandedPNData}
-            onExpandPN={handleExpandPN}
-            type="pending"
-          />
-        )}
-
-        {/* Trigger Evaluation Section */}
-        <div className="bg-white rounded-lg border border-neutral-200 p-6">
-          <h3 className="text-lg font-semibold text-neutral-900 mb-4">
-            Evaluate Prescriptive Norms
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-neutral-700 mb-3 block">
-                Select Prescriptive Norms to Evaluate:
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {availablePNs.map((pn) => (
-                  <button
-                    key={pn.id}
-                    onClick={() => {
-                      setSelectedPNs(prev =>
-                        prev.includes(pn.id)
-                          ? prev.filter(p => p !== pn.id)
-                          : [...prev, pn.id]
-                      );
-                    }}
-                    className={`text-sm px-4 py-2 rounded-lg border transition-all ${
-                      selectedPNs.includes(pn.id)
-                        ? 'bg-neutral-900 text-white border-neutral-900 shadow-sm'
-                        : 'bg-white text-neutral-700 border-neutral-200 hover:border-neutral-900'
-                    }`}
+          <div className="flex items-center justify-between">
+            {useCase.tags && useCase.tags.length > 0 && (
+              <div className="flex gap-2">
+                {useCase.tags.map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="text-xs px-2 py-1 bg-neutral-100 text-neutral-700 rounded font-medium"
                   >
-                    {pn.id}
-                  </button>
+                    {tag}
+                  </span>
                 ))}
               </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={triggerEvaluation}
-                disabled={selectedPNs.length === 0 || triggering}
-                className="px-6 py-3 bg-neutral-900 text-white rounded-lg text-sm font-semibold hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {triggering
-                  ? 'Triggering...'
-                  : `Trigger Selected ${selectedPNs.length > 0 ? `(${selectedPNs.length})` : ''}`}
-              </button>
-              {pendingPNs.length > 0 && (
-                <button
-                  onClick={evaluateAllPending}
-                  disabled={triggering}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  Evaluate All Pending ({pendingPNs.length})
-                </button>
-              )}
+            )}
+            {/* Compact Inline Stats */}
+            <div className="flex items-center gap-4 text-xs font-medium">
+              <span className="text-green-700">✓ {appliesPNs.length} Apply</span>
+              <span className="text-neutral-500">✗ {notApplicablePNs.length} N/A</span>
+              <span className="text-blue-700">○ {pendingPNs.length} Pending</span>
             </div>
           </div>
         </div>
+
+        {/* APPLIES Section - Groups + Individual PNs */}
+        {(appliesGroups.length > 0 || ungroupedAppliesPNs.length > 0) && (
+          <div className="space-y-2">
+            <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide px-1">
+              ✓ OBLIGATIONS THAT APPLY
+            </h2>
+
+            {/* Groups in Applies */}
+            {appliesGroups.map(group => (
+              <GroupCard
+                key={group.id}
+                group={group}
+                pnStatuses={pnStatuses}
+                sharedPrimitives={sharedPrimitives}
+                onEvaluateGroup={handleEvaluateGroup}
+                onEvaluatePN={(pnId) => {
+                  setSelectedPNs([pnId]);
+                  setTimeout(() => triggerEvaluation(), 100);
+                }}
+                onViewPN={handleViewPN}
+              />
+            ))}
+
+            {/* Individual PNs in Applies */}
+            {ungroupedAppliesPNs.length > 0 && (
+              <PNTable
+                title=""
+                pns={ungroupedAppliesPNs}
+                expandedPNId={expandedPNId}
+                expandedPNData={expandedPNData}
+                onExpandPN={handleExpandPN}
+                type="applies"
+                showHeader={false}
+              />
+            )}
+          </div>
+        )}
+
+        {/* NOT APPLICABLE Section - Groups + Individual PNs */}
+        {(notApplicableGroups.length > 0 || ungroupedNotApplicablePNs.length > 0) && (
+          <div className="space-y-2">
+            <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide px-1">
+              ✗ OBLIGATIONS THAT DO NOT APPLY
+            </h2>
+
+            {/* Groups in N/A */}
+            {notApplicableGroups.map(group => (
+              <GroupCard
+                key={group.id}
+                group={group}
+                pnStatuses={pnStatuses}
+                sharedPrimitives={sharedPrimitives}
+                onEvaluateGroup={handleEvaluateGroup}
+                onEvaluatePN={(pnId) => {
+                  setSelectedPNs([pnId]);
+                  setTimeout(() => triggerEvaluation(), 100);
+                }}
+                onViewPN={handleViewPN}
+              />
+            ))}
+
+            {/* Individual PNs in N/A */}
+            {ungroupedNotApplicablePNs.length > 0 && (
+              <PNTable
+                title=""
+                pns={ungroupedNotApplicablePNs}
+                expandedPNId={expandedPNId}
+                expandedPNData={expandedPNData}
+                onExpandPN={handleExpandPN}
+                type="not-applicable"
+                showHeader={false}
+              />
+            )}
+          </div>
+        )}
+
+        {/* PENDING Section - Groups + Individual PNs */}
+        {(pendingGroups.length > 0 || ungroupedPendingPNs.length > 0) && (
+          <div className="space-y-2">
+            <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide px-1">
+              ○ PENDING EVALUATION
+            </h2>
+
+            {/* Groups in Pending */}
+            {pendingGroups.map(group => (
+              <GroupCard
+                key={group.id}
+                group={group}
+                pnStatuses={pnStatuses}
+                sharedPrimitives={sharedPrimitives}
+                onEvaluateGroup={handleEvaluateGroup}
+                onEvaluatePN={(pnId) => {
+                  setSelectedPNs([pnId]);
+                  setTimeout(() => triggerEvaluation(), 100);
+                }}
+                onViewPN={handleViewPN}
+              />
+            ))}
+
+            {/* Individual PNs in Pending */}
+            {ungroupedPendingPNs.length > 0 && (
+              <PNTable
+                title=""
+                pns={ungroupedPendingPNs}
+                expandedPNId={expandedPNId}
+                expandedPNData={expandedPNData}
+                onExpandPN={handleExpandPN}
+                type="pending"
+                showHeader={false}
+              />
+            )}
+          </div>
+        )}
 
         {/* Evaluation History */}
         {evaluationHistory.length > 0 && (
@@ -680,7 +686,8 @@ function PNTable({
   expandedPNId,
   expandedPNData,
   onExpandPN,
-  type
+  type,
+  showHeader = true
 }: {
   title: string;
   pns: PNStatus[];
@@ -688,6 +695,7 @@ function PNTable({
   expandedPNData: any;
   onExpandPN: (pnId: string) => void;
   type: 'applies' | 'not-applicable' | 'pending';
+  showHeader?: boolean;
 }) {
   const getBorderColor = () => {
     if (type === 'applies') return 'border-green-200';
@@ -703,11 +711,13 @@ function PNTable({
 
   return (
     <div className={`bg-white rounded-lg border ${getBorderColor()} overflow-hidden`}>
-      <div className={`px-6 py-3 ${getHeaderBg()} border-b ${getBorderColor()}`}>
-        <h3 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">
-          {title}
-        </h3>
-      </div>
+      {showHeader && title && (
+        <div className={`px-4 py-2 ${getHeaderBg()} border-b ${getBorderColor()}`}>
+          <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
+            {title}
+          </h3>
+        </div>
+      )}
 
       <div className="divide-y divide-neutral-100">
         {pns.map((pn) => {
@@ -719,16 +729,16 @@ function PNTable({
               <button
                 onClick={() => onExpandPN(pn.pnId)}
                 disabled={pn.status === 'pending'}
-                className="w-full px-6 py-4 flex items-center justify-between hover:bg-neutral-50 transition-colors text-left disabled:cursor-default disabled:hover:bg-transparent"
+                className="w-full px-4 py-2 flex items-center justify-between hover:bg-neutral-50 transition-colors text-left disabled:cursor-default disabled:hover:bg-transparent"
               >
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="text-sm font-mono font-semibold text-neutral-900">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="text-xs font-mono font-semibold text-neutral-900">
                     {pn.pnId}
                   </div>
-                  <div className="text-xs text-neutral-500">
+                  <div className="text-[10px] text-neutral-500">
                     Art. {pn.article}
                   </div>
-                  <div className="text-sm text-neutral-900 flex-1">
+                  <div className="text-xs text-neutral-900 flex-1">
                     {pn.title}
                   </div>
                 </div>
