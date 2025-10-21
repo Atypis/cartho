@@ -317,6 +317,52 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     setTimeout(() => triggerEvaluation(), 100);
   };
 
+  // Individual PN handlers
+  const handleTogglePN = (pnId: string) => {
+    setSelectedPNs(prev =>
+      prev.includes(pnId)
+        ? prev.filter(id => id !== pnId)
+        : [...prev, pnId]
+    );
+  };
+
+  const handleEvaluateSelectedPNs = async () => {
+    if (selectedPNs.length === 0) return;
+    await triggerEvaluation();
+  };
+
+  const handleEvaluateAllPendingPNs = async (pnIds: string[]) => {
+    if (pnIds.length === 0) return;
+
+    setTriggering(true);
+    try {
+      const { data, error } = await supabase
+        .from('evaluations')
+        .insert({
+          use_case_id: useCaseId,
+          pn_ids: pnIds,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        // Trigger evaluation via parent callback
+        onTriggerEvaluation(data.id, useCaseId, pnIds);
+      }
+    } catch (error: any) {
+      console.error('Failed to trigger evaluation:', {
+        raw: error,
+        message: error?.message,
+      });
+      alert(`Failed to trigger evaluation: ${error?.message || 'Unknown error'}`);
+    } finally {
+      setTriggering(false);
+    }
+  };
+
   // Group evaluation handler
   const handleEvaluateGroup = async (groupId: string, pnIds: string[]) => {
     setTriggering(true);
@@ -608,6 +654,10 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 onExpandPN={handleExpandPN}
                 type="pending"
                 showHeader={false}
+                selectedPNs={selectedPNs}
+                onTogglePN={handleTogglePN}
+                onEvaluateSelected={handleEvaluateSelectedPNs}
+                onEvaluateAll={() => handleEvaluateAllPendingPNs(ungroupedPendingPNs.map(p => p.pnId))}
               />
             )}
           </div>
@@ -687,7 +737,11 @@ function PNTable({
   expandedPNData,
   onExpandPN,
   type,
-  showHeader = true
+  showHeader = true,
+  selectedPNs = [],
+  onTogglePN,
+  onEvaluateSelected,
+  onEvaluateAll
 }: {
   title: string;
   pns: PNStatus[];
@@ -696,6 +750,10 @@ function PNTable({
   onExpandPN: (pnId: string) => void;
   type: 'applies' | 'not-applicable' | 'pending';
   showHeader?: boolean;
+  selectedPNs?: string[];
+  onTogglePN?: (pnId: string) => void;
+  onEvaluateSelected?: () => void;
+  onEvaluateAll?: () => void;
 }) {
   const getBorderColor = () => {
     if (type === 'applies') return 'border-green-200';
@@ -722,55 +780,72 @@ function PNTable({
       <div className="divide-y divide-neutral-100">
         {pns.map((pn) => {
           const isExpanded = expandedPNId === pn.pnId;
+          const isPending = pn.status === 'pending';
+          const isSelected = selectedPNs.includes(pn.pnId);
+          const showCheckbox = isPending && onTogglePN;
 
           return (
             <div key={pn.pnId}>
               {/* Row */}
-              <button
-                onClick={() => onExpandPN(pn.pnId)}
-                disabled={pn.status === 'pending'}
-                className="w-full px-4 py-2 flex items-center justify-between hover:bg-neutral-50 transition-colors text-left disabled:cursor-default disabled:hover:bg-transparent"
-              >
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="text-xs font-mono font-semibold text-neutral-900">
-                    {pn.pnId}
-                  </div>
-                  <div className="text-[10px] text-neutral-500">
-                    Art. {pn.article}
-                  </div>
-                  <div className="text-xs text-neutral-900 flex-1">
-                    {pn.title}
-                  </div>
-                </div>
+              <div className="w-full px-4 py-2 flex items-center gap-3 hover:bg-neutral-50 transition-colors">
+                {/* Checkbox for pending PNs */}
+                {showCheckbox && (
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => onTogglePN(pn.pnId)}
+                    className="w-3.5 h-3.5 text-neutral-900 rounded flex-shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                )}
 
-                <div className="flex items-center gap-3">
-                  {pn.evaluatedAt && (
-                    <div className="text-xs text-neutral-500">
-                      {new Date(pn.evaluatedAt).toLocaleDateString('en', {
-                        month: 'short',
-                        day: 'numeric'
-                      })}
+                {/* Clickable area for expansion (evaluated PNs only) */}
+                <button
+                  onClick={() => !isPending && onExpandPN(pn.pnId)}
+                  disabled={isPending}
+                  className="flex-1 flex items-center justify-between text-left disabled:cursor-default"
+                >
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="text-xs font-mono font-semibold text-neutral-900">
+                      {pn.pnId}
                     </div>
-                  )}
-
-                  {pn.progressCurrent !== undefined && pn.progressTotal && (
-                    <div className="text-xs text-neutral-600">
-                      {pn.progressCurrent}/{pn.progressTotal}
+                    <div className="text-[10px] text-neutral-500">
+                      Art. {pn.article}
                     </div>
-                  )}
+                    <div className="text-xs text-neutral-900 flex-1">
+                      {pn.title}
+                    </div>
+                  </div>
 
-                  {pn.status !== 'pending' && (
-                    <svg
-                      className={`w-4 h-4 text-neutral-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  )}
-                </div>
-              </button>
+                  <div className="flex items-center gap-3">
+                    {pn.evaluatedAt && (
+                      <div className="text-xs text-neutral-500">
+                        {new Date(pn.evaluatedAt).toLocaleDateString('en', {
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </div>
+                    )}
+
+                    {pn.progressCurrent !== undefined && pn.progressTotal && (
+                      <div className="text-xs text-neutral-600">
+                        {pn.progressCurrent}/{pn.progressTotal}
+                      </div>
+                    )}
+
+                    {pn.status !== 'pending' && (
+                      <svg
+                        className={`w-4 h-4 text-neutral-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+              </div>
 
               {/* Expanded TREEMAXX View */}
               {isExpanded && expandedPNData && (
@@ -791,6 +866,40 @@ function PNTable({
           );
         })}
       </div>
+
+      {/* Action Buttons for Pending PNs */}
+      {type === 'pending' && pns.length > 0 && (onEvaluateSelected || onEvaluateAll) && (
+        <div className="border-t border-neutral-200 px-4 py-3 bg-neutral-50 flex items-center gap-2">
+          {onEvaluateSelected && selectedPNs.length > 0 && (
+            <button
+              onClick={onEvaluateSelected}
+              className="text-xs px-4 py-1.5 bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors font-medium"
+            >
+              Evaluate Selected ({selectedPNs.length})
+            </button>
+          )}
+
+          {onEvaluateAll && (
+            <button
+              onClick={onEvaluateAll}
+              className="text-xs px-4 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium"
+            >
+              Evaluate All ({pns.length})
+            </button>
+          )}
+
+          {selectedPNs.length > 0 && (
+            <button
+              onClick={() => {
+                selectedPNs.forEach(pnId => onTogglePN?.(pnId));
+              }}
+              className="text-xs px-3 py-1.5 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded transition-colors"
+            >
+              Deselect All
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
