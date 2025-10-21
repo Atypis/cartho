@@ -26,6 +26,28 @@
         "PN-16K",
         "PN-16L"
       ]
+    },
+    {
+      "id": "HR-SYS-REQS",
+      "title": "Articles 9–15: System Requirements for High-Risk AI Systems",
+      "article": "9–15",
+      "description": "Core system-level requirements in Section 2 (risk management, data, documentation, logging, transparency, human oversight, accuracy/robustness/cybersecurity)",
+      "effective_date": "2026-08-02",
+      "shared_gates": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "!ex:art2_2_product_safety_pathway"
+      ],
+      "members": [
+        "PN-09",
+        "PN-10",
+        "PN-11",
+        "PN-12",
+        "PN-13",
+        "PN-14",
+        "PN-15"
+      ]
     }
   ]
 }

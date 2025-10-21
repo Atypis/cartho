@@ -50,19 +50,19 @@
   "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-20" },
   "test_vectors": [
     {
-      "id": "tv1-true",
-      "facts": "Provider deploys a crawler to automatically harvest facial images at scale from social media and public CCTV streams to populate and enlarge a searchable facial recognition database offered to clients.",
-      "expected_root_decision": true
+      "name": "tv1-true",
+      "facts": { "summary": "Provider deploys a crawler to automatically harvest facial images at scale from social media and public CCTV streams to populate and enlarge a searchable facial recognition database offered to clients." },
+      "expected_applies": true
     },
     {
-      "id": "tv2-false-targeted",
-      "facts": "Research project with consented participants uploads their images to a closed dataset; no automated bulk scraping from the internet or CCTV; database is limited to the study and not used for recognition against the public.",
-      "expected_root_decision": false
+      "name": "tv2-false-targeted",
+      "facts": { "summary": "Research project with consented participants; no bulk scraping from internet or CCTV; closed dataset; not used to create/expand a public FR database." },
+      "expected_applies": false
     },
     {
-      "id": "tv3-false-no-db",
-      "facts": "An AI system detects faces on a device to unlock the screen; it does not create or expand a facial recognition database and does not scrape images from the internet or CCTV.",
-      "expected_root_decision": false
+      "name": "tv3-false-no-db",
+      "facts": { "summary": "On-device face unlock; no scraping and no creation/expansion of an FR database." },
+      "expected_applies": false
     }
   ]
 }

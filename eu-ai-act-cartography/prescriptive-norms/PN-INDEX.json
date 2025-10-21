@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2025-10-21T10:30:05.047Z",
+  "generated_at": "2025-10-21T13:13:24.326Z",
   "schema_version": "2025-10-10",
   "groups": [
     {
@@ -28,6 +28,28 @@
         "PN-16J",
         "PN-16K",
         "PN-16L"
+      ]
+    },
+    {
+      "id": "HR-SYS-REQS",
+      "title": "Articles 9–15: System Requirements for High-Risk AI Systems",
+      "article": "9–15",
+      "description": "Core system-level requirements in Section 2 (risk management, data, documentation, logging, transparency, human oversight, accuracy/robustness/cybersecurity)",
+      "effective_date": "2026-08-02",
+      "shared_gates": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "!ex:art2_2_product_safety_pathway"
+      ],
+      "members": [
+        "PN-09",
+        "PN-10",
+        "PN-11",
+        "PN-12",
+        "PN-13",
+        "PN-14",
+        "PN-15"
       ]
     }
   ],
@@ -150,6 +172,104 @@
         "ex:le_authorised_rbi_use"
       ],
       "status": "draft"
+    },
+    {
+      "id": "PN-09",
+      "title": "Risk management system for high-risk AI systems",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-09.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-SYS-REQS",
+      "group_order": 1
+    },
+    {
+      "id": "PN-10",
+      "title": "Data and data governance for high-risk AI systems",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-10.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-SYS-REQS",
+      "group_order": 2
+    },
+    {
+      "id": "PN-11",
+      "title": "Technical documentation for high-risk AI systems",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-11.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-SYS-REQS",
+      "group_order": 3
+    },
+    {
+      "id": "PN-12",
+      "title": "Record-keeping (automatic logging) for high-risk AI systems",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-12.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-SYS-REQS",
+      "group_order": 4
+    },
+    {
+      "id": "PN-13",
+      "title": "Transparency and provision of information to deployers",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-13.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-SYS-REQS",
+      "group_order": 5
+    },
+    {
+      "id": "PN-14",
+      "title": "Human oversight for high-risk AI systems",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-14.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-SYS-REQS",
+      "group_order": 6
+    },
+    {
+      "id": "PN-15",
+      "title": "Accuracy, robustness and cybersecurity for high-risk AI systems",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-15.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-SYS-REQS",
+      "group_order": 7
     },
     {
       "id": "PN-16A",
@@ -342,6 +462,16 @@
       "status": "draft"
     },
     {
+      "id": "ex:art2_2_product_safety_pathway",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-art2_2_product_safety_pathway.json",
+      "status": "draft"
+    },
+    {
+      "id": "ex:art6_3_opt_out_valid",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-art6_3_opt_out_valid.json",
+      "status": "draft"
+    },
+    {
       "id": "ex:categorising_biometric_data_law_enforcement_area",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-categorising_biometric_data_law_enforcement_area.json",
       "status": "draft"
@@ -379,6 +509,11 @@
     {
       "id": "qp:is_deployer",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_deployer.json",
+      "status": "draft"
+    },
+    {
+      "id": "qp:is_high_risk",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_high_risk.json",
       "status": "draft"
     },
     {

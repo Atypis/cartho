@@ -1,0 +1,55 @@
+{
+  "id": "PN-13",
+  "title": "Transparency and provision of information to deployers",
+  "group_id": "HR-SYS-REQS",
+  "group_order": 5,
+  "type": "duty",
+  "article_refs": [
+    {
+      "article": 13,
+      "paragraph": 1,
+      "quote": "High-risk AI systems shall be designed and developed in such a way as to ensure that their operation is sufficiently transparent to enable deployers to interpret a system’s output and use it appropriately."
+    }
+  ],
+  "legal_consequence": {
+    "verbatim": "High-risk AI systems shall be designed and developed in such a way as to ensure that their operation is sufficiently transparent to enable deployers to interpret a system’s output and use it appropriately.",
+    "context": {
+      "items": [
+        {
+          "label": "Instructions for use",
+          "kind": "guidance",
+          "text": "Systems shall be accompanied by instructions for use containing at least the specified identity, intended purpose, performance (accuracy/robustness/cybersecurity), risks, explanation capabilities, performance on specific groups where applicable, data set specifications where appropriate, and information to interpret outputs.",
+          "sources": [ { "article": 13, "paragraph": 2 }, { "article": 13, "paragraph": 3 } ]
+        },
+        {
+          "label": "Penalty and enforcement (Article 99)",
+          "kind": "guidance",
+          "text": "Obligation/requirement. Administrative fines up to EUR 15,000,000 or 3% of worldwide turnover (whichever is higher) may apply for non‑compliance (subject to SME caps and due process).",
+          "sources": [ { "article": 99, "paragraph": 2 } ]
+        }
+      ],
+      "refs": ["cons:penalty_art99_requirements"]
+    }
+  },
+  "side_info": { "effective_from": "2026-08-02" },
+  "requirements": {
+    "root": "R-1",
+    "nodes": [
+      { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4"] },
+      { "id": "R-1.1", "label": "Global scope gate (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2", "sources": [ { "article": 2 } ], "question": { "prompt": "Does Article 2 scope apply (and no exclusion)?", "answer_type": "boolean" } },
+      { "id": "R-1.2", "label": "Actor is provider (Art. 3(2))", "kind": "primitive", "ref": "qp:is_provider", "sources": [ { "article": 3, "paragraph": 2 } ], "question": { "prompt": "Is the actor a provider per Art. 3(2)?", "answer_type": "boolean" } },
+      { "id": "R-1.3", "label": "System is high-risk (Art. 6)", "kind": "primitive", "ref": "qp:is_high_risk", "sources": [ { "article": 6 } ], "question": { "prompt": "Is the AI system high-risk under Art. 6?", "answer_type": "boolean" } },
+      { "id": "R-1.4", "label": "Not product-safety carve-out (Art. 2(2))", "kind": "composite", "operator": "not", "children": ["R-1.4.1"], "sources": [ { "article": 2, "paragraph": 2 } ] },
+      { "id": "R-1.4.1", "label": "Product-safety pathway exclusion applies (Art. 2(2))", "kind": "primitive", "ref": "ex:art2_2_product_safety_pathway", "sources": [ { "article": 2, "paragraph": 2 } ], "question": { "prompt": "Is the system high-risk solely via Art. 6(1) and covered by Annex I Section B legislation?", "answer_type": "boolean" } }
+    ]
+  },
+  "shared_refs": [
+    "qp:in_scope_art2",
+    "qp:is_provider",
+    "qp:is_high_risk",
+    "ex:art2_2_product_safety_pathway"
+  ],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" },
+  "test_vectors": []
+}
+

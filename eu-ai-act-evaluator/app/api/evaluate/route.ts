@@ -9,6 +9,7 @@ import crypto from 'crypto';
 import { EvaluationEngine } from '@/lib/evaluation/engine';
 import type { PrescriptiveNorm, SharedPrimitive, EvaluationResult } from '@/lib/evaluation/types';
 import { NextRequest } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -37,6 +38,13 @@ export async function POST(req: NextRequest) {
 
     console.log(`📋 [API] Evaluating PN: ${prescriptiveNorm.id}`);
     console.log(`📄 [API] Case input length: ${caseInput.length} chars`);
+    console.log(`📝 [API] Evaluation ID: ${evaluationId || 'none'}`);
+
+    // Create Supabase client for database writes
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
     // Create a stream for progress updates
     const encoder = new TextEncoder();
@@ -51,6 +59,37 @@ export async function POST(req: NextRequest) {
           prescriptiveNorm as PrescriptiveNorm,
           sharedPrimitives as SharedPrimitive[] || [],
           async (states) => {
+            // Write completed primitive results to database
+            if (evaluationId) {
+              const completedStates = states.filter(s => s.status === 'completed' && s.result);
+
+              for (const state of completedStates) {
+                // Check if already written
+                const { data: existing } = await supabase
+                  .from('evaluation_results')
+                  .select('id')
+                  .eq('evaluation_id', evaluationId)
+                  .eq('node_id', state.nodeId)
+                  .single();
+
+                if (!existing && state.result) {
+                  // Write new result
+                  await supabase
+                    .from('evaluation_results')
+                    .insert({
+                      evaluation_id: evaluationId,
+                      node_id: state.nodeId,
+                      decision: state.result.decision,
+                      confidence: state.result.confidence,
+                      reasoning: state.result.reasoning,
+                      citations: state.result.citations || [],
+                    });
+
+                  console.log(`💾 [DB] Wrote result for ${state.nodeId}: ${state.result.decision ? 'YES' : 'NO'}`);
+                }
+              }
+            }
+
             // Stream progress update
             await writer.write(
               encoder.encode(`data: ${JSON.stringify({ type: 'progress', states })}\n\n`)
@@ -126,6 +165,22 @@ export async function POST(req: NextRequest) {
         console.log(`   Final verdict: ${result.compliant ? 'COMPLIANT ✓' : 'NON-COMPLIANT ✗'}`);
         console.log(`   Evaluated nodes: ${result.states.length}`);
 
+        // Update evaluation status to completed
+        if (evaluationId) {
+          const primitiveCount = result.states.filter(s => s.result).length;
+          await supabase
+            .from('evaluations')
+            .update({
+              status: 'completed',
+              completed_at: new Date().toISOString(),
+              progress_current: primitiveCount,
+              progress_total: primitiveCount,
+            })
+            .eq('id', evaluationId);
+
+          console.log(`✅ [DB] Marked evaluation ${evaluationId} as completed`);
+        }
+
         // Send final result
         await writer.write(
           encoder.encode(`data: ${JSON.stringify({ type: 'complete', result })}\n\n`)
@@ -133,6 +188,20 @@ export async function POST(req: NextRequest) {
         await writer.close();
       } catch (error) {
         console.error('❌ [API] Evaluation error:', error);
+
+        // Mark evaluation as failed
+        if (evaluationId) {
+          await supabase
+            .from('evaluations')
+            .update({
+              status: 'failed',
+              completed_at: new Date().toISOString(),
+            })
+            .eq('id', evaluationId);
+
+          console.log(`❌ [DB] Marked evaluation ${evaluationId} as failed`);
+        }
+
         await writer.write(
           encoder.encode(
             `data: ${JSON.stringify({

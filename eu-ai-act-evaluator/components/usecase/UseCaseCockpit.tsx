@@ -74,6 +74,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   // Running evaluations (inline cockpit mode)
   const [runningEvaluations, setRunningEvaluations] = useState<Set<string>>(new Set());
   const [evaluationProgress, setEvaluationProgress] = useState<Map<string, { current: number, total: number }>>(new Map());
+  const [evaluationBundles, setEvaluationBundles] = useState<Map<string, any>>(new Map()); // Cache bundles to avoid repeated fetches
 
   // Load PN catalog
   useEffect(() => {
@@ -350,6 +351,9 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const startPollingEvaluation = (evaluationId: string) => {
     console.log(`🔄 [Polling] Starting poll for evaluation ${evaluationId}`);
 
+    // Pre-load bundle once and cache it
+    let bundleCache: any = null;
+
     const pollInterval = setInterval(async () => {
       try {
         // Fetch evaluation status
@@ -364,7 +368,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
         console.log(`🔄 [Polling] Evaluation ${evaluationId} status: ${evaluation.status}`);
 
-        // Calculate progress from evaluation_results (since API doesn't update progress_current/total)
+        // Calculate progress from evaluation_results (API now writes to DB!)
         const { data: results, error: resultsError } = await supabase
           .from('evaluation_results')
           .select('node_id')
@@ -373,17 +377,22 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         if (!resultsError && results) {
           const pnIds = evaluation.pn_ids as string[];
 
-          // Load PN bundle to count total primitives (WITH EXPANSION)
-          const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnIds.join(','))}`);
-          if (bundleRes.ok) {
-            const bundle = await bundleRes.json();
+          // Load bundle ONCE and cache (avoid fetching 100+ times)
+          if (!bundleCache) {
+            const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnIds.join(','))}`);
+            if (bundleRes.ok) {
+              bundleCache = await bundleRes.json();
+              console.log(`📦 [Polling] Cached bundle for evaluation ${evaluationId}`);
+            }
+          }
 
+          if (bundleCache) {
             // Count total primitive nodes across all PNs (AFTER expanding shared requirements)
             let totalPrimitives = 0;
-            for (const pnData of bundle.pns) {
+            for (const pnData of bundleCache.pns) {
               if (pnData?.requirements?.nodes) {
                 // Expand shared requirements BEFORE counting (same as buildPNStatusMapOptimized)
-                const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, bundle.sharedPrimitives || []);
+                const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, bundleCache.sharedPrimitives || []);
                 const primitives = expandedNodes.filter((n: any) => n.kind === 'primitive');
                 totalPrimitives += primitives.length;
               }
@@ -391,7 +400,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
             const completedCount = results.length;
 
-            console.log(`📊 [Polling] Progress: ${completedCount}/${totalPrimitives} (expanded nodes)`);
+            console.log(`📊 [Polling] Progress: ${completedCount}/${totalPrimitives} (${results.length} results in DB)`);
 
             setEvaluationProgress(prev => {
               const newMap = new Map(prev);
