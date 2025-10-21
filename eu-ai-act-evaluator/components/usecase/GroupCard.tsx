@@ -32,17 +32,31 @@ interface Group {
   members: string[];
 }
 
+interface SharedPrimitive {
+  id: string;
+  title?: string;
+  path: string;
+}
+
 interface GroupCardProps {
   group: Group;
   pnStatuses: PNStatus[];
+  sharedPrimitives: SharedPrimitive[];
   onEvaluateGroup: (groupId: string, pnIds: string[]) => void;
   onEvaluatePN: (pnId: string) => void;
   onViewPN: (pnId: string, evaluationId?: string) => void;
 }
 
+// Helper function to resolve gate label
+function resolveGateLabel(gateRef: string, sharedPrimitives: SharedPrimitive[]): string {
+  const primitive = sharedPrimitives.find(sp => sp.id === gateRef);
+  return primitive?.title || gateRef;
+}
+
 export function GroupCard({
   group,
   pnStatuses,
+  sharedPrimitives,
   onEvaluateGroup,
   onEvaluatePN,
   onViewPN
@@ -161,11 +175,25 @@ export function GroupCard({
                   Shared Applicability Gates ({group.shared_gates.length})
                 </h4>
                 <div className="text-xs text-neutral-600 space-y-1">
-                  {group.shared_gates.map((gate, idx) => (
-                    <div key={idx} className="font-mono">
-                      {gate.startsWith('!') ? '✗ NOT ' : '✓ '}{gate.replace('!', '')}
-                    </div>
-                  ))}
+                  {group.shared_gates.map((gate, idx) => {
+                    const isNegated = gate.startsWith('!');
+                    const gateRef = gate.replace('!', '');
+                    const gateLabel = resolveGateLabel(gateRef, sharedPrimitives);
+
+                    return (
+                      <div key={idx} className="flex items-start gap-2">
+                        <span className="flex-shrink-0 font-semibold">
+                          {isNegated ? '✗ NOT' : '✓'}
+                        </span>
+                        <div>
+                          <div className="font-medium">{gateLabel}</div>
+                          {gateLabel !== gateRef && (
+                            <div className="text-neutral-400 font-mono text-[10px]">{gateRef}</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
                 <p className="text-xs text-neutral-500 mt-2">
                   These conditions are evaluated once and reused across all {totalObligations} obligations

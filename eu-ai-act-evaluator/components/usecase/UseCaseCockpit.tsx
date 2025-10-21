@@ -58,6 +58,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [groups, setGroups] = useState<Group[]>([]);
   const [availablePNs, setAvailablePNs] = useState<any[]>([]);
   const [ungroupedPNs, setUngroupedPNs] = useState<any[]>([]);
+  const [sharedPrimitives, setSharedPrimitives] = useState<any[]>([]);
   const [pnStatuses, setPNStatuses] = useState<PNStatus[]>([]);
   const [selectedPNs, setSelectedPNs] = useState<string[]>([]);
   const [triggering, setTriggering] = useState(false);
@@ -86,6 +87,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
           setGroups(data.groups || []);
           setAvailablePNs(data.all_pns || data.prescriptive_norms || []);
           setUngroupedPNs(data.ungrouped_pns || []);
+          setSharedPrimitives(data.shared_primitives || []);
         }
       } catch (e) {
         console.warn('[Catalog] Failed to load PN catalog');
@@ -493,6 +495,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                   key={group.id}
                   group={group}
                   pnStatuses={pnStatuses}
+                  sharedPrimitives={sharedPrimitives}
                   onEvaluateGroup={handleEvaluateGroup}
                   onEvaluatePN={(pnId) => {
                     setSelectedPNs([pnId]);
