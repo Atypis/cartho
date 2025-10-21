@@ -251,6 +251,10 @@ export default function Home() {
     try {
       console.log(`🚀 [Run] Starting evaluation ${evaluationId}...`);
 
+      // Navigate to evaluation view and set it as selected
+      setSelectedEvaluationId(evaluationId);
+      setCanvasView('evaluation');
+
       // Add to running set
       setRunningEvaluations(prev => new Set(prev).add(evaluationId));
       setEvaluationStatesMap(prev => new Map(prev).set(evaluationId, []));
@@ -271,14 +275,45 @@ export default function Home() {
       const pnDataList: PrescriptiveNorm[] = bundle.pns || [];
       const sharedPrimitives: SharedPrimitive[] = bundle.sharedPrimitives || [];
 
-      // Count total PRIMITIVE nodes for progress
+      // Build nodes array and count PRIMITIVE nodes for progress
+      const allNodes: any[] = [];
+      let rootId = '';
       let totalNodeCount = 0;
+
+      if (pnIds.length === 1 && pnDataList[0]) {
+        rootId = pnDataList[0].requirements.root;
+      }
+
       for (const pnData of pnDataList) {
         const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
+        allNodes.push(...expandedNodes);
         totalNodeCount += expandedNodes.filter(n => n.kind === 'primitive').length;
       }
+
       setTotalNodesMap(prev => new Map(prev).set(evaluationId, totalNodeCount));
       console.log(`📊 Total primitive nodes to evaluate: ${totalNodeCount}`);
+
+      // Load evaluation metadata
+      const { data: evaluation, error: evalError } = await supabase
+        .from('evaluations')
+        .select('*')
+        .eq('id', evaluationId)
+        .single();
+
+      if (evalError) {
+        console.error('❌ [Run] Error loading evaluation:', evalError);
+        throw new Error('Failed to load evaluation metadata');
+      }
+
+      // Set up evaluation data structure for display (with empty states initially)
+      setEvaluationData({
+        evaluation,
+        nodes: allNodes,
+        rootId,
+        evaluationStates: [],
+      } as any);
+
+      console.log(`📊 [Run] Evaluation view initialized with ${allNodes.length} nodes`);
 
       // Start SSE stream
       const response = await fetch('/api/evaluate', {
@@ -326,16 +361,31 @@ export default function Home() {
               });
             } else if (data.type === 'complete') {
               console.log('✅ [Evaluation] Complete! Saving results...');
+              console.log(`📊 [Save] Total states received: ${data.result.states.length}`);
 
               // Save results to Supabase
-              await supabase.from('evaluations').update({
+              const { error: updateError } = await supabase.from('evaluations').update({
                 status: 'completed',
                 completed_at: new Date().toISOString()
               }).eq('id', evaluationId);
 
+              if (updateError) {
+                console.error('❌ [Save] Error updating evaluation status:', updateError);
+              } else {
+                console.log('✅ [Save] Evaluation status updated to completed');
+              }
+
+              let savedCount = 0;
+              let skippedCount = 0;
+
               for (const state of data.result.states) {
                 if (state.result) {
-                  await supabase.from('evaluation_results').insert({
+                  console.log(`💾 [Save] Inserting result for node: ${state.nodeId}`, {
+                    decision: state.result.decision,
+                    confidence: state.result.confidence
+                  });
+
+                  const { error: insertError } = await supabase.from('evaluation_results').insert({
                     evaluation_id: evaluationId,
                     node_id: state.nodeId,
                     decision: state.result.decision,
@@ -343,10 +393,19 @@ export default function Home() {
                     reasoning: state.result.reasoning,
                     citations: state.result.citations || [],
                   });
+
+                  if (insertError) {
+                    console.error(`❌ [Save] Error inserting result for ${state.nodeId}:`, insertError);
+                  } else {
+                    savedCount++;
+                  }
+                } else {
+                  console.warn(`⚠️ [Save] Skipping state ${state.nodeId} - no result`);
+                  skippedCount++;
                 }
               }
 
-              console.log('✅ [Evaluation] Results saved. Removing from running set.');
+              console.log(`✅ [Save] Saved ${savedCount} results, skipped ${skippedCount}`);
               setRunningEvaluations(prev => {
                 const next = new Set(prev);
                 next.delete(evaluationId);
@@ -371,6 +430,20 @@ export default function Home() {
       alert('Evaluation failed: ' + (error as Error).message);
       await supabase.from('evaluations').update({ status: 'failed' }).eq('id', evaluationId);
     }
+  };
+
+  const handleViewEvaluation = (evaluationId: string) => {
+    console.log(`👁️ [View] Navigating to evaluation ${evaluationId}`);
+
+    // Clear old evaluation data first to prevent showing stale data
+    setEvaluationData(null);
+    setSelectedNodeId(null);
+
+    // Set the new evaluation ID and switch view
+    setSelectedEvaluationId(evaluationId);
+    setCanvasView('evaluation');
+
+    // loadEvaluationResults will be called automatically by the useEffect
   };
 
   // Get breadcrumb items based on current view
@@ -497,7 +570,16 @@ export default function Home() {
                   {/* Back button from evaluation */}
                   <button
                     onClick={() => {
-                      setCanvasView('welcome');
+                      // If evaluation has a use_case_id, return to that use case's cockpit
+                      const useCaseId = (evaluationData as any)?.evaluation?.use_case_id;
+                      if (useCaseId) {
+                        console.log(`🔙 [Nav] Returning to use case cockpit: ${useCaseId}`);
+                        setSelectedUseCaseId(useCaseId);
+                        setCanvasView('usecase-cockpit');
+                      } else {
+                        console.log(`🔙 [Nav] Returning to welcome screen`);
+                        setCanvasView('welcome');
+                      }
                       setSelectedEvaluationId(null);
                       setEvaluationData(null);
                     }}
@@ -517,6 +599,8 @@ export default function Home() {
                     onClick={() => {
                       setCanvasView('welcome');
                       setSelectedUseCaseId(null);
+                      setEvaluationData(null);
+                      setSelectedEvaluationId(null);
                     }}
                     className="text-sm px-3 py-1.5 text-neutral-600 hover:text-neutral-900 transition-colors flex items-center gap-2"
                   >
@@ -621,45 +705,60 @@ export default function Home() {
           </div>
         )}
 
-        {canvasView === 'evaluation' && evaluationData && (
+        {canvasView === 'evaluation' && (
           <>
-            {/* Evaluation Header */}
-            <div className="bg-white border-b border-neutral-200 px-8 py-4 flex items-center gap-4">
-              <h2 className="text-lg font-semibold text-neutral-900">
-                {(evaluationData as any).evaluation?.pn_ids?.join(', ')}
-              </h2>
-              <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                (evaluationData as any).evaluation?.status === 'completed'
-                  ? 'bg-green-100 text-green-800'
-                  : (evaluationData as any).evaluation?.status === 'running' || isCurrentEvaluationRunning
-                  ? 'bg-blue-100 text-blue-800'
-                  : (evaluationData as any).evaluation?.status === 'failed'
-                  ? 'bg-red-100 text-red-800'
-                  : 'bg-neutral-100 text-neutral-800'
-              }`}>
-                {isCurrentEvaluationRunning
-                  ? 'RUNNING'
-                  : (evaluationData as any).evaluation?.status?.toUpperCase() || 'PENDING'}
-              </div>
-            </div>
+            {evaluationData ? (
+              <>
+                {/* Evaluation Header */}
+                <div className="bg-white border-b border-neutral-200 px-8 py-4 flex items-center gap-4">
+                  <h2 className="text-lg font-semibold text-neutral-900">
+                    {(evaluationData as any).evaluation?.pn_ids?.join(', ')}
+                  </h2>
+                  <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                    (evaluationData as any).evaluation?.status === 'completed'
+                      ? 'bg-green-100 text-green-800'
+                      : (evaluationData as any).evaluation?.status === 'running' || isCurrentEvaluationRunning
+                      ? 'bg-blue-100 text-blue-800'
+                      : (evaluationData as any).evaluation?.status === 'failed'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-neutral-100 text-neutral-800'
+                  }`}>
+                    {isCurrentEvaluationRunning
+                      ? 'RUNNING'
+                      : (evaluationData as any).evaluation?.status?.toUpperCase() || 'PENDING'}
+                  </div>
+                </div>
 
-            {/* Evaluation Content */}
-            <div className="flex-1 overflow-auto p-8">
-              <RequirementsGrid
-                nodes={(evaluationData as any).nodes || []}
-                rootId={(evaluationData as any).rootId || ''}
-                evaluationStates={
-                  currentEvaluationStates.length > 0
-                    ? currentEvaluationStates
-                    : (evaluationData as any).evaluationStates || []
-                }
-                onNodeClick={setSelectedNodeId}
-                selectedNodeId={selectedNodeId}
-                isRunning={isCurrentEvaluationRunning}
-                totalNodes={currentTotalNodes}
-                evaluationStatus={(evaluationData as any).evaluation?.status}
-              />
-            </div>
+                {/* Evaluation Content */}
+                <div className="flex-1 overflow-auto p-8">
+                  <RequirementsGrid
+                    nodes={(evaluationData as any).nodes || []}
+                    rootId={(evaluationData as any).rootId || ''}
+                    evaluationStates={
+                      currentEvaluationStates.length > 0
+                        ? currentEvaluationStates
+                        : (evaluationData as any).evaluationStates || []
+                    }
+                    onNodeClick={setSelectedNodeId}
+                    selectedNodeId={selectedNodeId}
+                    isRunning={isCurrentEvaluationRunning}
+                    totalNodes={currentTotalNodes}
+                    evaluationStatus={(evaluationData as any).evaluation?.status}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="text-lg font-semibold text-neutral-900 mb-2">
+                    Loading evaluation...
+                  </div>
+                  <div className="text-sm text-neutral-500">
+                    Please wait while we load the evaluation data
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
 
@@ -667,6 +766,7 @@ export default function Home() {
           <UseCaseCockpit
             useCaseId={selectedUseCaseId}
             onTriggerEvaluation={runEvaluation}
+            onViewEvaluation={handleViewEvaluation}
           />
         )}
       </div>

@@ -36,9 +36,10 @@ interface PNStatus {
 interface UseCaseCockpitProps {
   useCaseId: string;
   onTriggerEvaluation: (evaluationId: string, useCaseId: string, pnIds: string[]) => void;
+  onViewEvaluation: (evaluationId: string) => void;
 }
 
-export function UseCaseCockpit({ useCaseId, onTriggerEvaluation }: UseCaseCockpitProps) {
+export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluation }: UseCaseCockpitProps) {
   const [useCase, setUseCase] = useState<UseCase | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -75,6 +76,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation }: UseCaseCockpi
 
   // Load use case and evaluations
   useEffect(() => {
+    console.log(`🏗️ [Cockpit] Component mounted/updated for use case: ${useCaseId}, availablePNs: ${availablePNs.length}`);
     if (!useCaseId) return;
     loadUseCaseAndEvaluations();
 
@@ -82,23 +84,29 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation }: UseCaseCockpi
     const subscription = supabase
       .channel(`usecase_cockpit_${useCaseId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'evaluations', filter: `use_case_id=eq.${useCaseId}` }, () => {
-        console.log('[Cockpit] Evaluation changed, reloading...');
+        console.log('🔄 [Cockpit] Evaluation changed, reloading...');
         loadUseCaseAndEvaluations();
       })
       .subscribe();
 
     return () => {
+      console.log(`🧹 [Cockpit] Cleanup for use case: ${useCaseId}`);
       subscription.unsubscribe();
     };
   }, [useCaseId, availablePNs.length]); // Add availablePNs.length to re-trigger when catalog loads
 
   const loadUseCaseAndEvaluations = async () => {
+    console.log(`📂 [Cockpit] loadUseCaseAndEvaluations called for use case: ${useCaseId}`);
+    console.log(`📂 [Cockpit] Available PNs count: ${availablePNs.length}`);
+
     if (availablePNs.length === 0) {
+      console.log('⚠️ [Cockpit] Waiting for PN catalog to load...');
       // Wait for catalog to load
       return;
     }
 
     setLoading(true);
+    console.log(`🔄 [Cockpit] Loading use case data...`);
 
     // Load use case
     const { data: useCaseData, error: ucError } = await supabase
@@ -121,15 +129,21 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation }: UseCaseCockpi
       .eq('use_case_id', useCaseId)
       .order('triggered_at', { ascending: false });
 
+    console.log(`📊 [Cockpit] Loaded ${evaluations?.length || 0} evaluations for use case`);
+
     setEvaluationHistory(evaluations || []);
 
     // Build PN status map (OPTIMIZED)
+    console.log(`🔨 [Cockpit] About to call buildPNStatusMapOptimized...`);
     await buildPNStatusMapOptimized(evaluations || []);
+    console.log(`✅ [Cockpit] buildPNStatusMapOptimized completed`);
     setLoading(false);
   };
 
   const buildPNStatusMapOptimized = async (evaluations: Evaluation[]) => {
     const statusMap = new Map<string, PNStatus>();
+
+    console.log(`🔍 [Cockpit] Building PN status map from ${evaluations.length} evaluations`);
 
     // Initialize all available PNs as pending
     for (const pn of availablePNs) {
@@ -143,9 +157,11 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation }: UseCaseCockpi
 
     // Process only completed evaluations
     const completedEvaluations = evaluations.filter(e => e.status === 'completed');
+    console.log(`✅ [Cockpit] Found ${completedEvaluations.length} completed evaluations`);
 
     for (const evaluation of completedEvaluations) {
       const pnIds = evaluation.pn_ids as string[];
+      console.log(`📊 [Cockpit] Processing evaluation ${evaluation.id} for PNs: ${pnIds.join(', ')}`);
 
       // Load all results for this evaluation at once
       const { data: results, error: resultsError } = await supabase
@@ -153,8 +169,13 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation }: UseCaseCockpi
         .select('*')
         .eq('evaluation_id', evaluation.id);
 
+      console.log(`📦 [Cockpit] Loaded ${results?.length || 0} results for evaluation ${evaluation.id}`);
+      if (results && results.length > 0) {
+        console.log(`📝 [Cockpit] Sample result node_ids:`, results.slice(0, 3).map((r: any) => r.node_id));
+      }
+
       if (resultsError || !results || results.length === 0) {
-        console.warn(`[Cockpit] No results for evaluation ${evaluation.id}`);
+        console.warn(`⚠️ [Cockpit] No results for evaluation ${evaluation.id}`);
         continue;
       }
 
@@ -182,22 +203,33 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation }: UseCaseCockpi
 
           const rootId = pnData.requirements.root;
           const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
+          const rootNode = expandedNodes.find((n: any) => n.id === rootId);
+
+          console.log(`🌳 [Cockpit] PN ${pnId}: rootId=${rootId}, rootNode.kind=${rootNode?.kind}`);
+          console.log(`🔎 [Cockpit] Looking for result with node_id=${rootId}`);
 
           // Find root node result
           const rootResult = results.find((r: any) => r.node_id === rootId);
 
+          console.log(`${rootResult ? '✅' : '❌'} [Cockpit] Root result ${rootResult ? 'FOUND' : 'NOT FOUND'} for ${pnId}`);
+
           if (rootResult) {
+            console.log(`📊 [Cockpit] Root decision for ${pnId}: ${rootResult.decision}`);
+
             const primitiveCount = expandedNodes.filter((n: any) => n.kind === 'primitive').length;
             const completedCount = results.filter((r: any) => {
               const node = expandedNodes.find((n: any) => n.id === r.node_id);
               return node?.kind === 'primitive';
             }).length;
 
+            const status = rootResult.decision ? 'applies' : 'not-applicable';
+            console.log(`🎯 [Cockpit] Setting ${pnId} status to: ${status}`);
+
             statusMap.set(pnId, {
               pnId,
               article: availablePNs.find(p => p.id === pnId)?.article || pnId.replace('PN-', ''),
               title: availablePNs.find(p => p.id === pnId)?.title || pnId,
-              status: rootResult.decision ? 'applies' : 'not-applicable',
+              status,
               evaluationId: evaluation.id,
               evaluatedAt: evaluation.triggered_at,
               rootDecision: rootResult.decision,
@@ -205,7 +237,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation }: UseCaseCockpi
               progressTotal: primitiveCount
             });
           } else {
-            console.warn(`[Cockpit] No root result for ${pnId} (root: ${rootId})`);
+            console.warn(`⚠️ [Cockpit] No root result for ${pnId} (root: ${rootId})`);
+            console.warn(`⚠️ [Cockpit] Available node_ids in results:`, results.map((r: any) => r.node_id).join(', '));
           }
         }
       } catch (error) {
@@ -486,9 +519,10 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation }: UseCaseCockpi
               <div className="border-t border-neutral-200 p-6">
                 <div className="space-y-2">
                   {evaluationHistory.map((evaluation) => (
-                    <div
+                    <button
                       key={evaluation.id}
-                      className="flex items-center justify-between p-3 rounded border border-neutral-200 hover:border-neutral-900 transition-colors"
+                      onClick={() => onViewEvaluation(evaluation.id)}
+                      className="w-full flex items-center justify-between p-3 rounded border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 transition-colors text-left"
                     >
                       <div className="flex-1">
                         <div className="text-sm font-medium text-neutral-900">
@@ -515,7 +549,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation }: UseCaseCockpi
                       }`}>
                         {evaluation.status.toUpperCase()}
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
