@@ -7,19 +7,24 @@
  * - ungrouped_pns: PNs that don't belong to any group
  * - all_pns: All PNs (for backward compatibility)
  */
-import { NextRequest } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
 
-export async function GET(_req: NextRequest) {
+interface PrescriptiveNorm {
+  id: string;
+  group_id?: string;
+  [key: string]: unknown;
+}
+
+export async function GET() {
   try {
     const indexPath = path.join(process.cwd(), '..', 'eu-ai-act-cartography', 'prescriptive-norms', 'PN-INDEX.json');
     const rawData = await readFile(indexPath, 'utf-8');
     const index = JSON.parse(rawData);
 
     // Separate grouped and ungrouped PNs
-    const grouped_pns = index.prescriptive_norms.filter((pn: any) => pn.group_id);
-    const ungrouped_pns = index.prescriptive_norms.filter((pn: any) => !pn.group_id);
+    const grouped_pns = index.prescriptive_norms.filter((pn: PrescriptiveNorm) => pn.group_id);
+    const ungrouped_pns = index.prescriptive_norms.filter((pn: PrescriptiveNorm) => !pn.group_id);
 
     // Enhanced response with grouping information
     const response = {
