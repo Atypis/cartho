@@ -162,7 +162,10 @@ async function main() {
   const pnFiles = listFiles(PN_DIR, (f) => f.endsWith('.json'))
     .filter((p) => !p.includes('/schema/'))
     .filter((p) => !p.endsWith('/PN-INDEX.json'))
-    .filter((p) => !p.includes('/examples/'));
+    .filter((p) => !p.endsWith('/groups.json'))
+    .filter((p) => !p.includes('/examples/'))
+    // Only validate PN files (convention: start with PN-)
+    .filter((p) => path.basename(p).startsWith('PN-'));
 
   console.log(`\n🔎 Validating prescriptive norms (${pnFiles.length})`);
   for (const fp of pnFiles) {

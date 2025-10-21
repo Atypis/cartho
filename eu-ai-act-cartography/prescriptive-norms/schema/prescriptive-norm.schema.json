@@ -5,6 +5,14 @@
   "type": "object",
   "required": ["id", "title", "type", "legal_consequence", "article_refs", "requirements"],
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "Optional grouping identifier (e.g., HR-PROV-CORE, HR-SYS-REQS)"
+    },
+    "group_order": {
+      "type": ["integer", "number"],
+      "description": "Optional display order within group"
+    },
     "id": {
       "type": "string",
       "description": "Stable PN identifier (e.g., PN-16C)",

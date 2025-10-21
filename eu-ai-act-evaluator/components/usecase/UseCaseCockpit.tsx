@@ -364,16 +364,44 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
         console.log(`🔄 [Polling] Evaluation ${evaluationId} status: ${evaluation.status}`);
 
-        // Update progress if available
-        if (evaluation.progress_current !== null && evaluation.progress_total !== null) {
-          setEvaluationProgress(prev => {
-            const newMap = new Map(prev);
-            newMap.set(evaluationId, {
-              current: evaluation.progress_current!,
-              total: evaluation.progress_total!
+        // Calculate progress from evaluation_results (since API doesn't update progress_current/total)
+        const { data: results, error: resultsError } = await supabase
+          .from('evaluation_results')
+          .select('node_id')
+          .eq('evaluation_id', evaluationId);
+
+        if (!resultsError && results) {
+          const pnIds = evaluation.pn_ids as string[];
+
+          // Load PN bundle to count total primitives (WITH EXPANSION)
+          const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnIds.join(','))}`);
+          if (bundleRes.ok) {
+            const bundle = await bundleRes.json();
+
+            // Count total primitive nodes across all PNs (AFTER expanding shared requirements)
+            let totalPrimitives = 0;
+            for (const pnData of bundle.pns) {
+              if (pnData?.requirements?.nodes) {
+                // Expand shared requirements BEFORE counting (same as buildPNStatusMapOptimized)
+                const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, bundle.sharedPrimitives || []);
+                const primitives = expandedNodes.filter((n: any) => n.kind === 'primitive');
+                totalPrimitives += primitives.length;
+              }
+            }
+
+            const completedCount = results.length;
+
+            console.log(`📊 [Polling] Progress: ${completedCount}/${totalPrimitives} (expanded nodes)`);
+
+            setEvaluationProgress(prev => {
+              const newMap = new Map(prev);
+              newMap.set(evaluationId, {
+                current: completedCount,
+                total: totalPrimitives
+              });
+              return newMap;
             });
-            return newMap;
-          });
+          }
         }
 
         // If completed or failed, stop polling
