@@ -122,25 +122,31 @@ export interface Database {
         Row: {
           id: string;
           evaluation_id: string;
-          pn_id: string;
-          compliant: boolean;
-          states: any; // JSONB array of EvaluationState
+          node_id: string;
+          decision: boolean;
+          confidence: number;
+          reasoning: string;
+          citations: any; // JSONB array
           created_at: string;
         };
         Insert: {
           id?: string;
           evaluation_id: string;
-          pn_id: string;
-          compliant: boolean;
-          states: any;
+          node_id: string;
+          decision: boolean;
+          confidence: number;
+          reasoning: string;
+          citations?: any;
           created_at?: string;
         };
         Update: {
           id?: string;
           evaluation_id?: string;
-          pn_id?: string;
-          compliant?: boolean;
-          states?: any;
+          node_id?: string;
+          decision?: boolean;
+          confidence?: number;
+          reasoning?: string;
+          citations?: any;
           created_at?: string;
         };
       };
