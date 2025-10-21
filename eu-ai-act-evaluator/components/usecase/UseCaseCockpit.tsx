@@ -406,6 +406,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   // Run evaluation INLINE (stay on cockpit)
   const runInlineEvaluation = async (pnIds: string[]) => {
     if (pnIds.length === 0) return;
+    if (!useCase) return;
 
     setTriggering(true);
     try {
@@ -425,38 +426,64 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
       console.log(`🚀 [Inline Eval] Starting evaluation ${evaluation.id} for ${pnIds.length} PNs`);
 
-      // Add to running evaluations
+      // Add to running evaluations immediately
       setRunningEvaluations(prev => new Set(prev).add(evaluation.id));
 
-      // Call API to start evaluation
-      const response = await fetch('/api/evaluate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          evaluationId: evaluation.id,
-          useCaseId,
-          pnIds,
-        }),
-      });
+      // Start polling BEFORE triggering API (so we catch it when it starts)
+      startPollingEvaluation(evaluation.id);
 
-      if (!response.ok) {
-        throw new Error(`Evaluation API failed: ${response.statusText}`);
+      // Load PN bundle
+      const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnIds.join(','))}`);
+      if (!bundleRes.ok) {
+        throw new Error('Failed to load PN bundle');
+      }
+      const bundle = await bundleRes.json();
+
+      // Trigger evaluation for each PN
+      for (let i = 0; i < pnIds.length; i++) {
+        const pnId = pnIds[i];
+        const pnData = bundle.pns[i];
+
+        if (!pnData) {
+          console.warn(`⚠️ [Inline Eval] No data for ${pnId}, skipping`);
+          continue;
+        }
+
+        console.log(`🎯 [Inline Eval] Starting evaluation for ${pnId}`);
+
+        // Call API for this PN (don't await - let it run in background)
+        fetch('/api/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prescriptiveNorm: pnData,
+            sharedPrimitives: bundle.sharedPrimitives || [],
+            caseInput: useCase.description,
+            evaluationId: evaluation.id,
+          }),
+        }).catch(error => {
+          console.error(`❌ [Inline Eval] Error evaluating ${pnId}:`, error);
+        });
       }
 
-      console.log(`✅ [Inline Eval] Evaluation ${evaluation.id} started successfully`);
-
-      // Start polling for this evaluation
-      startPollingEvaluation(evaluation.id);
+      console.log(`✅ [Inline Eval] All ${pnIds.length} evaluations triggered`);
 
       // Clear selection
       setSelectedPNs([]);
 
-      // Reload evaluations to update UI
+      // Reload immediately to show "evaluating" status
       await loadUseCaseAndEvaluations();
 
     } catch (error: any) {
       console.error('Failed to run inline evaluation:', error);
       alert(`Failed to start evaluation: ${error?.message || 'Unknown error'}`);
+
+      // Remove from running on error
+      setRunningEvaluations(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(error.evaluationId);
+        return newSet;
+      });
     } finally {
       setTriggering(false);
     }
