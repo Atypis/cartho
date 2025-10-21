@@ -45,6 +45,9 @@ export async function POST(req: NextRequest) {
     const stream = new TransformStream();
     const writer = stream.writable.getWriter();
 
+    // Track which nodes we've already written (prevents duplicates)
+    const writtenNodes = new Set<string>();
+
     // Start evaluation in background
     (async () => {
       try {
@@ -53,22 +56,15 @@ export async function POST(req: NextRequest) {
           prescriptiveNorm as PrescriptiveNorm,
           sharedPrimitives as SharedPrimitive[] || [],
           async (states) => {
-            // Write completed primitive results to database
+            // Write completed primitive results to database (WRITE-ONCE with cache)
             if (evaluationId) {
               const completedStates = states.filter(s => s.status === 'completed' && s.result);
 
               for (const state of completedStates) {
-                // Check if already written
-                const { data: existing } = await supabase
-                  .from('evaluation_results')
-                  .select('id')
-                  .eq('evaluation_id', evaluationId)
-                  .eq('node_id', state.nodeId)
-                  .single();
-
-                if (!existing && state.result) {
+                // Check in-memory cache first (fast, no race conditions)
+                if (!writtenNodes.has(state.nodeId) && state.result) {
                   // Write new result
-                  await supabase
+                  const { error } = await supabase
                     .from('evaluation_results')
                     .insert({
                       evaluation_id: evaluationId,
@@ -79,7 +75,16 @@ export async function POST(req: NextRequest) {
                       citations: state.result.citations || [],
                     });
 
-                  console.log(`💾 [DB] Wrote result for ${state.nodeId}: ${state.result.decision ? 'YES' : 'NO'}`);
+                  if (!error) {
+                    writtenNodes.add(state.nodeId);
+                    console.log(`💾 [DB] Wrote result for ${state.nodeId}: ${state.result.decision ? 'YES' : 'NO'}`);
+                  } else if (error.code === '23505') {
+                    // Unique constraint violation (already exists) - add to cache
+                    writtenNodes.add(state.nodeId);
+                    console.log(`⚠️  [DB] Skipped duplicate for ${state.nodeId}`);
+                  } else {
+                    console.error(`❌ [DB] Error writing ${state.nodeId}:`, error);
+                  }
                 }
               }
             }

@@ -594,16 +594,23 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
   // Load expanded PN data (used by handleExpandPN and live updates)
   const loadExpandedPNData = async (pnId: string, evaluationId: string) => {
+    console.log(`📂 [ExpandedData] Loading data for ${pnId}, evaluation ${evaluationId}`);
+
     const { data: evaluation } = await supabase
       .from('evaluations')
       .select('*')
       .eq('id', evaluationId)
       .single();
 
-    const { data: results } = await supabase
+    const { data: results, error: resultsError } = await supabase
       .from('evaluation_results')
       .select('*')
       .eq('evaluation_id', evaluationId);
+
+    console.log(`📊 [ExpandedData] Query results: ${results?.length || 0} rows, error:`, resultsError);
+    if (results && results.length > 0) {
+      console.log(`📝 [ExpandedData] Sample node IDs:`, results.slice(0, 3).map(r => r.node_id));
+    }
 
     const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnId)}`);
     const bundle = await bundleRes.json();
@@ -611,6 +618,10 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     const sharedPrimitives = bundle.sharedPrimitives || [];
 
     const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
+    const primitiveNodes = expandedNodes.filter(n => n.kind === 'primitive');
+
+    console.log(`🌳 [ExpandedData] Tree has ${primitiveNodes.length} primitives`);
+    console.log(`🔍 [ExpandedData] Primitive node IDs:`, primitiveNodes.slice(0, 3).map(n => n.id));
 
     // Map results to evaluation states with proper status
     const evaluationStates: EvaluationState[] = (results || []).map((result: any) => ({
@@ -625,11 +636,13 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       },
     }));
 
+    console.log(`✅ [ExpandedData] Created ${evaluationStates.length} completed states`);
+
     // Mark nodes without results as pending
     const resultNodeIds = new Set((results || []).map((r: any) => r.node_id));
-    const primitiveNodes = expandedNodes.filter(n => n.kind === 'primitive');
+    const primitiveNodes_filtered = primitiveNodes;
 
-    for (const node of primitiveNodes) {
+    for (const node of primitiveNodes_filtered) {
       if (!resultNodeIds.has(node.id)) {
         evaluationStates.push({
           nodeId: node.id,
@@ -637,6 +650,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         });
       }
     }
+
+    console.log(`📋 [ExpandedData] Final states: ${evaluationStates.filter(s => s.status === 'completed').length} completed, ${evaluationStates.filter(s => s.status === 'pending').length} pending`);
 
     setExpandedPNData({
       evaluation,
