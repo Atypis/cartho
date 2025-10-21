@@ -545,16 +545,28 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     console.log(`[Cockpit] Expanding ${pnId}...`);
 
     // Load full evaluation data
+    await loadExpandedPNData(pnId, pnStatus.evaluationId);
+    setExpandedPNId(pnId);
+
+    // If running, start polling for live updates
+    if (pnStatus.status === 'evaluating' || runningEvaluations.has(pnStatus.evaluationId)) {
+      console.log(`🔄 [Live Updates] Starting live polling for ${pnId}`);
+      startLiveUpdates(pnId, pnStatus.evaluationId);
+    }
+  };
+
+  // Load expanded PN data (used by handleExpandPN and live updates)
+  const loadExpandedPNData = async (pnId: string, evaluationId: string) => {
     const { data: evaluation } = await supabase
       .from('evaluations')
       .select('*')
-      .eq('id', pnStatus.evaluationId)
+      .eq('id', evaluationId)
       .single();
 
     const { data: results } = await supabase
       .from('evaluation_results')
       .select('*')
-      .eq('evaluation_id', pnStatus.evaluationId);
+      .eq('evaluation_id', evaluationId);
 
     const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnId)}`);
     const bundle = await bundleRes.json();
@@ -562,6 +574,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     const sharedPrimitives = bundle.sharedPrimitives || [];
 
     const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
+
+    // Map results to evaluation states with proper status
     const evaluationStates: EvaluationState[] = (results || []).map((result: any) => ({
       nodeId: result.node_id,
       status: 'completed' as const,
@@ -574,20 +588,56 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       },
     }));
 
+    // Mark nodes without results as pending
+    const resultNodeIds = new Set((results || []).map((r: any) => r.node_id));
+    const primitiveNodes = expandedNodes.filter(n => n.kind === 'primitive');
+
+    for (const node of primitiveNodes) {
+      if (!resultNodeIds.has(node.id)) {
+        evaluationStates.push({
+          nodeId: node.id,
+          status: 'pending' as const,
+        });
+      }
+    }
+
     setExpandedPNData({
       evaluation,
       nodes: expandedNodes,
       rootId: pnData.requirements.root,
       evaluationStates,
     });
-    setExpandedPNId(pnId);
-    console.log(`[Cockpit] Expanded ${pnId} successfully`);
+  };
+
+  // Start live updates for running evaluation
+  const startLiveUpdates = (pnId: string, evaluationId: string) => {
+    const pollInterval = setInterval(async () => {
+      // Check if still expanded
+      if (expandedPNId !== pnId) {
+        clearInterval(pollInterval);
+        return;
+      }
+
+      // Check if still running
+      const pnStatus = pnStatuses.find(p => p.pnId === pnId);
+      if (!pnStatus || pnStatus.status !== 'evaluating') {
+        console.log(`✅ [Live Updates] Stopping polling for ${pnId} - completed`);
+        clearInterval(pollInterval);
+        return;
+      }
+
+      // Reload the expanded data
+      await loadExpandedPNData(pnId, evaluationId);
+    }, 1000); // Poll every second
+
+    return () => clearInterval(pollInterval);
   };
 
   // Calculate PN statuses
   const appliesPNs = pnStatuses.filter(p => p.status === 'applies');
   const notApplicablePNs = pnStatuses.filter(p => p.status === 'not-applicable');
-  const pendingPNs = pnStatuses.filter(p => p.status === 'pending' || p.status === 'evaluating');
+  const pendingPNs = pnStatuses.filter(p => p.status === 'pending'); // ONLY pending, not evaluating
+  const evaluatingPNs = pnStatuses.filter(p => p.status === 'evaluating');
 
   // Categorize groups and PNs by status
   const groupedPNIds = new Set(groups.flatMap(g => g.members));
@@ -800,28 +850,45 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                         const isExpanded = expandedPNId === pnId;
 
                         return (
-                          <button
-                            key={pnId}
-                            onClick={() => handleExpandPN(pnId)}
-                            className="w-full text-left px-3 py-2 bg-white/50 hover:bg-white rounded border border-blue-200 hover:border-blue-300 transition-colors flex items-center gap-2"
-                          >
-                            <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-                            <div className="text-xs font-mono font-semibold text-blue-900">{pnId}</div>
-                            <div className="text-[10px] text-blue-600 flex-1">{pnStatus?.title || 'Evaluating...'}</div>
-                            {pnStatus?.progressCurrent !== undefined && pnStatus.progressTotal && (
-                              <div className="text-xs text-blue-700 font-medium">
-                                {pnStatus.progressCurrent}/{pnStatus.progressTotal}
+                          <div key={pnId}>
+                            <button
+                              onClick={() => handleExpandPN(pnId)}
+                              className="w-full text-left px-3 py-2 bg-white/50 hover:bg-white rounded border border-blue-200 hover:border-blue-300 transition-colors flex items-center gap-2"
+                            >
+                              <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                              <div className="text-xs font-mono font-semibold text-blue-900">{pnId}</div>
+                              <div className="text-[10px] text-blue-600 flex-1">{pnStatus?.title || 'Evaluating...'}</div>
+                              {pnStatus?.progressCurrent !== undefined && pnStatus.progressTotal && (
+                                <div className="text-xs text-blue-700 font-medium">
+                                  {pnStatus.progressCurrent}/{pnStatus.progressTotal}
+                                </div>
+                              )}
+                              <svg
+                                className={`w-3.5 h-3.5 text-blue-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+
+                            {/* Inline TREEMAXX expansion for running evaluation */}
+                            {isExpanded && expandedPNData && (
+                              <div className="mt-2 bg-white rounded border border-blue-300 px-4 py-3">
+                                <RequirementsGrid
+                                  nodes={expandedPNData.nodes || []}
+                                  rootId={expandedPNData.rootId || ''}
+                                  evaluationStates={expandedPNData.evaluationStates || []}
+                                  onNodeClick={() => {}}
+                                  selectedNodeId={null}
+                                  isRunning={true}
+                                  totalNodes={expandedPNData.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
+                                  evaluationStatus={expandedPNData.evaluation?.status || 'running'}
+                                />
                               </div>
                             )}
-                            <svg
-                              className={`w-3.5 h-3.5 text-blue-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </button>
+                          </div>
                         );
                       })}
                     </div>
