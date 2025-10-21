@@ -26,7 +26,7 @@ interface PNStatus {
   pnId: string;
   article: string;
   title: string;
-  status: 'applies' | 'not-applicable' | 'pending';
+  status: 'applies' | 'not-applicable' | 'pending' | 'evaluating';
   evaluationId?: string;
   evaluatedAt?: string;
   rootDecision?: boolean;
@@ -70,6 +70,10 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   // Evaluation history
   const [showHistory, setShowHistory] = useState(false);
   const [evaluationHistory, setEvaluationHistory] = useState<Evaluation[]>([]);
+
+  // Running evaluations (inline cockpit mode)
+  const [runningEvaluations, setRunningEvaluations] = useState<Set<string>>(new Set());
+  const [evaluationProgress, setEvaluationProgress] = useState<Map<string, { current: number, total: number }>>(new Map());
 
   // Load PN catalog
   useEffect(() => {
@@ -176,6 +180,31 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         title: pn.title || pn.id,
         status: 'pending'
       });
+    }
+
+    // First, mark PNs in running evaluations as "evaluating"
+    const runningEvals = evaluations.filter(e => e.status === 'running');
+    console.log(`⟳ [Cockpit] Found ${runningEvals.length} running evaluations`);
+
+    for (const evaluation of runningEvals) {
+      const pnIds = evaluation.pn_ids as string[];
+      const progress = evaluationProgress.get(evaluation.id);
+
+      for (const pnId of pnIds) {
+        const existing = statusMap.get(pnId);
+        if (existing) {
+          statusMap.set(pnId, {
+            ...existing,
+            status: 'evaluating' as any, // Add 'evaluating' to status type
+            evaluationId: evaluation.id,
+            progressCurrent: progress?.current,
+            progressTotal: progress?.total,
+          });
+        }
+      }
+
+      // Add to running evaluations set
+      setRunningEvaluations(prev => new Set(prev).add(evaluation.id));
     }
 
     // Process only completed evaluations
@@ -317,6 +346,122 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     setTimeout(() => triggerEvaluation(), 100);
   };
 
+  // Poll for evaluation progress
+  const startPollingEvaluation = (evaluationId: string) => {
+    console.log(`🔄 [Polling] Starting poll for evaluation ${evaluationId}`);
+
+    const pollInterval = setInterval(async () => {
+      try {
+        // Fetch evaluation status
+        const { data: evaluation, error } = await supabase
+          .from('evaluations')
+          .select('*')
+          .eq('id', evaluationId)
+          .single();
+
+        if (error) throw error;
+        if (!evaluation) return;
+
+        console.log(`🔄 [Polling] Evaluation ${evaluationId} status: ${evaluation.status}`);
+
+        // Update progress if available
+        if (evaluation.progress_current !== null && evaluation.progress_total !== null) {
+          setEvaluationProgress(prev => {
+            const newMap = new Map(prev);
+            newMap.set(evaluationId, {
+              current: evaluation.progress_current!,
+              total: evaluation.progress_total!
+            });
+            return newMap;
+          });
+        }
+
+        // If completed or failed, stop polling
+        if (evaluation.status === 'completed' || evaluation.status === 'failed') {
+          console.log(`✅ [Polling] Evaluation ${evaluationId} finished with status: ${evaluation.status}`);
+          clearInterval(pollInterval);
+          setRunningEvaluations(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(evaluationId);
+            return newSet;
+          });
+          setEvaluationProgress(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(evaluationId);
+            return newMap;
+          });
+
+          // Reload to update UI
+          await loadUseCaseAndEvaluations();
+        }
+      } catch (error) {
+        console.error(`❌ [Polling] Error polling evaluation ${evaluationId}:`, error);
+      }
+    }, 1000); // Poll every second
+
+    // Cleanup on unmount
+    return () => clearInterval(pollInterval);
+  };
+
+  // Run evaluation INLINE (stay on cockpit)
+  const runInlineEvaluation = async (pnIds: string[]) => {
+    if (pnIds.length === 0) return;
+
+    setTriggering(true);
+    try {
+      // Create evaluation record
+      const { data: evaluation, error: evalError } = await supabase
+        .from('evaluations')
+        .insert({
+          use_case_id: useCaseId,
+          pn_ids: pnIds,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (evalError) throw evalError;
+      if (!evaluation) throw new Error('Failed to create evaluation');
+
+      console.log(`🚀 [Inline Eval] Starting evaluation ${evaluation.id} for ${pnIds.length} PNs`);
+
+      // Add to running evaluations
+      setRunningEvaluations(prev => new Set(prev).add(evaluation.id));
+
+      // Call API to start evaluation
+      const response = await fetch('/api/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          evaluationId: evaluation.id,
+          useCaseId,
+          pnIds,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Evaluation API failed: ${response.statusText}`);
+      }
+
+      console.log(`✅ [Inline Eval] Evaluation ${evaluation.id} started successfully`);
+
+      // Start polling for this evaluation
+      startPollingEvaluation(evaluation.id);
+
+      // Clear selection
+      setSelectedPNs([]);
+
+      // Reload evaluations to update UI
+      await loadUseCaseAndEvaluations();
+
+    } catch (error: any) {
+      console.error('Failed to run inline evaluation:', error);
+      alert(`Failed to start evaluation: ${error?.message || 'Unknown error'}`);
+    } finally {
+      setTriggering(false);
+    }
+  };
+
   // Individual PN handlers
   const handleTogglePN = (pnId: string) => {
     setSelectedPNs(prev =>
@@ -328,71 +473,16 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
   const handleEvaluateSelectedPNs = async () => {
     if (selectedPNs.length === 0) return;
-    await triggerEvaluation();
+    await runInlineEvaluation(selectedPNs);
   };
 
   const handleEvaluateAllPendingPNs = async (pnIds: string[]) => {
-    if (pnIds.length === 0) return;
-
-    setTriggering(true);
-    try {
-      const { data, error } = await supabase
-        .from('evaluations')
-        .insert({
-          use_case_id: useCaseId,
-          pn_ids: pnIds,
-          status: 'pending',
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
-        // Trigger evaluation via parent callback
-        onTriggerEvaluation(data.id, useCaseId, pnIds);
-      }
-    } catch (error: any) {
-      console.error('Failed to trigger evaluation:', {
-        raw: error,
-        message: error?.message,
-      });
-      alert(`Failed to trigger evaluation: ${error?.message || 'Unknown error'}`);
-    } finally {
-      setTriggering(false);
-    }
+    await runInlineEvaluation(pnIds);
   };
 
   // Group evaluation handler
   const handleEvaluateGroup = async (groupId: string, pnIds: string[]) => {
-    setTriggering(true);
-    try {
-      const { data, error } = await supabase
-        .from('evaluations')
-        .insert({
-          use_case_id: useCaseId,
-          pn_ids: pnIds,
-          status: 'pending',
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
-        // Trigger evaluation via parent callback
-        onTriggerEvaluation(data.id, useCaseId, pnIds);
-      }
-    } catch (error: any) {
-      console.error('Failed to trigger group evaluation:', {
-        raw: error,
-        stringified: JSON.stringify(error),
-        message: error?.message,
-      });
-      alert(`Failed to trigger group evaluation: ${error?.message || 'Unknown error'}`);
-    } finally {
-      setTriggering(false);
-    }
+    await runInlineEvaluation(pnIds);
   };
 
   // Handler for viewing individual PN from group
@@ -464,7 +554,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   // Calculate PN statuses
   const appliesPNs = pnStatuses.filter(p => p.status === 'applies');
   const notApplicablePNs = pnStatuses.filter(p => p.status === 'not-applicable');
-  const pendingPNs = pnStatuses.filter(p => p.status === 'pending');
+  const pendingPNs = pnStatuses.filter(p => p.status === 'pending' || p.status === 'evaluating');
 
   // Categorize groups and PNs by status
   const groupedPNIds = new Set(groups.flatMap(g => g.members));
@@ -781,6 +871,8 @@ function PNTable({
         {pns.map((pn) => {
           const isExpanded = expandedPNId === pn.pnId;
           const isPending = pn.status === 'pending';
+          const isEvaluating = pn.status === 'evaluating';
+          const isCompleted = pn.status === 'applies' || pn.status === 'not-applicable';
           const isSelected = selectedPNs.includes(pn.pnId);
           const showCheckbox = isPending && onTogglePN;
 
@@ -788,7 +880,7 @@ function PNTable({
             <div key={pn.pnId}>
               {/* Row */}
               <div className="w-full px-4 py-2 flex items-center gap-3 hover:bg-neutral-50 transition-colors">
-                {/* Checkbox for pending PNs */}
+                {/* Checkbox for pending PNs (not evaluating) */}
                 {showCheckbox && (
                   <input
                     type="checkbox"
@@ -799,9 +891,16 @@ function PNTable({
                   />
                 )}
 
-                {/* Clickable area for expansion (evaluated PNs only) */}
+                {/* Running indicator for evaluating PNs */}
+                {isEvaluating && (
+                  <div className="w-3.5 h-3.5 flex-shrink-0">
+                    <div className="w-3.5 h-3.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+
+                {/* Clickable area for expansion */}
                 <button
-                  onClick={() => !isPending && onExpandPN(pn.pnId)}
+                  onClick={() => (isCompleted || isEvaluating) && onExpandPN(pn.pnId)}
                   disabled={isPending}
                   className="flex-1 flex items-center justify-between text-left disabled:cursor-default"
                 >
@@ -828,12 +927,18 @@ function PNTable({
                     )}
 
                     {pn.progressCurrent !== undefined && pn.progressTotal && (
-                      <div className="text-xs text-neutral-600">
-                        {pn.progressCurrent}/{pn.progressTotal}
+                      <div className={`text-xs font-medium ${isEvaluating ? 'text-blue-600' : 'text-neutral-600'}`}>
+                        ⟳ {pn.progressCurrent}/{pn.progressTotal}
                       </div>
                     )}
 
-                    {pn.status !== 'pending' && (
+                    {isEvaluating && (
+                      <div className="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-medium animate-pulse">
+                        Running
+                      </div>
+                    )}
+
+                    {(isCompleted || isEvaluating) && (
                       <svg
                         className={`w-4 h-4 text-neutral-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                         fill="none"
