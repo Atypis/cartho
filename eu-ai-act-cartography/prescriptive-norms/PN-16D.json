@@ -1,0 +1,29 @@
+{
+  "id": "PN-16D",
+  "title": "Provider duty: documentation keeping (Art. 18)",
+  "type": "duty",
+  "article_refs": [
+    { "article": 16, "point": "(d)", "quote": "keep the documentation referred to in Article 18;" },
+    { "article": 18, "quote": "The provider shall, for a period ending 10 years after the high-risk AI system has been placed on the market or put into service, keep at the disposal of the national competent authorities: (a) the technical documentation referred to in Article 11; (b) the documentation concerning the quality management system referred to in Article 17; (c) ..." }
+  ],
+  "legal_consequence": {
+    "verbatim": "Providers of high-risk AI systems shall keep the documentation referred to in Article 18.",
+    "context": { "items": [
+      { "label": "Documentation keeping (Art. 18) — scope", "kind": "definition", "text": "Includes technical documentation (Art. 11), QMS documentation (Art. 17), notified body documents, and EU declaration of conformity (Art. 47) for 10 years (with national rules for bankruptcy/cessation).", "sources": [ { "article": 18 } ] },
+      { "label": "Penalty and enforcement (Article 99)", "kind": "guidance", "text": "Obligation/requirement. Member States enforce with effective, proportionate and dissuasive measures. Administrative fines for non-compliance with obligations (other than Article 5 prohibitions) may be up to EUR 15,000,000 or 3% of worldwide turnover (whichever is higher), with SME caps; case-by-case factors and due process apply.", "sources": [ { "article": 99, "paragraph": 4 }, { "article": 99, "paragraph": 6 }, { "article": 99, "paragraph": 7 }, { "article": 99, "paragraph": 1 }, { "article": 99, "paragraph": 2 }, { "article": 99, "paragraph": 9 }, { "article": 99, "paragraph": 10 }, { "article": 99, "paragraph": 11 } ] }
+    ], "refs": ["cons:penalty_art99_requirements"] }
+  },
+  "side_info": { "effective_from": "2026-08-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4"] },
+    { "id": "R-1.1", "label": "Global scope gate (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2", "sources": [ { "article": 2 } ], "question": { "prompt": "Does Article 2 scope apply (and no exclusion)?", "answer_type": "boolean" } },
+    { "id": "R-1.2", "label": "Actor is provider (Art. 3(2))", "kind": "primitive", "ref": "qp:is_provider", "sources": [ { "article": 3, "paragraph": 2 } ], "question": { "prompt": "Is the actor a provider per Art. 3(2)?", "answer_type": "boolean" } },
+    { "id": "R-1.3", "label": "System is high-risk (Art. 6)", "kind": "primitive", "ref": "qp:is_high_risk", "sources": [ { "article": 6 } ], "question": { "prompt": "Is the AI system high-risk under Art. 6?", "answer_type": "boolean" } },
+    { "id": "R-1.4", "label": "Not product-safety carve-out (Art. 2(2))", "kind": "composite", "operator": "not", "children": ["R-1.4.1"], "sources": [ { "article": 2, "paragraph": 2 } ] },
+    { "id": "R-1.4.1", "label": "Product-safety pathway exclusion applies (Art. 2(2))", "kind": "primitive", "ref": "ex:art2_2_product_safety_pathway", "sources": [ { "article": 2, "paragraph": 2, "quote": "only Article 6(1), Articles 102 to 109 and Article 112 apply" } ], "question": { "prompt": "Is the system high-risk solely via Art. 6(1) and covered by Annex I Section B product legislation (Art. 2(2))?", "answer_type": "boolean" } }
+  ] },
+  "shared_refs": [ "qp:in_scope_art2", "qp:is_provider", "qp:is_high_risk", "ex:art2_2_product_safety_pathway" ],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" },
+  "test_vectors": []
+}
+
