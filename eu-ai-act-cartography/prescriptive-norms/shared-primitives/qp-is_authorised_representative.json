@@ -1,0 +1,23 @@
+{
+  "id": "qp:is_authorised_representative",
+  "title": "Actor is an authorised representative established in the Union",
+  "namespace": "qp",
+  "article_refs": [ { "article": 22 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "Authorised representative (Union-established)",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Is the actor an authorised representative established in the Union for a provider of a high-risk AI system?",
+          "answer_type": "boolean"
+        },
+        "sources": [ { "article": 22, "paragraph": 1 } ]
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" }
+}
+

@@ -1,0 +1,26 @@
+{
+  "id": "PN-27C",
+  "title": "Deployer duty: complement DPIA with FRIA where DPIA already met parts of Article 27",
+  "group_id": "HR-DEPLOYER-FRIA",
+  "group_order": 3,
+  "type": "duty",
+  "article_refs": [ { "article": 27, "paragraph": 4 } ],
+  "legal_consequence": {
+    "verbatim": "If any of the obligations laid down in this Article is already met through the data protection impact assessment conducted pursuant to Article 35 of Regulation (EU) 2016/679 or Article 27 of Directive (EU) 2016/680, the fundamental rights impact assessment referred to in paragraph 1 of this Article shall complement that data protection impact assessment.",
+    "context": { "items": [ { "label": "Template support", "kind": "guidance", "text": "The AI Office will provide a template and may enable automated tooling for the FRIA submission.", "sources": [ { "article": 27, "paragraph": 5 } ] }, { "label": "Penalty (Art. 99)", "kind": "guidance", "text": "Obligation/requirement; fines up to EUR 15,000,000 or 3% turnover may apply.", "sources": [ { "article": 99, "paragraph": 2 } ] } ], "refs": ["cons:penalty_art99_requirements"] }
+  },
+  "side_info": { "effective_from": "2026-08-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1","R-1.2","R-1.3","R-1.4","R-1.5"] },
+    { "id": "R-1.1", "label": "Global scope (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2" },
+    { "id": "R-1.2", "label": "Actor is deployer", "kind": "primitive", "ref": "qp:is_deployer" },
+    { "id": "R-1.3", "label": "System is high-risk", "kind": "primitive", "ref": "qp:is_high_risk" },
+    { "id": "R-1.4", "label": "FRIA applicability holds (Art. 27(1))", "kind": "primitive", "ref": "ex:art27_fria_required" },
+    { "id": "R-1.5", "label": "Not product-safety carve-out", "kind": "composite", "operator": "not", "children": ["R-1.5.1"] },
+    { "id": "R-1.5.1", "label": "Product-safety pathway applies", "kind": "primitive", "ref": "ex:art2_2_product_safety_pathway" }
+  ] },
+  "shared_refs": ["qp:in_scope_art2","qp:is_deployer","qp:is_high_risk","ex:art27_fria_required","ex:art2_2_product_safety_pathway"],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" },
+  "test_vectors": []
+}
+

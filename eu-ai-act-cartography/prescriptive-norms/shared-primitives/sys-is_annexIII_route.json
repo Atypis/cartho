@@ -1,0 +1,23 @@
+{
+  "id": "sys:is_annexIII_route",
+  "title": "High-risk classification via Annex III route (Art. 6(2))",
+  "namespace": "sys",
+  "article_refs": [ { "article": 6, "paragraph": 2 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "System referred to in Annex III (Art. 6(2))",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Is the AI system one referred to in Annex III (classified high-risk under Article 6(2))?",
+          "answer_type": "boolean"
+        },
+        "sources": [ { "article": 6, "paragraph": 2 } ]
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" }
+}
+

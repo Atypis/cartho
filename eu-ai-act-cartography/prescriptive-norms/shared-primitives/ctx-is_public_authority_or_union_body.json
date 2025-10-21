@@ -1,0 +1,24 @@
+{
+  "id": "ctx:is_public_authority_or_union_body",
+  "title": "Deployer is a public authority or a Union institution/body/office/agency",
+  "namespace": "ctx",
+  "article_refs": [ { "article": 26 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "Deployer is a public authority or Union institution/body/office/agency (or acting on its behalf)",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Is the deployer a public authority or a Union institution, body, office or agency, or acting on behalf of one?",
+          "answer_type": "boolean",
+          "help": "Answer yes if the deployer is part of the public sector or a Union institution/body/office/agency, including when acting on its behalf."
+        },
+        "sources": [ { "article": 26, "paragraph": 8 } ]
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" }
+}
+

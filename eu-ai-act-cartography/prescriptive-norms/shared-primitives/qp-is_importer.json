@@ -1,0 +1,23 @@
+{
+  "id": "qp:is_importer",
+  "title": "Actor is an importer of a high-risk AI system",
+  "namespace": "qp",
+  "article_refs": [ { "article": 23 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "Importer role",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Is the actor an importer of a high-risk AI system?",
+          "answer_type": "boolean"
+        },
+        "sources": [ { "article": 23 } ]
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" }
+}
+

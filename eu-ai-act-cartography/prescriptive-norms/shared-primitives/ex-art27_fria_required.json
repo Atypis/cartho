@@ -1,0 +1,34 @@
+{
+  "id": "ex:art27_fria_required",
+  "title": "FRIA required before deployment (Art. 27(1))",
+  "namespace": "ex",
+  "article_refs": [ { "article": 27, "paragraph": 1 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "FRIA obligation applies (Art. 27(1))",
+        "kind": "composite",
+        "operator": "anyOf",
+        "children": ["R-1.1", "R-1.2"]
+      },
+      {
+        "id": "R-1.1",
+        "label": "Public body/PSP using Annex III route (not point 2)",
+        "kind": "composite",
+        "operator": "allOf",
+        "children": ["R-1.1.1", "R-1.1.2", "R-1.1.3"],
+        "sources": [ { "article": 27, "paragraph": 1 } ]
+      },
+      { "id": "R-1.1.1", "label": "Deployer is public authority or Union body OR private entity providing public services", "kind": "composite", "operator": "anyOf", "children": ["R-1.1.1.1", "R-1.1.1.2"], "sources": [ { "article": 27, "paragraph": 1 } ] },
+      { "id": "R-1.1.1.1", "label": "Public authority or Union institution/body/office/agency", "kind": "primitive", "ref": "ctx:is_public_authority_or_union_body", "question": { "prompt": "Is the deployer a public authority or a Union institution/body/office/agency?", "answer_type": "boolean" } },
+      { "id": "R-1.1.1.2", "label": "Private entity providing public services", "kind": "primitive", "ref": "ctx:is_private_entity_providing_public_services", "question": { "prompt": "Is the deployer a private entity providing public services?", "answer_type": "boolean" } },
+      { "id": "R-1.1.2", "label": "System is Annex III route (Art. 6(2))", "kind": "primitive", "ref": "sys:is_annexIII_route", "question": { "prompt": "Is the system referred to in Annex III (Art. 6(2))?", "answer_type": "boolean" }, "sources": [ { "article": 6, "paragraph": 2 } ] },
+      { "id": "R-1.1.3", "label": "NOT Annex III point 2", "kind": "composite", "operator": "not", "children": ["R-1.1.3.1"], "sources": [ { "article": 27, "paragraph": 1 } ] },
+      { "id": "R-1.1.3.1", "label": "Annex III point 2 use area", "kind": "primitive", "ref": "sys:is_annexIII_point_2", "question": { "prompt": "Is the system intended to be used in the area of Annex III point 2?", "answer_type": "boolean" } },
+      { "id": "R-1.2", "label": "Deployers of Annex III 5(b) or 5(c)", "kind": "primitive", "ref": "sys:is_annexIII_5b_or_5c", "question": { "prompt": "Is the system one referred to in Annex III points 5(b) or 5(c)?", "answer_type": "boolean" }, "sources": [ { "article": 27, "paragraph": 1 } ] }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" }
+}

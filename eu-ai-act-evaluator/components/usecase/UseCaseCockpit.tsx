@@ -638,20 +638,25 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
     console.log(`✅ [ExpandedData] Created ${evaluationStates.length} completed states`);
 
-    // Mark nodes without results as pending
+    // Mark nodes without results as 'evaluating' (if running) or 'pending'
     const resultNodeIds = new Set((results || []).map((r: any) => r.node_id));
-    const primitiveNodes_filtered = primitiveNodes;
+    const isRunning = evaluation?.status === 'running';
 
-    for (const node of primitiveNodes_filtered) {
+    for (const node of primitiveNodes) {
       if (!resultNodeIds.has(node.id)) {
         evaluationStates.push({
           nodeId: node.id,
-          status: 'pending' as const,
+          // If evaluation is running and no result yet → node is being evaluated!
+          status: (isRunning ? 'evaluating' : 'pending') as const,
         });
       }
     }
 
-    console.log(`📋 [ExpandedData] Final states: ${evaluationStates.filter(s => s.status === 'completed').length} completed, ${evaluationStates.filter(s => s.status === 'pending').length} pending`);
+    const evaluatingCount = evaluationStates.filter(s => s.status === 'evaluating').length;
+    const completedCount = evaluationStates.filter(s => s.status === 'completed').length;
+    const pendingCount = evaluationStates.filter(s => s.status === 'pending').length;
+
+    console.log(`📋 [ExpandedData] Final states: ${completedCount} completed, ${evaluatingCount} evaluating, ${pendingCount} pending`);
 
     setExpandedPNData({
       evaluation,

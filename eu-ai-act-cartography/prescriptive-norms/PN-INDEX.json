@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2025-10-21T13:13:24.326Z",
+  "generated_at": "2025-10-21T13:41:59.419Z",
   "schema_version": "2025-10-10",
   "groups": [
     {
@@ -50,6 +50,50 @@
         "PN-13",
         "PN-14",
         "PN-15"
+      ]
+    },
+    {
+      "id": "HR-DEPLOYER-CORE",
+      "title": "Article 26: Deployer Duties for High-Risk AI Systems",
+      "article": "26",
+      "description": "Core obligations for deployers of high-risk AI systems (use per IFU, oversight, input data, monitoring/suspension/notification, logs, workplace info, public registration, DPIA info, PRBI constraints, natural person info, cooperation)",
+      "effective_date": "2026-08-02",
+      "shared_gates": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "!ex:art2_2_product_safety_pathway"
+      ],
+      "members": [
+        "PN-26A",
+        "PN-26B",
+        "PN-26C",
+        "PN-26D",
+        "PN-26E",
+        "PN-26F",
+        "PN-26G",
+        "PN-26H",
+        "PN-26I",
+        "PN-26J",
+        "PN-26K"
+      ]
+    },
+    {
+      "id": "HR-DEPLOYER-FRIA",
+      "title": "Article 27: FRIA Obligations for Deployers",
+      "article": "27",
+      "description": "Fundamental rights impact assessment (FRIA) requirements prior to deployment, notification and complementarity with DPIA",
+      "effective_date": "2026-08-02",
+      "shared_gates": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "!ex:art2_2_product_safety_pathway"
+      ],
+      "members": [
+        "PN-27A",
+        "PN-27B",
+        "PN-27C"
       ]
     }
   ],
@@ -438,6 +482,209 @@
       "status": "draft",
       "group_id": "HR-PROV-CORE",
       "group_order": 12
+    },
+    {
+      "id": "PN-26A",
+      "title": "Deployer duty: use high-risk AI systems per instructions (technical and organisational measures)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-26A.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-CORE",
+      "group_order": 1
+    },
+    {
+      "id": "PN-26B",
+      "title": "Deployer duty: assign human oversight to competent, trained and authorised natural persons",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-26B.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-CORE",
+      "group_order": 2
+    },
+    {
+      "id": "PN-26C",
+      "title": "Deployer duty: ensure input data is relevant and sufficiently representative when under deployer control",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-26C.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-CORE",
+      "group_order": 3
+    },
+    {
+      "id": "PN-26D",
+      "title": "Deployer duty: monitor operation; suspend on risk; inform provider/distributor/MSA; serious incident notification",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-26D.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-CORE",
+      "group_order": 4
+    },
+    {
+      "id": "PN-26E",
+      "title": "Deployer duty: keep automatically generated logs (≥6 months unless otherwise provided)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-26E.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-CORE",
+      "group_order": 5
+    },
+    {
+      "id": "PN-26F",
+      "title": "Deployer duty: inform workers/representatives before workplace use",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-26F.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ctx:is_employer",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-CORE",
+      "group_order": 6
+    },
+    {
+      "id": "PN-26G",
+      "title": "Deployer duty: public authorities/Union bodies must register use and not use unregistered systems",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-26G.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ctx:is_public_authority_or_union_body",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-CORE",
+      "group_order": 7
+    },
+    {
+      "id": "PN-26H",
+      "title": "Deployer duty: use provider information (Art. 13) to comply with DPIA obligations, where applicable",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-26H.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-CORE",
+      "group_order": 8
+    },
+    {
+      "id": "PN-26I",
+      "title": "Deployer duty: ex ante/near-time authorisation and constraints for post-remote biometric identification (PRBI) use",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-26I.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "sys:is_post_remote_biometric_identification",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-CORE",
+      "group_order": 9
+    },
+    {
+      "id": "PN-26J",
+      "title": "Deployer duty: inform natural persons when decisions are made or assisted by Annex III high-risk systems",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-26J.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "sys:is_annexIII_route",
+        "sys:makes_decisions_affecting_natural_persons",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-CORE",
+      "group_order": 10
+    },
+    {
+      "id": "PN-26K",
+      "title": "Deployer duty: cooperate with competent authorities",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-26K.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-CORE",
+      "group_order": 11
+    },
+    {
+      "id": "PN-27A",
+      "title": "Deployer duty: perform fundamental rights impact assessment (FRIA) before first deployment where required",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-27A.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ex:art27_fria_required",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-FRIA",
+      "group_order": 1
+    },
+    {
+      "id": "PN-27B",
+      "title": "Deployer duty: notify market surveillance authority of FRIA results (with template)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-27B.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ex:art27_fria_required",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-FRIA",
+      "group_order": 2
+    },
+    {
+      "id": "PN-27C",
+      "title": "Deployer duty: complement DPIA with FRIA where DPIA already met parts of Article 27",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-27C.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ex:art27_fria_required",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft",
+      "group_id": "HR-DEPLOYER-FRIA",
+      "group_order": 3
     }
   ],
   "shared_primitives": [
@@ -447,8 +694,23 @@
       "status": "draft"
     },
     {
+      "id": "ctx:is_employer",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ctx-is_employer.json",
+      "status": "draft"
+    },
+    {
       "id": "ctx:is_law_enforcement_context",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ctx-is_law_enforcement_context.json",
+      "status": "draft"
+    },
+    {
+      "id": "ctx:is_private_entity_providing_public_services",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ctx-is_private_entity_providing_public_services.json",
+      "status": "draft"
+    },
+    {
+      "id": "ctx:is_public_authority_or_union_body",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ctx-is_public_authority_or_union_body.json",
       "status": "draft"
     },
     {
@@ -464,6 +726,11 @@
     {
       "id": "ex:art2_2_product_safety_pathway",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-art2_2_product_safety_pathway.json",
+      "status": "draft"
+    },
+    {
+      "id": "ex:art27_fria_required",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-art27_fria_required.json",
       "status": "draft"
     },
     {
@@ -557,6 +824,21 @@
       "status": "draft"
     },
     {
+      "id": "sys:is_annexIII_5b_or_5c",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_annexIII_5b_or_5c.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:is_annexIII_point_2",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_annexIII_point_2.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:is_annexIII_route",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_annexIII_route.json",
+      "status": "draft"
+    },
+    {
       "id": "sys:is_biometric_categorisation_sensitive_attrs",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_biometric_categorisation_sensitive_attrs.json",
       "status": "draft"
@@ -572,6 +854,11 @@
       "status": "draft"
     },
     {
+      "id": "sys:is_post_remote_biometric_identification",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_post_remote_biometric_identification.json",
+      "status": "draft"
+    },
+    {
       "id": "sys:is_real_time_rbi",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_real_time_rbi.json",
       "status": "draft"
@@ -584,6 +871,11 @@
     {
       "id": "sys:is_untargeted_scraping_faces",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-is_untargeted_scraping_faces.json",
+      "status": "draft"
+    },
+    {
+      "id": "sys:makes_decisions_affecting_natural_persons",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/sys-makes_decisions_affecting_natural_persons.json",
       "status": "draft"
     },
     {

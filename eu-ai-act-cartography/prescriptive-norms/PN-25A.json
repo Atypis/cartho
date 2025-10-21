@@ -1,0 +1,22 @@
+{
+  "id": "PN-25A",
+  "title": "Value-chain reclassification: actor shall be considered provider and subject to Art. 16 obligations (Art. 25(1))",
+  "type": "duty",
+  "article_refs": [ { "article": 25, "paragraph": 1 } ],
+  "legal_consequence": { "verbatim": "Any distributor, importer, deployer or other third-party shall be considered to be a provider of a high-risk AI system for the purposes of this Regulation and shall be subject to the obligations of the provider under Article 16, in any of the following circumstances: (a) ... (b) ... (c) ...", "context": { "items": [ { "label": "Circumstances (a)-(c)", "kind": "definition", "text": "(a) name/trademark on a system already placed/put into service; (b) substantial modification such that it remains high-risk; (c) modify intended purpose so system becomes high-risk.", "sources": [ { "article": 25, "paragraph": 1 } ] } ], "refs": ["cons:penalty_art99_requirements"] } },
+  "side_info": { "effective_from": "2026-08-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1","R-1.2","R-1.3","R-1.4"] },
+    { "id": "R-1.1", "label": "Global scope (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2" },
+    { "id": "R-1.2", "label": "Actor is importer OR distributor OR deployer", "kind": "composite", "operator": "anyOf", "children": ["R-1.2.1","R-1.2.2","R-1.2.3"] },
+    { "id": "R-1.2.1", "label": "Importer", "kind": "primitive", "ref": "qp:is_importer" },
+    { "id": "R-1.2.2", "label": "Distributor", "kind": "primitive", "ref": "qp:is_distributor" },
+    { "id": "R-1.2.3", "label": "Deployer", "kind": "primitive", "ref": "qp:is_deployer" },
+    { "id": "R-1.3", "label": "Reclassification trigger holds (Art. 25(1))", "kind": "primitive", "ref": "ex:art25_becomes_provider" },
+    { "id": "R-1.4", "label": "System is or becomes high-risk (Art. 6)", "kind": "primitive", "ref": "qp:is_high_risk" }
+  ] },
+  "shared_refs": ["qp:in_scope_art2","qp:is_importer","qp:is_distributor","qp:is_deployer","qp:is_high_risk","ex:art25_becomes_provider"],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" },
+  "test_vectors": []
+}
+

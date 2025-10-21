@@ -1,0 +1,17 @@
+{
+  "id": "ex:art25_becomes_provider",
+  "title": "Value-chain reclassification: actor becomes provider under Art. 25(1)",
+  "namespace": "ex",
+  "article_refs": [ { "article": 25, "paragraph": 1 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      { "id": "R-1", "label": "Any of (a)-(c) holds", "kind": "composite", "operator": "anyOf", "children": ["R-1.1","R-1.2","R-1.3"], "sources": [ { "article": 25, "paragraph": 1 } ] },
+      { "id": "R-1.1", "label": "Puts name/trademark on system already placed/put into service", "kind": "primitive", "question": { "prompt": "Did the actor put its name or trademark on a high-risk AI system already placed on the market or put into service?", "answer_type": "boolean" }, "sources": [ { "article": 25, "paragraph": 1, "point": "(a)" } ] },
+      { "id": "R-1.2", "label": "Makes substantial modification so it remains high-risk (Art. 6)", "kind": "primitive", "question": { "prompt": "Did the actor make a substantial modification to a high-risk AI system already placed/put into service such that it remains high-risk under Art. 6?", "answer_type": "boolean" }, "sources": [ { "article": 25, "paragraph": 1, "point": "(b)" }, { "article": 6 } ] },
+      { "id": "R-1.3", "label": "Modifies intended purpose so a non-high-risk becomes high-risk (Art. 6)", "kind": "primitive", "question": { "prompt": "Did the actor modify the intended purpose of an AI system not previously high-risk such that it becomes high-risk under Art. 6?", "answer_type": "boolean" }, "sources": [ { "article": 25, "paragraph": 1, "point": "(c)" }, { "article": 6 } ] }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" }
+}
+

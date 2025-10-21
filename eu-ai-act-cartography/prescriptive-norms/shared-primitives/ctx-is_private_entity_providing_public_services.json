@@ -1,0 +1,23 @@
+{
+  "id": "ctx:is_private_entity_providing_public_services",
+  "title": "Deployer is a private entity providing public services",
+  "namespace": "ctx",
+  "article_refs": [ { "article": 27, "paragraph": 1 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "Private entity providing public services",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Is the deployer a private entity providing public services?",
+          "answer_type": "boolean"
+        },
+        "sources": [ { "article": 27, "paragraph": 1 } ]
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" }
+}
+

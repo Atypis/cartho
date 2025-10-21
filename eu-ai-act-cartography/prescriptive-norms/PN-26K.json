@@ -1,0 +1,25 @@
+{
+  "id": "PN-26K",
+  "title": "Deployer duty: cooperate with competent authorities",
+  "group_id": "HR-DEPLOYER-CORE",
+  "group_order": 11,
+  "type": "duty",
+  "article_refs": [ { "article": 26, "paragraph": 12, "quote": "Deployers shall cooperate with the relevant competent authorities in any action those authorities take in relation to the high-risk AI system in order to implement this Regulation." } ],
+  "legal_consequence": {
+    "verbatim": "Deployers shall cooperate with the relevant competent authorities in any action those authorities take in relation to the high-risk AI system in order to implement this Regulation.",
+    "context": { "items": [ { "label": "Penalty (Art. 99)", "kind": "guidance", "text": "Obligation/requirement; fines up to EUR 15,000,000 or 3% turnover may apply.", "sources": [ { "article": 99, "paragraph": 2 } ] } ], "refs": ["cons:penalty_art99_requirements"] }
+  },
+  "side_info": { "effective_from": "2026-08-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1","R-1.2","R-1.3","R-1.4"] },
+    { "id": "R-1.1", "label": "Global scope (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2" },
+    { "id": "R-1.2", "label": "Actor is deployer", "kind": "primitive", "ref": "qp:is_deployer" },
+    { "id": "R-1.3", "label": "System is high-risk", "kind": "primitive", "ref": "qp:is_high_risk" },
+    { "id": "R-1.4", "label": "Not product-safety carve-out", "kind": "composite", "operator": "not", "children": ["R-1.4.1"] },
+    { "id": "R-1.4.1", "label": "Product-safety pathway applies", "kind": "primitive", "ref": "ex:art2_2_product_safety_pathway" }
+  ] },
+  "shared_refs": ["qp:in_scope_art2","qp:is_deployer","qp:is_high_risk","ex:art2_2_product_safety_pathway"],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" },
+  "test_vectors": []
+}
+

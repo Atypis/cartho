@@ -48,6 +48,20 @@ export async function POST(req: NextRequest) {
     // Track which nodes we've already written (prevents duplicates)
     const writtenNodes = new Set<string>();
 
+    // Build set of primitive node IDs (to filter composites from DB writes)
+    const primitiveNodeIds = new Set<string>();
+    const tempEngine = new EvaluationEngine(
+      prescriptiveNorm as PrescriptiveNorm,
+      sharedPrimitives as SharedPrimitive[] || []
+    );
+    // Access expanded nodes to identify primitives
+    for (const node of (tempEngine as any).expandedNodes || []) {
+      if (node.kind === 'primitive') {
+        primitiveNodeIds.add(node.id);
+      }
+    }
+    console.log(`🔍 [API] Identified ${primitiveNodeIds.size} primitive nodes to track`);
+
     // Start evaluation in background
     (async () => {
       try {
@@ -61,8 +75,11 @@ export async function POST(req: NextRequest) {
               const completedStates = states.filter(s => s.status === 'completed' && s.result);
 
               for (const state of completedStates) {
+                // ONLY write primitive nodes (filter out composites)
+                const isPrimitive = primitiveNodeIds.has(state.nodeId);
+
                 // Check in-memory cache first (fast, no race conditions)
-                if (!writtenNodes.has(state.nodeId) && state.result) {
+                if (isPrimitive && !writtenNodes.has(state.nodeId) && state.result) {
                   // Write new result
                   const { error } = await supabase
                     .from('evaluation_results')
@@ -85,6 +102,9 @@ export async function POST(req: NextRequest) {
                   } else {
                     console.error(`❌ [DB] Error writing ${state.nodeId}:`, error);
                   }
+                } else if (!isPrimitive) {
+                  // Composite node - skip writing to database
+                  console.log(`⏭️  [DB] Skipped composite node ${state.nodeId}`);
                 }
               }
             }

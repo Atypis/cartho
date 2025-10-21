@@ -1,0 +1,23 @@
+{
+  "id": "sys:makes_decisions_affecting_natural_persons",
+  "title": "High-risk AI system makes or assists decisions related to natural persons",
+  "namespace": "sys",
+  "article_refs": [ { "article": 26, "paragraph": 11 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "Makes or assists decisions re: natural persons",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Does the high-risk AI system make decisions or assist in making decisions related to natural persons?",
+          "answer_type": "boolean"
+        },
+        "sources": [ { "article": 26, "paragraph": 11 } ]
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" }
+}
+

@@ -1,0 +1,13 @@
+{
+  "id": "PN-24A",
+  "title": "Distributor duty: verify CE/DoC/IFU and provider/importer compliance before making available",
+  "type": "duty",
+  "article_refs": [ { "article": 24, "paragraph": 1 } ],
+  "legal_consequence": { "verbatim": "Before making a high-risk AI system available on the market, distributors shall verify that it bears the required CE marking, that it is accompanied by a copy of the EU declaration of conformity referred to in Article 47 and instructions for use, and that the provider and the importer of that system, as applicable, have complied with their respective obligations as laid down in Article 16, points (b) and (c) and Article 23(3).", "context": { "items": [ { "label": "Penalty (Art. 99)", "kind": "guidance", "text": "Obligation/requirement; fines up to EUR 15,000,000 or 3% turnover may apply.", "sources": [ { "article": 99, "paragraph": 2 } ] } ], "refs": ["cons:penalty_art99_requirements"] } },
+  "side_info": { "effective_from": "2026-08-02" },
+  "requirements": { "root": "R-1", "nodes": [ { "id": "R-1", "label": "All gates", "kind": "composite", "operator": "allOf", "children": ["R-1.1","R-1.2","R-1.3","R-1.4"] }, { "id": "R-1.1", "label": "Art. 2 scope", "kind": "primitive", "ref": "qp:in_scope_art2" }, { "id": "R-1.2", "label": "Actor is distributor", "kind": "primitive", "ref": "qp:is_distributor" }, { "id": "R-1.3", "label": "High-risk", "kind": "primitive", "ref": "qp:is_high_risk" }, { "id": "R-1.4", "label": "Not Art. 2(2)", "kind": "composite", "operator": "not", "children": ["R-1.4.1"] }, { "id": "R-1.4.1", "label": "Art. 2(2) applies", "kind": "primitive", "ref": "ex:art2_2_product_safety_pathway" } ] },
+  "shared_refs": ["qp:in_scope_art2","qp:is_distributor","qp:is_high_risk","ex:art2_2_product_safety_pathway"],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" },
+  "test_vectors": []
+}
+

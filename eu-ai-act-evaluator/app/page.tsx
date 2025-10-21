@@ -360,76 +360,15 @@ export default function Home() {
                 return prev;
               });
             } else if (data.type === 'complete') {
-              console.log('✅ [Evaluation] Complete! Saving results...');
-              console.log(`📊 [Save] Total states received: ${data.result.states.length}`);
+              console.log('✅ [Evaluation] Complete!');
+              console.log(`📊 [Complete] Total states: ${data.result.states.length}`);
+              console.log(`ℹ️  [Complete] Server already saved results to database`);
 
-              // Log evaluation details before update
-              console.log(`🔍 [Save] About to update evaluation:`, {
-                evaluationId,
-                evaluationIdType: typeof evaluationId,
-                updatePayload: {
-                  status: 'completed',
-                  completed_at: new Date().toISOString()
-                }
-              });
+              // NOTE: Server callback already:
+              // 1. Wrote all primitive results to evaluation_results during evaluation
+              // 2. Updated evaluation status to 'completed'
+              // No need to save again - just update UI state
 
-              // Save results to Supabase
-              const { error: updateError } = await supabase.from('evaluations').update({
-                status: 'completed',
-                completed_at: new Date().toISOString()
-              }).eq('id', evaluationId);
-
-              if (updateError) {
-                console.error('❌ [Save] Error updating evaluation status:', {
-                  raw: updateError,
-                  stringified: JSON.stringify(updateError),
-                  message: updateError?.message,
-                  code: updateError?.code,
-                  details: updateError?.details,
-                  hint: updateError?.hint,
-                  // Extract ALL properties (including non-enumerable)
-                  allProperties: Object.getOwnPropertyNames(updateError),
-                  allDescriptors: Object.getOwnPropertyDescriptors(updateError),
-                  constructor: updateError?.constructor?.name,
-                  toString: updateError?.toString(),
-                  typeof: typeof updateError,
-                });
-                console.error('❌ [Save] Full error object:', updateError);
-              } else {
-                console.log('✅ [Save] Evaluation status updated to completed');
-              }
-
-              let savedCount = 0;
-              let skippedCount = 0;
-
-              for (const state of data.result.states) {
-                if (state.result) {
-                  console.log(`💾 [Save] Inserting result for node: ${state.nodeId}`, {
-                    decision: state.result.decision,
-                    confidence: state.result.confidence
-                  });
-
-                  const { error: insertError } = await supabase.from('evaluation_results').insert({
-                    evaluation_id: evaluationId,
-                    node_id: state.nodeId,
-                    decision: state.result.decision,
-                    confidence: state.result.confidence,
-                    reasoning: state.result.reasoning,
-                    citations: state.result.citations || [],
-                  });
-
-                  if (insertError) {
-                    console.error(`❌ [Save] Error inserting result for ${state.nodeId}:`, insertError);
-                  } else {
-                    savedCount++;
-                  }
-                } else {
-                  console.warn(`⚠️ [Save] Skipping state ${state.nodeId} - no result`);
-                  skippedCount++;
-                }
-              }
-
-              console.log(`✅ [Save] Saved ${savedCount} results, skipped ${skippedCount}`);
               setRunningEvaluations(prev => {
                 const next = new Set(prev);
                 next.delete(evaluationId);

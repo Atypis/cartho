@@ -1,0 +1,26 @@
+{
+  "id": "PN-27B",
+  "title": "Deployer duty: notify market surveillance authority of FRIA results (with template)",
+  "group_id": "HR-DEPLOYER-FRIA",
+  "group_order": 2,
+  "type": "duty",
+  "article_refs": [ { "article": 27, "paragraph": 3 } ],
+  "legal_consequence": {
+    "verbatim": "Once the assessment referred to in paragraph 1 of this Article has been performed, the deployer shall notify the market surveillance authority of its results, submitting the filled-out template referred to in paragraph 5 of this Article as part of the notification.",
+    "context": { "items": [ { "label": "Exemption note", "kind": "guidance", "text": "In the case referred to in Article 46(1), deployers may be exempt from the obligation to notify.", "sources": [ { "article": 27, "paragraph": 3 } ] }, { "label": "Template", "kind": "guidance", "text": "The AI Office will develop a questionnaire template (incl. automated tool) for simplified compliance.", "sources": [ { "article": 27, "paragraph": 5 } ] } ], "refs": ["cons:penalty_art99_requirements"] }
+  },
+  "side_info": { "effective_from": "2026-08-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1","R-1.2","R-1.3","R-1.4","R-1.5"] },
+    { "id": "R-1.1", "label": "Global scope (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2" },
+    { "id": "R-1.2", "label": "Actor is deployer", "kind": "primitive", "ref": "qp:is_deployer" },
+    { "id": "R-1.3", "label": "System is high-risk", "kind": "primitive", "ref": "qp:is_high_risk" },
+    { "id": "R-1.4", "label": "FRIA applicability holds (Art. 27(1))", "kind": "primitive", "ref": "ex:art27_fria_required" },
+    { "id": "R-1.5", "label": "Not product-safety carve-out", "kind": "composite", "operator": "not", "children": ["R-1.5.1"] },
+    { "id": "R-1.5.1", "label": "Product-safety pathway applies", "kind": "primitive", "ref": "ex:art2_2_product_safety_pathway" }
+  ] },
+  "shared_refs": ["qp:in_scope_art2","qp:is_deployer","qp:is_high_risk","ex:art27_fria_required","ex:art2_2_product_safety_pathway"],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" },
+  "test_vectors": []
+}
+

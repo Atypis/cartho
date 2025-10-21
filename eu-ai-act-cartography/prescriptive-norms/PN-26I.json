@@ -1,0 +1,33 @@
+{
+  "id": "PN-26I",
+  "title": "Deployer duty: ex ante/near-time authorisation and constraints for post-remote biometric identification (PRBI) use",
+  "group_id": "HR-DEPLOYER-CORE",
+  "group_order": 9,
+  "type": "duty",
+  "article_refs": [ { "article": 26, "paragraph": 10 } ],
+  "legal_consequence": {
+    "verbatim": "Without prejudice to Directive (EU) 2016/680, in the framework of an investigation for the targeted search of a person suspected or convicted of having committed a criminal offence, the deployer of a high-risk AI system for post-remote biometric identification shall request an authorisation, ex ante, or without undue delay and no later than 48 hours, by a judicial authority or an administrative authority whose decision is binding and subject to judicial review, for the use of that system, except when it is used for the initial identification of a potential suspect based on objective and verifiable facts directly linked to the offence. Each use shall be limited to what is strictly necessary for the investigation of a specific criminal offence.",
+    "context": {
+      "items": [
+        { "label": "Rejection consequence", "kind": "guidance", "text": "If authorisation is rejected, use shall stop immediately and linked personal data shall be deleted.", "sources": [ { "article": 26, "paragraph": 10 } ] },
+        { "label": "No untargeted use; no sole reliance", "kind": "guidance", "text": "No untargeted law‑enforcement use; no adverse decision solely based on PRBI output; document each use and report annually (see full paragraph).", "sources": [ { "article": 26, "paragraph": 10 } ] },
+        { "label": "Penalty (Art. 99)", "kind": "guidance", "text": "Obligation/requirement; fines up to EUR 15,000,000 or 3% turnover may apply.", "sources": [ { "article": 99, "paragraph": 2 } ] }
+      ],
+      "refs": ["cons:penalty_art99_requirements"]
+    }
+  },
+  "side_info": { "effective_from": "2026-08-02" },
+  "requirements": { "root": "R-1", "nodes": [
+    { "id": "R-1", "label": "All gates must hold", "kind": "composite", "operator": "allOf", "children": ["R-1.1","R-1.2","R-1.3","R-1.4","R-1.5"] },
+    { "id": "R-1.1", "label": "Global scope (Art. 2)", "kind": "primitive", "ref": "qp:in_scope_art2" },
+    { "id": "R-1.2", "label": "Actor is deployer", "kind": "primitive", "ref": "qp:is_deployer" },
+    { "id": "R-1.3", "label": "System is high-risk", "kind": "primitive", "ref": "qp:is_high_risk" },
+    { "id": "R-1.4", "label": "Use is PRBI", "kind": "primitive", "ref": "sys:is_post_remote_biometric_identification", "sources": [ { "article": 26, "paragraph": 10 } ] },
+    { "id": "R-1.5", "label": "Not product-safety carve-out", "kind": "composite", "operator": "not", "children": ["R-1.5.1"] },
+    { "id": "R-1.5.1", "label": "Product-safety pathway applies", "kind": "primitive", "ref": "ex:art2_2_product_safety_pathway" }
+  ] },
+  "shared_refs": ["qp:in_scope_art2","qp:is_deployer","qp:is_high_risk","sys:is_post_remote_biometric_identification","ex:art2_2_product_safety_pathway"],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" },
+  "test_vectors": []
+}
+
