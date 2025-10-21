@@ -363,6 +363,16 @@ export default function Home() {
               console.log('✅ [Evaluation] Complete! Saving results...');
               console.log(`📊 [Save] Total states received: ${data.result.states.length}`);
 
+              // Log evaluation details before update
+              console.log(`🔍 [Save] About to update evaluation:`, {
+                evaluationId,
+                evaluationIdType: typeof evaluationId,
+                updatePayload: {
+                  status: 'completed',
+                  completed_at: new Date().toISOString()
+                }
+              });
+
               // Save results to Supabase
               const { error: updateError } = await supabase.from('evaluations').update({
                 status: 'completed',
@@ -375,8 +385,16 @@ export default function Home() {
                   stringified: JSON.stringify(updateError),
                   message: updateError?.message,
                   code: updateError?.code,
-                  details: updateError?.details
+                  details: updateError?.details,
+                  hint: updateError?.hint,
+                  // Extract ALL properties (including non-enumerable)
+                  allProperties: Object.getOwnPropertyNames(updateError),
+                  allDescriptors: Object.getOwnPropertyDescriptors(updateError),
+                  constructor: updateError?.constructor?.name,
+                  toString: updateError?.toString(),
+                  typeof: typeof updateError,
                 });
+                console.error('❌ [Save] Full error object:', updateError);
               } else {
                 console.log('✅ [Save] Evaluation status updated to completed');
               }
