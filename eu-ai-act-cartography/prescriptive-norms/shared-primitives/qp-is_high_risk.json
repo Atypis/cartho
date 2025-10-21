@@ -1,0 +1,103 @@
+{
+  "id": "qp:is_high_risk",
+  "title": "High-risk AI system (Art. 6) — Classification Gate",
+  "namespace": "qp",
+  "article_refs": [ { "article": 6 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "High-risk classification holds (Art. 6)",
+        "kind": "composite",
+        "operator": "anyOf",
+        "children": ["R-1.1", "R-1.2"],
+        "sources": [ { "article": 6 } ],
+        "context": {
+          "items": [
+            {
+              "label": "Recital (54) — biometric high-risk rationale",
+              "kind": "guidance",
+              "text": "Certain biometric systems (e.g., remote biometric identification, biometric categorisation for sensitive attributes, some emotion recognition) are high-risk due to inaccuracy risks and potential discriminatory effects; biometric verification solely for authentication/access may be excluded.",
+              "sources": [ { "article": 0, "quote": "Recital (54)" } ]
+            },
+            {
+              "label": "Recital (63) — classification ≠ lawfulness",
+              "kind": "guidance",
+              "text": "Classification as high-risk under this Regulation does not, by itself, make a system’s use lawful under other Union or national law (e.g., data protection regimes).",
+              "sources": [ { "article": 0, "quote": "Recital (63)" } ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "R-1.1",
+        "label": "Product route (Art. 6(1))",
+        "kind": "composite",
+        "operator": "allOf",
+        "children": ["R-1.1.1", "R-1.1.2"],
+        "sources": [ { "article": 6, "paragraph": 1 } ]
+      },
+      {
+        "id": "R-1.1.1",
+        "label": "Safety component/product covered by Annex I legislation",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Is the AI intended as a safety component of a product, or itself a product, covered by Union harmonisation legislation listed in Annex I?",
+          "answer_type": "boolean",
+          "help": "Confirm coverage under Annex I Union harmonisation legislation and that the AI is a safety component or the product itself."
+        },
+        "sources": [ { "article": 6, "paragraph": 1 } ]
+      },
+      {
+        "id": "R-1.1.2",
+        "label": "Third-party conformity assessment required",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Is the covered product/AI subject to a third-party conformity assessment under that legislation?",
+          "answer_type": "boolean"
+        },
+        "sources": [ { "article": 6, "paragraph": 1 } ]
+      },
+      {
+        "id": "R-1.2",
+        "label": "Annex III route (Art. 6(2))",
+        "kind": "composite",
+        "operator": "allOf",
+        "children": ["R-1.2.1", "R-1.2.2"],
+        "sources": [ { "article": 6, "paragraph": 2 } ]
+      },
+      {
+        "id": "R-1.2.1",
+        "label": "Referred to in Annex III",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Is the AI system one of the use cases referred to in Annex III (Art. 6(2))?",
+          "answer_type": "boolean"
+        },
+        "sources": [ { "article": 6, "paragraph": 2 } ]
+      },
+      {
+        "id": "R-1.2.2",
+        "label": "Not eligible for Annex III derogation (Art. 6(3)-(4))",
+        "kind": "composite",
+        "operator": "not",
+        "children": ["R-1.2.2.1"],
+        "sources": [ { "article": 6, "paragraph": 3 } ]
+      },
+      {
+        "id": "R-1.2.2.1",
+        "label": "Annex III not-high-risk derogation applies",
+        "kind": "primitive",
+        "ref": "ex:art6_3_opt_out_valid",
+        "question": {
+          "prompt": "Does the Annex III derogation (Art. 6(3)-(4)) apply?",
+          "answer_type": "boolean"
+        },
+        "sources": [ { "article": 6, "paragraph": 3 }, { "article": 6, "paragraph": 4 } ]
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" }
+}
+

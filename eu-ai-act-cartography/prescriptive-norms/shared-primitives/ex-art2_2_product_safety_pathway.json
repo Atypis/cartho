@@ -1,0 +1,34 @@
+{
+  "id": "ex:art2_2_product_safety_pathway",
+  "title": "Chapter III carve-out — product safety pathway (Art. 2(2))",
+  "namespace": "ex",
+  "article_refs": [ { "article": 2, "paragraph": 2 } ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "Only Article 6(1), Articles 102–109 and 112 apply (Art. 2(2))",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Is the AI system classified as high-risk solely via Article 6(1) and related to products covered by Annex I Section B, such that only Article 6(1), Articles 102–109 and Article 112 apply?",
+          "answer_type": "boolean",
+          "help": "This carve-out limits which provisions apply for systems classified only under Art. 6(1) via product law."
+        },
+        "sources": [ { "article": 2, "paragraph": 2 } ],
+        "context": {
+          "items": [
+            {
+              "label": "Scope of carve-out",
+              "kind": "guidance",
+              "text": "For high-risk AI systems under Art. 6(1) related to products covered by Annex I Section B, only Art. 6(1), Arts. 102–109 and Art. 112 apply (Art. 57 may apply where requirements are integrated).",
+              "sources": [ { "article": 2, "paragraph": 2 } ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" }
+}
+

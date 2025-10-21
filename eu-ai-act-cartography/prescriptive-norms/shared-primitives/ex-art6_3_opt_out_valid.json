@@ -1,0 +1,76 @@
+{
+  "id": "ex:art6_3_opt_out_valid",
+  "title": "Annex III not-high-risk derogation (Art. 6(3)–(4))",
+  "namespace": "ex",
+  "article_refs": [
+    { "article": 6, "paragraph": 3 },
+    { "article": 6, "paragraph": 4 },
+    { "article": 49, "paragraph": 2 }
+  ],
+  "logic": {
+    "root": "R-1",
+    "nodes": [
+      {
+        "id": "R-1",
+        "label": "All derogation conditions hold",
+        "kind": "composite",
+        "operator": "allOf",
+        "children": ["R-1.1", "R-1.2", "R-1.3", "R-1.4", "R-1.5"],
+        "sources": [ { "article": 6, "paragraph": 3 }, { "article": 6, "paragraph": 4 } ]
+      },
+      {
+        "id": "R-1.1",
+        "label": "No significant risk of harm, incl. not materially influencing decision outcomes",
+        "kind": "primitive",
+        "question": {
+          "prompt": "Does the Annex III system NOT pose a significant risk of harm to health, safety or fundamental rights, including by not materially influencing the outcome of decision making?",
+          "answer_type": "boolean"
+        },
+        "sources": [ { "article": 6, "paragraph": 3 } ]
+      },
+      {
+        "id": "R-1.2",
+        "label": "One of the narrow purposes (a–d) applies",
+        "kind": "composite",
+        "operator": "anyOf",
+        "children": ["R-1.2.1", "R-1.2.2", "R-1.2.3", "R-1.2.4"],
+        "sources": [ { "article": 6, "paragraph": 3 } ]
+      },
+      { "id": "R-1.2.1", "label": "Narrow procedural task", "kind": "primitive", "question": { "prompt": "Is the AI intended to perform a narrow procedural task?", "answer_type": "boolean" }, "sources": [ { "article": 6, "paragraph": 3 } ] },
+      { "id": "R-1.2.2", "label": "Improves result of a previously completed human activity", "kind": "primitive", "question": { "prompt": "Is the AI intended to improve the result of a previously completed human activity?", "answer_type": "boolean" }, "sources": [ { "article": 6, "paragraph": 3 } ] },
+      { "id": "R-1.2.3", "label": "Detects patterns/deviations; not meant to replace/influence prior assessment without proper human review", "kind": "primitive", "question": { "prompt": "Is the AI intended to detect decision-making patterns or deviations and not meant to replace or influence the previously completed human assessment without proper human review?", "answer_type": "boolean" }, "sources": [ { "article": 6, "paragraph": 3 } ] },
+      { "id": "R-1.2.4", "label": "Preparatory task for Annex III assessment", "kind": "primitive", "question": { "prompt": "Is the AI intended to perform a preparatory task to an assessment relevant for Annex III use cases?", "answer_type": "boolean" }, "sources": [ { "article": 6, "paragraph": 3 } ] },
+      {
+        "id": "R-1.3",
+        "label": "Not profiling of natural persons (always high-risk if profiling)",
+        "kind": "composite",
+        "operator": "not",
+        "children": ["R-1.3.1"],
+        "sources": [ { "article": 6, "paragraph": 3 } ]
+      },
+      {
+        "id": "R-1.3.1",
+        "label": "Performs profiling of natural persons",
+        "kind": "primitive",
+        "question": { "prompt": "Does the AI system perform profiling of natural persons?", "answer_type": "boolean" },
+        "sources": [ { "article": 6, "paragraph": 3 } ]
+      },
+      {
+        "id": "R-1.4",
+        "label": "Provider documented assessment before placing/putting into service",
+        "kind": "primitive",
+        "question": { "prompt": "Has the provider documented its assessment before placing or putting the system into service that it is not high-risk under Art. 6(3)?", "answer_type": "boolean" },
+        "sources": [ { "article": 6, "paragraph": 4 } ]
+      },
+      {
+        "id": "R-1.5",
+        "label": "Registered in EU database per Art. 49(2)",
+        "kind": "primitive",
+        "question": { "prompt": "Has the provider registered the not-high-risk Annex III system in the EU database pursuant to Article 49(2)?", "answer_type": "boolean" },
+        "sources": [ { "article": 49, "paragraph": 2 } ]
+      }
+    ]
+  },
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" }
+}
+
