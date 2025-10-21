@@ -774,7 +774,7 @@ function PNTable({
 
               {/* Expanded TREEMAXX View */}
               {isExpanded && expandedPNData && (
-                <div className="border-t border-neutral-100 bg-neutral-50 px-6 py-6">
+                <div className="border-t border-neutral-100 bg-neutral-50 px-4 py-3">
                   <RequirementsGrid
                     nodes={expandedPNData.nodes || []}
                     rootId={expandedPNData.rootId || ''}

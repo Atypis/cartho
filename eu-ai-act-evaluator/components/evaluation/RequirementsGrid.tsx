@@ -149,29 +149,29 @@ export function RequirementsGrid({
     'unknown';
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Compact Stats Bar - Cockpit Style */}
       {showProgress && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 overflow-hidden">
-          <div className="px-4 py-2.5 flex items-center justify-between gap-4">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded border border-blue-200 overflow-hidden">
+          <div className="px-3 py-2 flex items-center justify-between gap-3">
             {/* Left: Status & Progress */}
-            <div className="flex items-center gap-4 flex-1 min-w-0">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
                 {isRunning ? (
                   <div className="relative">
-                    <div className="w-2.5 h-2.5 bg-blue-600 rounded-full animate-pulse" />
-                    <div className="absolute inset-0 w-2.5 h-2.5 bg-blue-600 rounded-full animate-ping opacity-75" />
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
+                    <div className="absolute inset-0 w-2 h-2 bg-blue-600 rounded-full animate-ping opacity-75" />
                   </div>
                 ) : (
-                  <div className="w-2.5 h-2.5 bg-green-500 rounded-full" />
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
                 )}
-                <span className="text-xs font-semibold text-neutral-700">
+                <span className="text-[10px] font-semibold text-neutral-700">
                   {evaluationStatus === 'completed' ? totalNodes : completed}/{totalNodes}
                 </span>
               </div>
 
               {/* Inline Progress Bar */}
-              <div className="flex-1 bg-blue-200 rounded-full h-1.5 min-w-[100px] max-w-[200px]">
+              <div className="flex-1 bg-blue-200 rounded-full h-1 min-w-[80px] max-w-[150px]">
                 <div
                   className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 rounded-full"
                   style={{ width: `${progress}%` }}
@@ -179,24 +179,24 @@ export function RequirementsGrid({
               </div>
 
               {/* Stats Pills - Compact */}
-              <div className="flex items-center gap-1.5 text-xs">
+              <div className="flex items-center gap-1 text-[10px]">
                 {passed > 0 && (
-                  <div className="px-2 py-0.5 bg-green-100 text-green-700 rounded font-medium">
+                  <div className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded font-medium">
                     ✓ {passed}
                   </div>
                 )}
                 {failed > 0 && (
-                  <div className="px-2 py-0.5 bg-red-100 text-red-700 rounded font-medium">
+                  <div className="px-1.5 py-0.5 bg-red-100 text-red-700 rounded font-medium">
                     ✗ {failed}
                   </div>
                 )}
                 {evaluating > 0 && (
-                  <div className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-medium">
+                  <div className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-medium">
                     ⟳ {evaluating}
                   </div>
                 )}
                 {pending > 0 && (
-                  <div className="px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded font-medium">
+                  <div className="px-1.5 py-0.5 bg-neutral-100 text-neutral-600 rounded font-medium">
                     {pending}
                   </div>
                 )}
@@ -205,8 +205,8 @@ export function RequirementsGrid({
 
             {/* Right: Current Node (if running) */}
             {currentNode && (
-              <div className="flex items-center gap-2 text-xs text-neutral-700 truncate max-w-md">
-                <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              <div className="flex items-center gap-1.5 text-[10px] text-neutral-700 truncate max-w-md">
+                <div className="w-2.5 h-2.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
                 <span className="truncate font-mono">{currentNode.nodeId}</span>
               </div>
             )}
@@ -214,10 +214,10 @@ export function RequirementsGrid({
             {/* Expand Button */}
             <button
               onClick={() => setProgressExpanded(!progressExpanded)}
-              className="p-1 hover:bg-blue-100 rounded transition-colors flex-shrink-0"
+              className="p-0.5 hover:bg-blue-100 rounded transition-colors flex-shrink-0"
             >
               <svg
-                className={`w-4 h-4 text-neutral-500 transition-transform duration-200 ${
+                className={`w-3.5 h-3.5 text-neutral-500 transition-transform duration-200 ${
                   progressExpanded ? 'rotate-180' : ''
                 }`}
                 fill="none"
@@ -231,8 +231,8 @@ export function RequirementsGrid({
 
           {/* Expanded Details */}
           {progressExpanded && (
-            <div className="border-t border-blue-200 bg-white/50 px-4 py-3 text-xs">
-              <div className="grid grid-cols-2 gap-3">
+            <div className="border-t border-blue-200 bg-white/50 px-3 py-2 text-[10px]">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <span className="text-neutral-500 uppercase tracking-wide font-semibold">Status:</span>
                   <span className="ml-2 text-neutral-900">
@@ -251,18 +251,18 @@ export function RequirementsGrid({
 
       {/* Article 4 Obligation Summary Card */}
       {showSummary && (
-        <div ref={summaryCardRef} className="bg-white rounded-lg border-2 border-neutral-300 overflow-hidden shadow-sm">
+        <div ref={summaryCardRef} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
           {/* Header */}
-          <div className="px-5 py-3 flex items-center justify-between gap-4 bg-neutral-100 border-b-2 border-neutral-300">
-            <div className="flex items-center gap-3 flex-1">
+          <div className="px-4 py-2 flex items-center justify-between gap-3 bg-neutral-50 border-b border-neutral-200">
+            <div className="flex items-center gap-2 flex-1">
               {/* Title */}
-              <h4 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">
+              <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
                 Article 4: AI Literacy Obligation
               </h4>
 
               {/* Status Badge - Only show final status when complete */}
               {isEvaluationFinished && (
-                <div className={`ml-auto flex items-center gap-2 px-3 py-1 rounded text-xs font-bold ${
+                <div className={`ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold ${
                   applicabilityStatus === 'applies' ? 'bg-green-500 text-white' :
                   applicabilityStatus === 'does-not-apply' ? 'bg-red-500 text-white' :
                   'bg-neutral-400 text-white'
@@ -274,8 +274,8 @@ export function RequirementsGrid({
               )}
 
               {(isRunning || !isEvaluationFinished) && hasResults && (
-                <div className="ml-auto flex items-center gap-2 px-3 py-1 rounded text-xs font-bold bg-blue-500 text-white">
-                  <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold bg-blue-500 text-white">
+                  <div className="w-2 h-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   EVALUATION IN PROGRESS
                 </div>
               )}
@@ -284,10 +284,10 @@ export function RequirementsGrid({
             {/* Expand Button */}
             <button
               onClick={() => setSummaryExpanded(!summaryExpanded)}
-              className="p-1.5 hover:bg-neutral-200 rounded transition-colors flex-shrink-0"
+              className="p-1 hover:bg-neutral-100 rounded transition-colors flex-shrink-0"
             >
               <svg
-                className={`w-4 h-4 text-neutral-700 transition-transform duration-200 ${
+                className={`w-3.5 h-3.5 text-neutral-600 transition-transform duration-200 ${
                   summaryExpanded ? 'rotate-180' : ''
                 }`}
                 fill="none"
@@ -301,13 +301,13 @@ export function RequirementsGrid({
 
           {/* Expanded Content */}
           {summaryExpanded && (
-            <div className="px-5 py-4 space-y-4 text-sm">
+            <div className="px-4 py-3 space-y-3 text-xs">
               {/* Obligation Overview - Always visible */}
               <div>
-                <div className="font-bold text-neutral-900 mb-2 text-xs uppercase tracking-wide">
+                <div className="font-bold text-neutral-900 mb-1.5 text-[10px] uppercase tracking-wide">
                   Legal Obligation Under EU AI Act
                 </div>
-                <div className="text-neutral-700 text-sm leading-relaxed bg-neutral-50 rounded-lg p-4 border border-neutral-200">
+                <div className="text-neutral-700 text-xs leading-relaxed bg-neutral-50 rounded p-3 border border-neutral-200">
                   Providers and deployers of AI systems shall take measures to ensure, to their best extent,
                   a <strong>sufficient level of AI literacy</strong> of their staff and other persons dealing
                   with the operation and use of AI systems on their behalf, taking into account their technical
@@ -318,14 +318,14 @@ export function RequirementsGrid({
 
               {/* Applicability Result - Only show when complete */}
               {isEvaluationFinished && applicabilityStatus === 'applies' && (
-                <div className="bg-green-50 border-l-4 border-green-600 rounded-r-lg p-4">
-                  <div className="font-bold text-green-900 mb-2 text-xs uppercase tracking-wide">
+                <div className="bg-green-50 border-l-4 border-green-600 rounded-r p-3">
+                  <div className="font-bold text-green-900 mb-1.5 text-[10px] uppercase tracking-wide">
                     ✓ This Obligation Applies
                   </div>
-                  <div className="text-green-900 text-sm leading-relaxed mb-3">
+                  <div className="text-green-900 text-xs leading-relaxed mb-2">
                     Based on the evaluation, <strong>Article 4 AI Literacy obligations apply to your AI system.</strong>
                   </div>
-                  <div className="text-green-900 text-sm leading-relaxed">
+                  <div className="text-green-900 text-xs leading-relaxed">
                     <strong>What this means:</strong> You must implement measures to ensure sufficient AI literacy
                     among your staff and persons dealing with the operation and use of your AI system.
                   </div>
@@ -333,11 +333,11 @@ export function RequirementsGrid({
               )}
 
               {isEvaluationFinished && applicabilityStatus === 'does-not-apply' && (
-                <div className="bg-neutral-50 border-l-4 border-neutral-400 rounded-r-lg p-4">
-                  <div className="font-bold text-neutral-900 mb-2 text-xs uppercase tracking-wide">
+                <div className="bg-neutral-50 border-l-4 border-neutral-400 rounded-r p-3">
+                  <div className="font-bold text-neutral-900 mb-1.5 text-[10px] uppercase tracking-wide">
                     ✗ This Obligation Does Not Apply
                   </div>
-                  <div className="text-neutral-900 text-sm leading-relaxed">
+                  <div className="text-neutral-900 text-xs leading-relaxed">
                     Based on the evaluation, <strong>Article 4 AI Literacy obligations do not apply to your AI system.</strong>
                     You are not required to implement AI literacy measures under this specific obligation.
                   </div>
@@ -345,12 +345,12 @@ export function RequirementsGrid({
               )}
 
               {!isEvaluationFinished && (isRunning || hasResults) && (
-                <div className="bg-blue-50 border-l-4 border-blue-600 rounded-r-lg p-4">
-                  <div className="font-bold text-blue-900 mb-2 text-xs uppercase tracking-wide flex items-center gap-2">
-                    <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <div className="bg-blue-50 border-l-4 border-blue-600 rounded-r p-3">
+                  <div className="font-bold text-blue-900 mb-1.5 text-[10px] uppercase tracking-wide flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                     Evaluation In Progress
                   </div>
-                  <div className="text-blue-900 text-sm leading-relaxed">
+                  <div className="text-blue-900 text-xs leading-relaxed">
                     AI is currently evaluating whether Article 4 obligations apply to your AI system.
                     The result will be determined once the evaluation is complete.
                   </div>
@@ -363,14 +363,14 @@ export function RequirementsGrid({
 
       {/* Title - Compact with View Toggle */}
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-neutral-900">
+        <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
           Requirements Assessment
         </h3>
-        <div className="flex items-center gap-2">
-          <div className="flex bg-neutral-100 rounded-lg p-0.5">
+        <div className="flex items-center gap-1.5">
+          <div className="flex bg-neutral-100 rounded p-0.5">
             <button
               onClick={() => setViewMode('grid')}
-              className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+              className={`px-2.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
                 viewMode === 'grid'
                   ? 'bg-white text-neutral-900 shadow-sm'
                   : 'text-neutral-600 hover:text-neutral-900'
@@ -380,7 +380,7 @@ export function RequirementsGrid({
             </button>
             <button
               onClick={() => setViewMode('tree')}
-              className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+              className={`px-2.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
                 viewMode === 'tree'
                   ? 'bg-white text-neutral-900 shadow-sm'
                   : 'text-neutral-600 hover:text-neutral-900'
@@ -689,21 +689,21 @@ function TreeNode({
 
         {/* Inline Details Panel */}
         {showDetails && (
-          <div className="bg-gradient-to-b from-neutral-50 to-white border-b border-neutral-200 px-6 py-3 text-xs animate-in slide-in-from-top-2 fade-in duration-200"
-               style={{ paddingLeft: `${depth * 20 + 60}px` }}>
+          <div className="bg-gradient-to-b from-neutral-50 to-white border-b border-neutral-200 px-4 py-2 text-xs animate-in slide-in-from-top-2 fade-in duration-200"
+               style={{ paddingLeft: `${depth * 20 + 40}px` }}>
 
             {/* AI Thinking Indicator - ONLY for primitives */}
             {isActiveSubsumption && (
-              <div className="mb-3 p-3 bg-blue-50 border-l-4 border-blue-500 rounded animate-pulse">
-                <div className="flex items-center gap-2">
+              <div className="mb-2 p-2 bg-blue-50 border-l-4 border-blue-500 rounded animate-pulse">
+                <div className="flex items-center gap-1.5">
                   <div className="relative">
-                    <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    <div className="w-2.5 h-2.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                   </div>
-                  <span className="font-semibold text-blue-900 text-sm">
+                  <span className="font-semibold text-blue-900 text-xs">
                     AI is analyzing this requirement...
                   </span>
                 </div>
-                <div className="mt-2 text-blue-700 italic">
+                <div className="mt-1.5 text-blue-700 italic text-[10px]">
                   Evaluating compliance based on legal context and case facts
                 </div>
               </div>
@@ -711,25 +711,25 @@ function TreeNode({
 
             {/* Question */}
             {node.kind === 'primitive' && node.question && (
-              <div className="mb-3">
-                <div className="font-semibold text-neutral-700 mb-1 uppercase tracking-wide">Question:</div>
-                <div className="text-neutral-900 leading-relaxed">{node.question.prompt}</div>
+              <div className="mb-2">
+                <div className="font-semibold text-neutral-700 mb-1 uppercase tracking-wide text-[10px]">Question:</div>
+                <div className="text-neutral-900 leading-relaxed text-xs">{node.question.prompt}</div>
                 {node.question.help && (
-                  <div className="mt-1 text-neutral-600 italic">{node.question.help}</div>
+                  <div className="mt-1 text-neutral-600 italic text-[10px]">{node.question.help}</div>
                 )}
               </div>
             )}
 
             {/* Legal Context */}
             {node.context?.items && node.context.items.length > 0 && (
-              <div className="mb-3">
-                <div className="font-semibold text-neutral-700 mb-1 uppercase tracking-wide">Legal Context:</div>
+              <div className="mb-2">
+                <div className="font-semibold text-neutral-700 mb-1 uppercase tracking-wide text-[10px]">Legal Context:</div>
                 {node.context.items.map((item, idx) => (
-                  <div key={idx} className="pl-2 border-l-2 border-neutral-300 mb-2">
-                    <div className="font-medium text-neutral-800">{item.label}</div>
-                    <div className="text-neutral-600 leading-relaxed">{item.text}</div>
+                  <div key={idx} className="pl-2 border-l-2 border-neutral-300 mb-1.5">
+                    <div className="font-medium text-neutral-800 text-xs">{item.label}</div>
+                    <div className="text-neutral-600 leading-relaxed text-xs">{item.text}</div>
                     {item.sources?.[0] && (
-                      <div className="mt-0.5 font-mono text-neutral-500">
+                      <div className="mt-0.5 font-mono text-neutral-500 text-[10px]">
                         Art. {item.sources[0].article}
                         {item.sources[0].paragraph && `(${item.sources[0].paragraph})`}
                         {item.sources[0].point && ` pt. ${item.sources[0].point}`}
@@ -743,8 +743,8 @@ function TreeNode({
             {/* AI Reasoning */}
             {status === 'completed' && result && (
               <div>
-                <div className="font-semibold text-neutral-700 mb-1 uppercase tracking-wide">AI Analysis:</div>
-                <div className="bg-white rounded p-2 border border-neutral-200 text-neutral-900 leading-relaxed">
+                <div className="font-semibold text-neutral-700 mb-1 uppercase tracking-wide text-[10px]">AI Analysis:</div>
+                <div className="bg-white rounded p-2 border border-neutral-200 text-neutral-900 leading-relaxed text-xs">
                   {result.reasoning}
                 </div>
               </div>
