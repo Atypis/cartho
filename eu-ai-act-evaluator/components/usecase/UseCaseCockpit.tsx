@@ -13,6 +13,7 @@
 
 import { useState, useEffect } from 'react';
 import { RequirementsGrid } from '@/components/evaluation/RequirementsGrid';
+import { GroupCard } from '@/components/usecase/GroupCard';
 import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/types';
 import type { EvaluationState } from '@/lib/evaluation/types';
@@ -33,6 +34,16 @@ interface PNStatus {
   progressTotal?: number;
 }
 
+interface Group {
+  id: string;
+  title: string;
+  article: string;
+  description: string;
+  effective_date: string;
+  shared_gates: string[];
+  members: string[];
+}
+
 interface UseCaseCockpitProps {
   useCaseId: string;
   onTriggerEvaluation: (evaluationId: string, useCaseId: string, pnIds: string[]) => void;
@@ -44,7 +55,9 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [loading, setLoading] = useState(true);
 
   // PN catalog and status
+  const [groups, setGroups] = useState<Group[]>([]);
   const [availablePNs, setAvailablePNs] = useState<any[]>([]);
+  const [ungroupedPNs, setUngroupedPNs] = useState<any[]>([]);
   const [pnStatuses, setPNStatuses] = useState<PNStatus[]>([]);
   const [selectedPNs, setSelectedPNs] = useState<string[]>([]);
   const [triggering, setTriggering] = useState(false);
@@ -64,12 +77,20 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         const res = await fetch('/api/catalog');
         if (res.ok) {
           const data = await res.json();
-          const pns = data?.prescriptive_norms || [];
-          setAvailablePNs(pns);
+          console.log('[Catalog] Loaded catalog:', {
+            groups: data.groups?.length || 0,
+            grouped_pns: data.grouped_pns?.length || 0,
+            ungrouped_pns: data.ungrouped_pns?.length || 0
+          });
+
+          setGroups(data.groups || []);
+          setAvailablePNs(data.all_pns || data.prescriptive_norms || []);
+          setUngroupedPNs(data.ungrouped_pns || []);
         }
       } catch (e) {
         console.warn('[Catalog] Failed to load PN catalog');
         setAvailablePNs([{ id: 'PN-04', article: '4', title: 'AI Literacy' }]);
+        setUngroupedPNs([{ id: 'PN-04', article: '4', title: 'AI Literacy' }]);
       }
     })();
   }, []);
@@ -294,6 +315,49 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     setTimeout(() => triggerEvaluation(), 100);
   };
 
+  // Group evaluation handler
+  const handleEvaluateGroup = async (groupId: string, pnIds: string[]) => {
+    setTriggering(true);
+    try {
+      const { data, error } = await supabase
+        .from('evaluations')
+        .insert({
+          use_case_id: useCaseId,
+          pn_ids: pnIds,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        // Trigger evaluation via parent callback
+        onTriggerEvaluation(data.id, useCaseId, pnIds);
+      }
+    } catch (error: any) {
+      console.error('Failed to trigger group evaluation:', {
+        raw: error,
+        stringified: JSON.stringify(error),
+        message: error?.message,
+      });
+      alert(`Failed to trigger group evaluation: ${error?.message || 'Unknown error'}`);
+    } finally {
+      setTriggering(false);
+    }
+  };
+
+  // Handler for viewing individual PN from group
+  const handleViewPN = async (pnId: string, evaluationId?: string) => {
+    if (!evaluationId) {
+      console.warn(`[Cockpit] Cannot view ${pnId}: no evaluationId`);
+      return;
+    }
+
+    // Expand the PN to show its evaluation tree
+    await handleExpandPN(pnId);
+  };
+
   const handleExpandPN = async (pnId: string) => {
     if (expandedPNId === pnId) {
       setExpandedPNId(null);
@@ -349,9 +413,16 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     console.log(`[Cockpit] Expanded ${pnId} successfully`);
   };
 
+  // Separate grouped vs ungrouped PNs
+  const groupedPNIds = new Set(groups.flatMap(g => g.members));
+
   const appliesPNs = pnStatuses.filter(p => p.status === 'applies');
   const notApplicablePNs = pnStatuses.filter(p => p.status === 'not-applicable');
   const pendingPNs = pnStatuses.filter(p => p.status === 'pending');
+
+  const ungroupedAppliesPNs = appliesPNs.filter(pn => !groupedPNIds.has(pn.pnId));
+  const ungroupedNotApplicablePNs = notApplicablePNs.filter(pn => !groupedPNIds.has(pn.pnId));
+  const ungroupedPendingPNs = pendingPNs.filter(pn => !groupedPNIds.has(pn.pnId));
 
   if (loading) {
     return (
@@ -410,11 +481,42 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
           </div>
         </div>
 
+        {/* Grouped Obligations */}
+        {groups.length > 0 && (
+          <div>
+            <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide mb-4">
+              Grouped Obligations
+            </h2>
+            <div className="space-y-4">
+              {groups.map(group => (
+                <GroupCard
+                  key={group.id}
+                  group={group}
+                  pnStatuses={pnStatuses}
+                  onEvaluateGroup={handleEvaluateGroup}
+                  onEvaluatePN={(pnId) => {
+                    setSelectedPNs([pnId]);
+                    setTimeout(() => triggerEvaluation(), 100);
+                  }}
+                  onViewPN={handleViewPN}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Individual Ungrouped Obligations */}
+        {(ungroupedAppliesPNs.length > 0 || ungroupedNotApplicablePNs.length > 0 || ungroupedPendingPNs.length > 0) && (
+          <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide mt-8">
+            Individual Obligations
+          </h2>
+        )}
+
         {/* APPLIES Table */}
-        {appliesPNs.length > 0 && (
+        {ungroupedAppliesPNs.length > 0 && (
           <PNTable
             title="✓ OBLIGATIONS THAT APPLY - Action Required"
-            pns={appliesPNs}
+            pns={ungroupedAppliesPNs}
             expandedPNId={expandedPNId}
             expandedPNData={expandedPNData}
             onExpandPN={handleExpandPN}
@@ -423,10 +525,10 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         )}
 
         {/* NOT APPLICABLE Table */}
-        {notApplicablePNs.length > 0 && (
+        {ungroupedNotApplicablePNs.length > 0 && (
           <PNTable
             title="✗ OBLIGATIONS THAT DO NOT APPLY"
-            pns={notApplicablePNs}
+            pns={ungroupedNotApplicablePNs}
             expandedPNId={expandedPNId}
             expandedPNData={expandedPNData}
             onExpandPN={handleExpandPN}
@@ -435,10 +537,10 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         )}
 
         {/* PENDING Table */}
-        {pendingPNs.length > 0 && (
+        {ungroupedPendingPNs.length > 0 && (
           <PNTable
             title="○ PENDING EVALUATION"
-            pns={pendingPNs}
+            pns={ungroupedPendingPNs}
             expandedPNId={expandedPNId}
             expandedPNData={expandedPNData}
             onExpandPN={handleExpandPN}
