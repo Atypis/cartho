@@ -1,0 +1,31 @@
+{
+  "groups": [
+    {
+      "id": "HR-PROV-CORE",
+      "title": "Article 16: Provider Duties for High-Risk AI Systems",
+      "article": "16",
+      "description": "Core obligations for providers of high-risk AI systems under Article 16",
+      "effective_date": "2026-08-02",
+      "shared_gates": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "!ex:art2_2_product_safety_pathway"
+      ],
+      "members": [
+        "PN-16A",
+        "PN-16B",
+        "PN-16C",
+        "PN-16D",
+        "PN-16E",
+        "PN-16F",
+        "PN-16G",
+        "PN-16H",
+        "PN-16I",
+        "PN-16J",
+        "PN-16K",
+        "PN-16L"
+      ]
+    }
+  ]
+}

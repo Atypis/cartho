@@ -1,6 +1,8 @@
 {
   "id": "PN-16B",
   "title": "Provider duty: indicate provider identification on system/packaging/documentation",
+  "group_id": "HR-PROV-CORE",
+  "group_order": 2,
   "type": "duty",
   "article_refs": [
     {

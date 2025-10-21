@@ -1,6 +1,8 @@
 {
   "id": "PN-16I",
   "title": "Provider duty: registration obligations (Art. 49(1))",
+  "group_id": "HR-PROV-CORE",
+  "group_order": 9,
   "type": "duty",
   "article_refs": [
     { "article": 16, "point": "(i)", "quote": "comply with the registration obligations referred to in Article 49(1);" },

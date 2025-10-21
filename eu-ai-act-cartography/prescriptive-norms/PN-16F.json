@@ -1,6 +1,8 @@
 {
   "id": "PN-16F",
   "title": "Provider duty: conformity assessment prior to placing/putting into service (Art. 43)",
+  "group_id": "HR-PROV-CORE",
+  "group_order": 6,
   "type": "duty",
   "article_refs": [
     { "article": 16, "point": "(f)", "quote": "ensure that the high-risk AI system undergoes the relevant conformity assessment procedure as referred to in Article 43, prior to its being placed on the market or put into service;" },

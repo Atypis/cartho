@@ -1,6 +1,8 @@
 {
   "id": "PN-16K",
   "title": "Provider duty: demonstrate conformity with Section 2 upon reasoned request",
+  "group_id": "HR-PROV-CORE",
+  "group_order": 11,
   "type": "duty",
   "article_refs": [
     { "article": 16, "point": "(k)", "quote": "upon a reasoned request of a national competent authority, demonstrate the conformity of the high-risk AI system with the requirements set out in Section 2;" }

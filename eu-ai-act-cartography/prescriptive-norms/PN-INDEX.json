@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2025-10-21T09:14:19.998Z",
+  "generated_at": "2025-10-21T10:30:05.047Z",
   "schema_version": "2025-10-10",
   "groups": [
     {
@@ -15,7 +15,20 @@
         "qp:is_high_risk",
         "!ex:art2_2_product_safety_pathway"
       ],
-      "members": ["PN-16A", "PN-16B", "PN-16C", "PN-16D", "PN-16E", "PN-16F", "PN-16G", "PN-16H", "PN-16I", "PN-16J", "PN-16K", "PN-16L"]
+      "members": [
+        "PN-16A",
+        "PN-16B",
+        "PN-16C",
+        "PN-16D",
+        "PN-16E",
+        "PN-16F",
+        "PN-16G",
+        "PN-16H",
+        "PN-16I",
+        "PN-16J",
+        "PN-16K",
+        "PN-16L"
+      ]
     }
   ],
   "prescriptive_norms": [
@@ -142,169 +155,169 @@
       "id": "PN-16A",
       "title": "Provider duty: ensure compliance with Section 2 (requirements for high-risk AI systems)",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16A.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 1,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 1
     },
     {
       "id": "PN-16B",
       "title": "Provider duty: indicate provider identification on system/packaging/documentation",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16B.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 2,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 2
     },
     {
       "id": "PN-16C",
       "title": "Quality management system for providers of high-risk AI systems",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16C.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 3,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 3
     },
     {
       "id": "PN-16D",
       "title": "Provider duty: documentation keeping (Art. 18)",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16D.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 4,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 4
     },
     {
       "id": "PN-16E",
       "title": "Provider duty: keep automatically generated logs when under control (Art. 19)",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16E.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 5,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 5
     },
     {
       "id": "PN-16F",
       "title": "Provider duty: conformity assessment prior to placing/putting into service (Art. 43)",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16F.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 6,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 6
     },
     {
       "id": "PN-16G",
       "title": "Provider duty: EU declaration of conformity (Art. 47)",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16G.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 7,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 7
     },
     {
       "id": "PN-16H",
       "title": "Provider duty: affix CE marking (Art. 48)",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16H.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 8,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 8
     },
     {
       "id": "PN-16I",
       "title": "Provider duty: registration obligations (Art. 49(1))",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16I.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 9,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 9
     },
     {
       "id": "PN-16J",
       "title": "Provider duty: corrective actions and duty of information (Art. 20)",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16J.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 10,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 10
     },
     {
       "id": "PN-16K",
       "title": "Provider duty: demonstrate conformity with Section 2 upon reasoned request",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16K.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 11,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 11
     },
     {
       "id": "PN-16L",
       "title": "Provider duty: accessibility requirements (Directives (EU) 2016/2102 and 2019/882)",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-16L.json",
-      "group_id": "HR-PROV-CORE",
-      "group_order": 12,
       "shared_refs": [
         "qp:in_scope_art2",
         "qp:is_provider",
         "qp:is_high_risk",
         "ex:art2_2_product_safety_pathway"
       ],
-      "status": "draft"
+      "status": "draft",
+      "group_id": "HR-PROV-CORE",
+      "group_order": 12
     }
   ],
   "shared_primitives": [

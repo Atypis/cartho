@@ -1,6 +1,8 @@
 {
   "id": "PN-16H",
   "title": "Provider duty: affix CE marking (Art. 48)",
+  "group_id": "HR-PROV-CORE",
+  "group_order": 8,
   "type": "duty",
   "article_refs": [
     { "article": 16, "point": "(h)", "quote": "affix the CE marking to the high-risk AI system or, where that is not possible, on its packaging or its accompanying documentation, to indicate conformity with this Regulation, in accordance with Article 48;" },

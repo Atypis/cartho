@@ -1,6 +1,8 @@
 {
   "id": "PN-16J",
   "title": "Provider duty: corrective actions and duty of information (Art. 20)",
+  "group_id": "HR-PROV-CORE",
+  "group_order": 10,
   "type": "duty",
   "article_refs": [
     { "article": 16, "point": "(j)", "quote": "take the necessary corrective actions and provide information as required in Article 20;" },

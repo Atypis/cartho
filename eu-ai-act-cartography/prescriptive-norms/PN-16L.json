@@ -1,6 +1,8 @@
 {
   "id": "PN-16L",
   "title": "Provider duty: accessibility requirements (Directives (EU) 2016/2102 and 2019/882)",
+  "group_id": "HR-PROV-CORE",
+  "group_order": 12,
   "type": "duty",
   "article_refs": [
     { "article": 16, "point": "(l)", "quote": "ensure that the high-risk AI system complies with accessibility requirements in accordance with Directives (EU) 2016/2102 and (EU) 2019/882." }

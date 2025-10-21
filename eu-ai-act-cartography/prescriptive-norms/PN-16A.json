@@ -1,6 +1,8 @@
 {
   "id": "PN-16A",
   "title": "Provider duty: ensure compliance with Section 2 (requirements for high-risk AI systems)",
+  "group_id": "HR-PROV-CORE",
+  "group_order": 1,
   "type": "duty",
   "article_refs": [
     {

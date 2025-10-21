@@ -1,6 +1,8 @@
 {
   "id": "PN-16G",
   "title": "Provider duty: EU declaration of conformity (Art. 47)",
+  "group_id": "HR-PROV-CORE",
+  "group_order": 7,
   "type": "duty",
   "article_refs": [
     { "article": 16, "point": "(g)", "quote": "draw up an EU declaration of conformity in accordance with Article 47;" },
