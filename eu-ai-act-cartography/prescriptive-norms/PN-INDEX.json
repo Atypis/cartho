@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated_at": "2025-10-21T13:41:59.419Z",
+  "generated_at": "2025-10-21T13:53:39.852Z",
   "schema_version": "2025-10-10",
   "groups": [
     {
@@ -484,6 +484,315 @@
       "group_order": 12
     },
     {
+      "id": "PN-22A",
+      "title": "Provider duty: appoint an authorised representative in the Union (third-country providers)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-22A.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-22B",
+      "title": "Authorised representative duty: verify DoC/tech docs and conformity assessment carried out",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-22B.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_authorised_representative",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-22C",
+      "title": "Authorised representative duty: keep docs and contact details available for 10 years",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-22C.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_authorised_representative",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-22D",
+      "title": "Authorised representative duty: provide information and documentation (incl. logs access if under provider control)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-22D.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_authorised_representative",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-22E",
+      "title": "Authorised representative duty: cooperate with competent authorities",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-22E.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_authorised_representative",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-22F",
+      "title": "Authorised representative duty: comply with registration obligations or ensure information correctness",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-22F.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_authorised_representative",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-22G",
+      "title": "Authorised representative duty: terminate mandate and inform authorities if provider acts contrary to obligations",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-22G.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_authorised_representative",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-23A",
+      "title": "Importer duty: verify relevant conformity assessment carried out (Art. 43)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-23A.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_importer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-23B",
+      "title": "Importer duty: verify technical documentation drawn up (Art. 11/Annex IV)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-23B.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_importer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-23C",
+      "title": "Importer duty: verify CE marking, DoC, and instructions for use accompany the system",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-23C.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_importer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-23D",
+      "title": "Importer duty: verify authorised representative appointed (Art. 22(1))",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-23D.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_importer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-23E",
+      "title": "Importer duty: withhold placement if non-conform/falsified; inform provider/AR/MSA if risk",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-23E.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_importer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-23F",
+      "title": "Importer duty: indicate importer identification on system/packaging/docs",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-23F.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_importer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-23G",
+      "title": "Importer duty: storage/transport conditions not to jeopardise compliance",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-23G.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_importer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-23H",
+      "title": "Importer duty: keep specified documents for 10 years",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-23H.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_importer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-23I",
+      "title": "Importer duty: provide information and ensure technical documentation availability",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-23I.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_importer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-23J",
+      "title": "Importer duty: cooperate with competent authorities",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-23J.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_importer",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-24A",
+      "title": "Distributor duty: verify CE/DoC/IFU and provider/importer compliance before making available",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-24A.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_distributor",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-24B",
+      "title": "Distributor duty: withhold making available if non-conform; inform provider/importer if risk",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-24B.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_distributor",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-24C",
+      "title": "Distributor duty: storage/transport conditions not to jeopardise compliance",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-24C.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_distributor",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-24D",
+      "title": "Distributor duty: corrective actions or ensure others act; inform provider/importer and authorities if risk",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-24D.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_distributor",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-24E",
+      "title": "Distributor duty: provide information and documentation to authorities on request",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-24E.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_distributor",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-24F",
+      "title": "Distributor duty: cooperate with competent authorities",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-24F.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_distributor",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-25A",
+      "title": "Value-chain reclassification: actor shall be considered provider and subject to Art. 16 obligations (Art. 25(1))",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-25A.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_importer",
+        "qp:is_distributor",
+        "qp:is_deployer",
+        "qp:is_high_risk",
+        "ex:art25_becomes_provider"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-25B",
+      "title": "Initial provider duty: cooperate with new provider and make available necessary information/access (with exception where specified)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-25B.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "ex:art25_becomes_provider"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-25C",
+      "title": "Product manufacturer considered provider in specified circumstances (safety components in Annex I Section A framework)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-25C.json",
+      "shared_refs": [
+        "qp:in_scope_art2"
+      ],
+      "status": "draft"
+    },
+    {
       "id": "PN-26A",
       "title": "Deployer duty: use high-risk AI systems per instructions (technical and organisational measures)",
       "path": "eu-ai-act-cartography/prescriptive-norms/PN-26A.json",
@@ -685,6 +994,30 @@
       "status": "draft",
       "group_id": "HR-DEPLOYER-FRIA",
       "group_order": 3
+    },
+    {
+      "id": "PN-72A",
+      "title": "Provider duty: establish and document post-market monitoring system for high-risk AI systems",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-72A.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
+    },
+    {
+      "id": "PN-73A",
+      "title": "Provider duty: report serious incidents to market surveillance authorities (with timelines)",
+      "path": "eu-ai-act-cartography/prescriptive-norms/PN-73A.json",
+      "shared_refs": [
+        "qp:in_scope_art2",
+        "qp:is_provider",
+        "qp:is_high_risk",
+        "ex:art2_2_product_safety_pathway"
+      ],
+      "status": "draft"
     }
   ],
   "shared_primitives": [
@@ -726,6 +1059,11 @@
     {
       "id": "ex:art2_2_product_safety_pathway",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-art2_2_product_safety_pathway.json",
+      "status": "draft"
+    },
+    {
+      "id": "ex:art25_becomes_provider",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/ex-art25_becomes_provider.json",
       "status": "draft"
     },
     {
@@ -774,13 +1112,28 @@
       "status": "draft"
     },
     {
+      "id": "qp:is_authorised_representative",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_authorised_representative.json",
+      "status": "draft"
+    },
+    {
       "id": "qp:is_deployer",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_deployer.json",
       "status": "draft"
     },
     {
+      "id": "qp:is_distributor",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_distributor.json",
+      "status": "draft"
+    },
+    {
       "id": "qp:is_high_risk",
       "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_high_risk.json",
+      "status": "draft"
+    },
+    {
+      "id": "qp:is_importer",
+      "path": "eu-ai-act-cartography/prescriptive-norms/shared-primitives/qp-is_importer.json",
       "status": "draft"
     },
     {

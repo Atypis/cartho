@@ -472,9 +472,6 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         .update({ status: 'running' })
         .eq('id', evaluation.id);
 
-      // Start polling BEFORE triggering API (so we catch it when it starts)
-      startPollingEvaluation(evaluation.id);
-
       // Load PN bundle
       const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnIds.join(','))}`);
       if (!bundleRes.ok) {
@@ -482,40 +479,104 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       }
       const bundle = await bundleRes.json();
 
-      // Trigger evaluation for each PN
-      for (let i = 0; i < pnIds.length; i++) {
-        const pnId = pnIds[i];
+      // Trigger evaluation for each PN with SSE stream consumption
+      const evaluationPromises = pnIds.map(async (pnId, i) => {
         const pnData = bundle.pns[i];
 
         if (!pnData) {
           console.warn(`⚠️ [Inline Eval] No data for ${pnId}, skipping`);
-          continue;
+          return;
         }
 
         console.log(`🎯 [Inline Eval] Starting evaluation for ${pnId}`);
 
-        // Call API for this PN (don't await - let it run in background)
-        fetch('/api/evaluate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prescriptiveNorm: pnData,
-            sharedPrimitives: bundle.sharedPrimitives || [],
-            caseInput: useCase.description,
-            evaluationId: evaluation.id,
-          }),
-        }).catch(error => {
-          console.error(`❌ [Inline Eval] Error evaluating ${pnId}:`, error);
-        });
-      }
+        try {
+          // Start SSE stream
+          const response = await fetch('/api/evaluate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prescriptiveNorm: pnData,
+              sharedPrimitives: bundle.sharedPrimitives || [],
+              caseInput: useCase.description,
+              evaluationId: evaluation.id,
+            }),
+          });
 
-      console.log(`✅ [Inline Eval] All ${pnIds.length} evaluations triggered`);
+          if (!response.ok) throw new Error(`Evaluation failed for ${pnId}`);
+
+          const reader = response.body?.getReader();
+          const decoder = new TextDecoder();
+
+          if (!reader) throw new Error(`No response body for ${pnId}`);
+
+          console.log(`📡 [SSE] Stream started for ${pnId}`);
+
+          // Read SSE stream
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              console.log(`📡 [SSE] Stream ended for ${pnId}`);
+              break;
+            }
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = JSON.parse(line.slice(6));
+
+                if (data.type === 'progress') {
+                  console.log(`📊 [SSE Progress] ${pnId}: ${data.states.filter((s: any) => s.status === 'completed').length} nodes completed`);
+
+                  // If this PN is currently expanded, update its tree live!
+                  if (expandedPNId === pnId) {
+                    const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, bundle.sharedPrimitives || []);
+
+                    setExpandedPNData({
+                      evaluation,
+                      nodes: expandedNodes,
+                      rootId: pnData.requirements.root,
+                      evaluationStates: data.states,
+                    });
+                  }
+                } else if (data.type === 'complete') {
+                  console.log(`✅ [SSE Complete] ${pnId}: Evaluation finished`);
+
+                  // Remove from running evaluations
+                  setRunningEvaluations(prev => {
+                    const next = new Set(prev);
+                    next.delete(evaluation.id);
+                    return next;
+                  });
+
+                  // Reload to show final results
+                  await loadUseCaseAndEvaluations();
+                } else if (data.type === 'error') {
+                  throw new Error(data.error);
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`❌ [Inline Eval] Error evaluating ${pnId}:`, error);
+          throw error;
+        }
+      });
+
+      console.log(`✅ [Inline Eval] All ${pnIds.length} SSE streams started`);
 
       // Clear selection
       setSelectedPNs([]);
 
       // Reload immediately to show "evaluating" status
       await loadUseCaseAndEvaluations();
+
+      // Wait for all evaluations to complete (in background)
+      Promise.all(evaluationPromises).catch(error => {
+        console.error('❌ [Inline Eval] One or more evaluations failed:', error);
+      });
 
     } catch (error: any) {
       console.error('Failed to run inline evaluation:', error);
@@ -585,11 +646,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     await loadExpandedPNData(pnId, pnStatus.evaluationId);
     setExpandedPNId(pnId);
 
-    // If running, start polling for live updates
-    if (pnStatus.status === 'evaluating' || runningEvaluations.has(pnStatus.evaluationId)) {
-      console.log(`🔄 [Live Updates] Starting live polling for ${pnId}`);
-      startLiveUpdates(pnId, pnStatus.evaluationId);
-    }
+    // Note: Live updates handled by SSE stream in runInlineEvaluation
+    // No need for separate polling
   };
 
   // Load expanded PN data (used by handleExpandPN and live updates)

@@ -1,0 +1,13 @@
+{
+  "id": "PN-73A",
+  "title": "Provider duty: report serious incidents to market surveillance authorities (with timelines)",
+  "type": "duty",
+  "article_refs": [ { "article": 73, "paragraph": 1 } ],
+  "legal_consequence": { "verbatim": "Providers of high-risk AI systems placed on the Union market shall report any serious incident to the market surveillance authorities of the Member States where that incident occurred.", "context": { "items": [ { "label": "Timelines", "kind": "guidance", "text": "Report immediately after establishing a causal link or its reasonable likelihood, and in any event ≤15 days; widespread infringement or serious incident (49(b)) immediately, ≤2 days; in the event of death, immediately or ≤10 days.", "sources": [ { "article": 73, "paragraph": 2 }, { "article": 73, "paragraph": 3 }, { "article": 73, "paragraph": 4 } ] }, { "label": "Initial incomplete report allowed", "kind": "guidance", "text": "An initial incomplete report may be submitted, followed by a complete report.", "sources": [ { "article": 73, "paragraph": 5 } ] }, { "label": "Penalty (Art. 99)", "kind": "guidance", "text": "Obligation/requirement; fines up to EUR 15,000,000 or 3% turnover may apply.", "sources": [ { "article": 99, "paragraph": 2 } ] } ], "refs": ["cons:penalty_art99_requirements"] } },
+  "side_info": { "effective_from": "2026-08-02" },
+  "requirements": { "root": "R-1", "nodes": [ { "id": "R-1", "label": "All gates", "kind": "composite", "operator": "allOf", "children": ["R-1.1","R-1.2","R-1.3","R-1.4"] }, { "id": "R-1.1", "label": "Art. 2 scope", "kind": "primitive", "ref": "qp:in_scope_art2" }, { "id": "R-1.2", "label": "Actor is provider", "kind": "primitive", "ref": "qp:is_provider" }, { "id": "R-1.3", "label": "High-risk", "kind": "primitive", "ref": "qp:is_high_risk" }, { "id": "R-1.4", "label": "Not Art. 2(2)", "kind": "composite", "operator": "not", "children": ["R-1.4.1"] }, { "id": "R-1.4.1", "label": "Art. 2(2) applies", "kind": "primitive", "ref": "ex:art2_2_product_safety_pathway" } ] },
+  "shared_refs": ["qp:in_scope_art2","qp:is_provider","qp:is_high_risk","ex:art2_2_product_safety_pathway"],
+  "metadata": { "version": "1.0", "status": "draft", "extraction_date": "2025-10-21" },
+  "test_vectors": []
+}
+
