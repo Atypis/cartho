@@ -271,9 +271,16 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         // Trigger evaluation via parent callback
         onTriggerEvaluation(data.id, useCaseId, selectedPNs);
       }
-    } catch (error) {
-      console.error('Failed to trigger evaluation:', error);
-      alert('Failed to trigger evaluation');
+    } catch (error: any) {
+      console.error('Failed to trigger evaluation:', {
+        raw: error,
+        stringified: JSON.stringify(error),
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+        hint: error?.hint
+      });
+      alert(`Failed to trigger evaluation: ${error?.message || 'Unknown error'}`);
     } finally {
       setTriggering(false);
     }

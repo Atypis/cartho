@@ -370,7 +370,13 @@ export default function Home() {
               }).eq('id', evaluationId);
 
               if (updateError) {
-                console.error('❌ [Save] Error updating evaluation status:', updateError);
+                console.error('❌ [Save] Error updating evaluation status:', {
+                  raw: updateError,
+                  stringified: JSON.stringify(updateError),
+                  message: updateError?.message,
+                  code: updateError?.code,
+                  details: updateError?.details
+                });
               } else {
                 console.log('✅ [Save] Evaluation status updated to completed');
               }
