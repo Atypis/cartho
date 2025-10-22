@@ -1021,15 +1021,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const ungroupedNotApplicablePNs = notApplicablePNs.filter(pn => !groupedPNIds.has(pn.pnId));
   const ungroupedPendingPNs = pendingPNs.filter(pn => !groupedPNIds.has(pn.pnId));
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-neutral-500">Loading use case...</div>
-      </div>
-    );
-  }
-
-  if (!useCase) {
+  // Don't show blank loading screen - render UI immediately with loading states
+  if (!useCase && !loading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-neutral-500">Use case not found</div>
@@ -1042,36 +1035,61 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       <div className="max-w-5xl mx-auto px-6 py-4 space-y-4">
         {/* Use Case Header with Inline Stats */}
         <div className="bg-white rounded-lg border border-neutral-200 p-4">
-          <h1 className="text-base font-bold text-neutral-900 mb-1">
-            {useCase.title}
-          </h1>
-          <p className="text-sm text-neutral-600 mb-3">
-            {useCase.description}
-          </p>
-          <div className="flex items-center justify-between">
-            {useCase.tags && useCase.tags.length > 0 && (
-              <div className="flex gap-2">
-                {useCase.tags.map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="text-xs px-2 py-1 bg-neutral-100 text-neutral-700 rounded font-medium"
-                  >
-                    {tag}
-                  </span>
-                ))}
+          {useCase ? (
+            <>
+              <h1 className="text-base font-bold text-neutral-900 mb-1">
+                {useCase.title}
+              </h1>
+              <p className="text-sm text-neutral-600 mb-3">
+                {useCase.description}
+              </p>
+              <div className="flex items-center justify-between">
+                {useCase.tags && useCase.tags.length > 0 && (
+                  <div className="flex gap-2">
+                    {useCase.tags.map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="text-xs px-2 py-1 bg-neutral-100 text-neutral-700 rounded font-medium"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {/* Compact Inline Stats */}
+                <div className="flex items-center gap-4 text-xs font-medium">
+                  <span className="text-green-700">✓ {appliesPNs.length} Apply</span>
+                  <span className="text-neutral-500">✗ {notApplicablePNs.length} N/A</span>
+                  <span className="text-blue-700">○ {pendingPNs.length} Pending</span>
+                </div>
               </div>
-            )}
-            {/* Compact Inline Stats */}
-            <div className="flex items-center gap-4 text-xs font-medium">
-              <span className="text-green-700">✓ {appliesPNs.length} Apply</span>
-              <span className="text-neutral-500">✗ {notApplicablePNs.length} N/A</span>
-              <span className="text-blue-700">○ {pendingPNs.length} Pending</span>
-            </div>
-          </div>
+            </>
+          ) : (
+            <>
+              {/* Loading skeleton */}
+              <div className="h-6 bg-neutral-100 rounded animate-pulse mb-2 w-3/4"></div>
+              <div className="h-4 bg-neutral-100 rounded animate-pulse mb-2 w-full"></div>
+              <div className="h-4 bg-neutral-100 rounded animate-pulse w-5/6"></div>
+            </>
+          )}
         </div>
 
+        {/* Loading skeleton for PN sections */}
+        {loading && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-lg border border-neutral-200 p-4">
+              <div className="h-5 bg-neutral-100 rounded animate-pulse mb-3 w-48"></div>
+              <div className="space-y-2">
+                <div className="h-16 bg-neutral-50 rounded animate-pulse"></div>
+                <div className="h-16 bg-neutral-50 rounded animate-pulse"></div>
+                <div className="h-16 bg-neutral-50 rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* APPLIES Section - Groups + Individual PNs */}
-        {(appliesGroups.length > 0 || ungroupedAppliesPNs.length > 0) && (
+        {!loading && (appliesGroups.length > 0 || ungroupedAppliesPNs.length > 0) && (
           <div className="space-y-2">
             <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide px-1">
               ✓ OBLIGATIONS THAT APPLY
@@ -1112,7 +1130,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         )}
 
         {/* NOT APPLICABLE Section - Groups + Individual PNs */}
-        {(notApplicableGroups.length > 0 || ungroupedNotApplicablePNs.length > 0) && (
+        {!loading && (notApplicableGroups.length > 0 || ungroupedNotApplicablePNs.length > 0) && (
           <div className="space-y-2">
             <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide px-1">
               ✗ OBLIGATIONS THAT DO NOT APPLY
@@ -1258,7 +1276,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         )}
 
         {/* PENDING Section - Groups + Individual PNs */}
-        {(pendingGroups.length > 0 || ungroupedPendingPNs.length > 0) && (
+        {!loading && (pendingGroups.length > 0 || ungroupedPendingPNs.length > 0) && (
           <div className="space-y-2">
             <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide px-1">
               ○ PENDING EVALUATION
