@@ -44,7 +44,7 @@ export function RequirementBlock({
     }
   }, [status, result]);
 
-  const isSkipped = shouldSkipNode(node.id, allNodes, evaluationStates);
+  const isSkipped = state?.status === 'skipped' || shouldSkipNode(node.id, allNodes, evaluationStates);
   const isSelected = selectedNodeId === node.id;
 
   // Show detail panel if there's content to show
@@ -274,6 +274,9 @@ function getStatusBorderClass(
   }
   if (status === 'error') {
     return `border-red-600 bg-red-50 ${selectedClass}`;
+  }
+  if (status === 'skipped') {
+    return `border-neutral-200 bg-neutral-50 ${selectedClass}`;
   }
   return `border-neutral-200 ${selectedClass}`; // pending
 }

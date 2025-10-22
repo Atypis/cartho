@@ -5,7 +5,7 @@
 export type NodeKind = 'composite' | 'primitive';
 export type Operator = 'allOf' | 'anyOf' | 'not' | 'xor';
 export type AnswerType = 'boolean';
-export type NodeStatus = 'pending' | 'evaluating' | 'completed' | 'error';
+export type NodeStatus = 'pending' | 'evaluating' | 'completed' | 'error' | 'skipped';
 
 export interface Question {
   prompt: string;

@@ -28,15 +28,17 @@ export function EvaluationProgress({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const completed = states.filter(s => s.status === 'completed').length;
+  const skipped = states.filter(s => s.status === 'skipped').length;
   const evaluating = states.filter(s => s.status === 'evaluating').length;
   const errors = states.filter(s => s.status === 'error').length;
   const pending = states.filter(s => s.status === 'pending').length;
 
-  const progress = totalNodes > 0 ? (completed / totalNodes) * 100 : 0;
+  const resolved = completed + skipped;
+  const progress = totalNodes > 0 ? (resolved / totalNodes) * 100 : 0;
 
   const currentNode = states.find(s => s.status === 'evaluating');
 
-  if (!isRunning && completed === 0) return null;
+  if (!isRunning && completed === 0 && skipped === 0) return null;
 
   return (
     <div className="fixed top-4 right-4 z-50 w-96 animate-in slide-in-from-right duration-300">
@@ -61,7 +63,7 @@ export function EvaluationProgress({
                   {isRunning ? 'Evaluation Running' : 'Evaluation Complete'}
                 </div>
                 <div className="text-xs opacity-90">
-                  {completed}/{totalNodes} requirements
+                  {resolved}/{totalNodes} requirements
                 </div>
               </div>
             </div>
@@ -93,6 +95,12 @@ export function EvaluationProgress({
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
                 <span>{evaluating} running</span>
+              </div>
+            )}
+            {skipped > 0 && (
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-neutral-400 rounded-full" />
+                <span>{skipped} skipped</span>
               </div>
             )}
             {pending > 0 && (
@@ -141,6 +149,8 @@ export function EvaluationProgress({
                       ? 'bg-yellow-50 text-yellow-900 ring-1 ring-yellow-300'
                       : state.status === 'error'
                       ? 'bg-red-50 text-red-900'
+                      : state.status === 'skipped'
+                      ? 'bg-neutral-50 text-neutral-500 italic'
                       : 'bg-neutral-50 text-neutral-600'
                   }`}
                 >
@@ -151,6 +161,8 @@ export function EvaluationProgress({
                       <div className="w-3 h-3 border-2 border-yellow-600 border-t-transparent rounded-full animate-spin" />
                     ) : state.status === 'error' ? (
                       <span className="text-red-600">✗</span>
+                    ) : state.status === 'skipped' ? (
+                      <span className="text-neutral-400">⊘</span>
                     ) : (
                       <div className="w-2 h-2 bg-neutral-400 rounded-full" />
                     )}

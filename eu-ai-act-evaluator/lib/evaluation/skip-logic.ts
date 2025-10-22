@@ -15,6 +15,11 @@ export function shouldSkipNode(
   nodes: RequirementNode[],
   evaluationStates: EvaluationState[]
 ): boolean {
+  const nodeState = evaluationStates.find(s => s.nodeId === nodeId);
+  if (nodeState?.status === 'skipped') {
+    return true;
+  }
+
   const nodeMap = new Map(nodes.map(n => [n.id, n]));
   const parents = getParentChain(nodeId, nodes);
 

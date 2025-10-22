@@ -19,6 +19,7 @@ import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/types';
 import type { EvaluationState } from '@/lib/evaluation/types';
 import { expandSharedRequirements } from '@/lib/evaluation/expand-shared';
+import { reconstructEvaluation } from '@/lib/evaluation/reconstruct';
 
 type UseCase = Database['public']['Tables']['use_cases']['Row'];
 type Evaluation = Database['public']['Tables']['evaluations']['Row'];
@@ -181,6 +182,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
   const buildPNStatusMapOptimized = async (evaluations: Evaluation[]) => {
     const statusMap = new Map<string, PNStatus>();
+    const nextRunningEvaluations = new Set<string>();
 
     console.log(`🔍 [Cockpit] Building PN status map from ${evaluations.length} evaluations`);
 
@@ -199,6 +201,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     console.log(`⟳ [Cockpit] Found ${runningEvals.length} running evaluations`);
 
     for (const evaluation of runningEvals) {
+      nextRunningEvaluations.add(evaluation.id);
+
       const pnIds = evaluation.pn_ids as string[];
       const progress = evaluationProgress.get(evaluation.id);
 
@@ -207,7 +211,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         if (existing) {
           statusMap.set(pnId, {
             ...existing,
-            status: 'evaluating' as any, // Add 'evaluating' to status type
+            status: 'evaluating',
             evaluationId: evaluation.id,
             progressCurrent: progress?.current,
             progressTotal: progress?.total,
@@ -215,15 +219,13 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         }
       }
 
-      // Add to running evaluations set
-      setRunningEvaluations(prev => new Set(prev).add(evaluation.id));
     }
 
-    // Process only completed evaluations
-    const completedEvaluations = evaluations.filter(e => e.status === 'completed');
-    console.log(`✅ [Cockpit] Found ${completedEvaluations.length} completed evaluations`);
+    // Process evaluations that have either completed or have results we can replay
+    const evaluationsToProcess = evaluations.filter(e => e.status === 'completed' || e.status === 'running');
+    console.log(`📊 [Cockpit] Processing ${evaluationsToProcess.length} evaluations for status derivation`);
 
-    for (const evaluation of completedEvaluations) {
+    for (const evaluation of evaluationsToProcess) {
       const pnIds = evaluation.pn_ids as string[];
       console.log(`📊 [Cockpit] Processing evaluation ${evaluation.id} for PNs: ${pnIds.join(', ')}`);
 
@@ -238,12 +240,11 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         console.log(`📝 [Cockpit] Sample result node_ids:`, results.slice(0, 3).map((r: any) => r.node_id));
       }
 
-      if (resultsError || !results || results.length === 0) {
-        console.warn(`⚠️ [Cockpit] No results for evaluation ${evaluation.id}`);
+      if (resultsError) {
+        console.warn(`⚠️ [Cockpit] Failed to load results for evaluation ${evaluation.id}`);
         continue;
       }
 
-      // Load PN bundle for all PNs at once
       try {
         const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnIds.join(','))}`);
         if (!bundleRes.ok) {
@@ -255,8 +256,9 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         const pnDataList = bundle.pns || [];
         const sharedPrimitives = bundle.sharedPrimitives || [];
 
-        // Process each PN
-        for (let i = 0; i < pnIds.length; i++) {
+        let evaluationFullyResolved = true;
+
+        for (let i = 0; i < pnIds.length; i += 1) {
           const pnId = pnIds[i];
           const pnData = pnDataList[i];
 
@@ -265,50 +267,66 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
             continue;
           }
 
-          const rootId = pnData.requirements.root;
-          const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
-          const rootNode = expandedNodes.find((n: any) => n.id === rootId);
-
-          console.log(`🌳 [Cockpit] PN ${pnId}: rootId=${rootId}, rootNode.kind=${rootNode?.kind}`);
-          console.log(`🔎 [Cockpit] Looking for result with node_id=${rootId}`);
-
-          // Find root node result
-          const rootResult = results.find((r: any) => r.node_id === rootId);
-
-          console.log(`${rootResult ? '✅' : '❌'} [Cockpit] Root result ${rootResult ? 'FOUND' : 'NOT FOUND'} for ${pnId}`);
-
-          if (rootResult) {
-            console.log(`📊 [Cockpit] Root decision for ${pnId}: ${rootResult.decision}`);
-
-            const primitiveCount = expandedNodes.filter((n: any) => n.kind === 'primitive').length;
-            const completedCount = results.filter((r: any) => {
-              const node = expandedNodes.find((n: any) => n.id === r.node_id);
-              return node?.kind === 'primitive';
-            }).length;
-
-            const status = rootResult.decision ? 'applies' : 'not-applicable';
-            console.log(`🎯 [Cockpit] Setting ${pnId} status to: ${status}`);
-
-            statusMap.set(pnId, {
-              pnId,
-              article: availablePNs.find(p => p.id === pnId)?.article || pnId.replace('PN-', ''),
-              title: availablePNs.find(p => p.id === pnId)?.title || pnId,
-              status,
-              evaluationId: evaluation.id,
-              evaluatedAt: evaluation.triggered_at,
-              rootDecision: rootResult.decision,
-              progressCurrent: completedCount,
-              progressTotal: primitiveCount
-            });
-          } else {
-            console.warn(`⚠️ [Cockpit] No root result for ${pnId} (root: ${rootId})`);
-            console.warn(`⚠️ [Cockpit] Available node_ids in results:`, results.map((r: any) => r.node_id).join(', '));
+          if (!results || results.length === 0) {
+            evaluationFullyResolved = false;
+            continue;
           }
+
+          const reconstruction = reconstructEvaluation(pnData, sharedPrimitives, results ?? []);
+
+          const primitiveTotal = reconstruction.primitiveTotal;
+          const primitiveResolved = reconstruction.primitiveResolved;
+          const rootDecision = reconstruction.rootDecision;
+
+          const pnResolved = rootDecision !== null && (primitiveTotal === 0 || primitiveResolved === primitiveTotal);
+          if (!pnResolved) {
+            evaluationFullyResolved = false;
+          }
+
+          if (primitiveTotal === 0) {
+            console.warn(`⚠️ [Cockpit] PN ${pnId} has no primitive nodes after expansion`);
+          }
+
+          const status = pnResolved
+            ? (rootDecision ? 'applies' : 'not-applicable')
+            : 'evaluating';
+
+          console.log(
+            `🎯 [Cockpit] Setting ${pnId} status to: ${status} (${primitiveResolved}/${primitiveTotal})`
+          );
+
+          statusMap.set(pnId, {
+            pnId,
+            article: availablePNs.find(p => p.id === pnId)?.article || pnId.replace('PN-', ''),
+            title: availablePNs.find(p => p.id === pnId)?.title || pnId,
+            status,
+            evaluationId: evaluation.id,
+            evaluatedAt: evaluation.triggered_at,
+            rootDecision: rootDecision ?? undefined,
+            progressCurrent: primitiveResolved,
+            progressTotal: primitiveTotal,
+          });
+        }
+
+        if (evaluation.status === 'running' && evaluationFullyResolved) {
+          console.log(`✅ [Cockpit] Evaluation ${evaluation.id} resolved via reconstruction`);
+          nextRunningEvaluations.delete(evaluation.id);
         }
       } catch (error) {
         console.error('[Cockpit] Error processing evaluation:', error);
       }
     }
+
+    setRunningEvaluations(nextRunningEvaluations);
+    setEvaluationProgress(prev => {
+      const next = new Map(prev);
+      for (const key of Array.from(next.keys())) {
+        if (!nextRunningEvaluations.has(key)) {
+          next.delete(key);
+        }
+      }
+      return next;
+    });
 
     setPNStatuses(Array.from(statusMap.values()));
   };
@@ -757,50 +775,20 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     const pnData = bundle.pns[0];
     const sharedPrimitives = bundle.sharedPrimitives || [];
 
-    const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
-    const primitiveNodes = expandedNodes.filter(n => n.kind === 'primitive');
+    const reconstruction = reconstructEvaluation(pnData, sharedPrimitives, results || []);
+    const evaluationStates = reconstruction.states;
 
-    console.log(`🌳 [ExpandedData] Tree has ${primitiveNodes.length} primitives`);
-    console.log(`🔍 [ExpandedData] Primitive node IDs:`, primitiveNodes.slice(0, 3).map(n => n.id));
-
-    // Map results to evaluation states with proper status
-    const evaluationStates: EvaluationState[] = (results || []).map((result: any) => ({
-      nodeId: result.node_id,
-      status: 'completed' as const,
-      result: {
-        nodeId: result.node_id,
-        decision: result.decision,
-        confidence: result.confidence || 0,
-        reasoning: result.reasoning || '',
-        citations: result.citations || [],
-      },
-    }));
-
-    console.log(`✅ [ExpandedData] Created ${evaluationStates.length} completed states`);
-
-    // Mark nodes without results as 'evaluating' (if running) or 'pending'
-    const resultNodeIds = new Set((results || []).map((r: any) => r.node_id));
-    const isRunning = evaluation?.status === 'running';
-
-    for (const node of primitiveNodes) {
-      if (!resultNodeIds.has(node.id)) {
-        evaluationStates.push({
-          nodeId: node.id,
-          // If evaluation is running and no result yet → node is being evaluated!
-          status: (isRunning ? 'evaluating' : 'pending') as const,
-        });
-      }
-    }
-
-    const evaluatingCount = evaluationStates.filter(s => s.status === 'evaluating').length;
     const completedCount = evaluationStates.filter(s => s.status === 'completed').length;
-    const pendingCount = evaluationStates.filter(s => s.status === 'pending').length;
+    const skippedCount = evaluationStates.filter(s => s.status === 'skipped').length;
+    const evaluatingCount = evaluationStates.filter(s => s.status === 'evaluating').length;
 
-    console.log(`📋 [ExpandedData] Final states: ${completedCount} completed, ${evaluatingCount} evaluating, ${pendingCount} pending`);
+    console.log(
+      `📋 [ExpandedData] Final states: ${completedCount} completed, ${skippedCount} skipped, ${evaluatingCount} evaluating`
+    );
 
     setExpandedPNData({
       evaluation,
-      nodes: expandedNodes,
+      nodes: reconstruction.nodes,
       rootId: pnData.requirements.root,
       evaluationStates,
     });

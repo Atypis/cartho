@@ -135,7 +135,9 @@ export default function StandaloneEvaluationPage() {
             const data = JSON.parse(line.slice(6));
 
             if (data.type === 'progress') {
-              console.log(`📊 [Standalone Progress] ${data.states.filter((s: any) => s.status === 'completed').length} nodes completed`);
+              const completedCount = data.states.filter((s: any) => s.status === 'completed').length;
+              const skippedCount = data.states.filter((s: any) => s.status === 'skipped').length;
+              console.log(`📊 [Standalone Progress] ${completedCount + skippedCount} nodes resolved`);
 
               // LIVE UPDATE: Set states immediately
               setEvaluationStates(data.states);
@@ -284,7 +286,7 @@ export default function StandaloneEvaluationPage() {
                   Progress
                 </div>
                 <div className="text-sm text-neutral-700">
-                  {evaluationStates.filter(s => s.status === 'completed').length} / {expandedNodes.filter((n: any) => n.kind === 'primitive').length} nodes completed
+                  {evaluationStates.filter(s => s.status === 'completed' || s.status === 'skipped').length} / {expandedNodes.filter((n: any) => n.kind === 'primitive').length} nodes resolved
                 </div>
               </div>
             )}

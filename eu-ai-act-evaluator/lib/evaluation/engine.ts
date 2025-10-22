@@ -66,6 +66,25 @@ export class EvaluationEngine {
   }
 
   /**
+   * Mark a node and its descendants as skipped (short-circuited branch)
+   */
+  private markSkipped(nodeId: string) {
+    const existing = this.evaluationStates.get(nodeId);
+    if (existing && existing.status !== 'pending' && existing.status !== 'evaluating') {
+      return;
+    }
+
+    this.updateState(nodeId, { status: 'skipped' });
+
+    const node = this.nodeMap.get(nodeId);
+    if (node?.kind === 'composite') {
+      for (const childId of node.children ?? []) {
+        this.markSkipped(childId);
+      }
+    }
+  }
+
+  /**
    * Evaluate a single primitive node using LLM
    */
   private async evaluatePrimitive(
@@ -157,7 +176,8 @@ export class EvaluationEngine {
 
     const childResults: boolean[] = [];
 
-    for (const childId of node.children) {
+    for (let idx = 0; idx < node.children.length; idx += 1) {
+      const childId = node.children[idx];
       const childNode = this.nodeMap.get(childId);
       if (!childNode) {
         throw new Error(`Child node not found: ${childId}`);
@@ -169,9 +189,15 @@ export class EvaluationEngine {
       // Short-circuit optimization
       if (node.operator === 'allOf' && !result) {
         // If any child fails in allOf, we can stop
+        for (let j = idx + 1; j < node.children.length; j += 1) {
+          this.markSkipped(node.children[j]);
+        }
         break;
       } else if (node.operator === 'anyOf' && result) {
         // If any child succeeds in anyOf, we can stop
+        for (let j = idx + 1; j < node.children.length; j += 1) {
+          this.markSkipped(node.children[j]);
+        }
         break;
       }
     }

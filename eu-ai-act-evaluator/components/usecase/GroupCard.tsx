@@ -16,7 +16,7 @@ interface PNStatus {
   pnId: string;
   article: string;
   title: string;
-  status: 'applies' | 'not-applicable' | 'pending';
+  status: 'applies' | 'not-applicable' | 'pending' | 'evaluating';
   evaluationId?: string;
   evaluatedAt?: string;
   rootDecision?: boolean;
@@ -72,13 +72,14 @@ export function GroupCard({
   const evaluatedCount = groupPNStatuses.filter(ps => ps.status !== 'pending').length;
   const appliesCount = groupPNStatuses.filter(ps => ps.status === 'applies').length;
   const notApplicableCount = groupPNStatuses.filter(ps => ps.status === 'not-applicable').length;
+  const evaluatingCount = groupPNStatuses.filter(ps => ps.status === 'evaluating').length;
   const pendingCount = groupPNStatuses.filter(ps => ps.status === 'pending').length;
 
   // Determine overall group status
   let groupStatus: 'pending' | 'partial' | 'evaluated';
   if (pendingCount === totalObligations) {
     groupStatus = 'pending';
-  } else if (pendingCount > 0) {
+  } else if (pendingCount > 0 || evaluatingCount > 0) {
     groupStatus = 'partial';
   } else {
     groupStatus = 'evaluated';
@@ -148,6 +149,9 @@ export function GroupCard({
               )}
               {notApplicableCount > 0 && (
                 <span className="text-neutral-500">{notApplicableCount} N/A</span>
+              )}
+              {evaluatingCount > 0 && (
+                <span className="text-blue-600">{evaluatingCount} running</span>
               )}
             </div>
           )}

@@ -49,7 +49,10 @@ export function RequirementsGrid({
     return node?.kind === 'primitive';
   });
   const completedForHook = primitiveStatesForHook.filter(s => s.status === 'completed').length;
-  const allCompletedForHook = (evaluationStatus === 'completed') || (completedForHook === totalNodes && totalNodes > 0);
+  const skippedForHook = primitiveStatesForHook.filter(s => s.status === 'skipped').length;
+  const resolvedForHook = completedForHook + skippedForHook;
+  const allCompletedForHook =
+    evaluationStatus === 'completed' || (resolvedForHook === totalNodes && totalNodes > 0);
   const isEvaluationFinishedForHook = allCompletedForHook && !isRunning;
 
   // Auto-scroll to summary card when evaluation completes (MUST be before early return!)
@@ -89,11 +92,13 @@ export function RequirementsGrid({
   });
 
   const completed = primitiveStates.filter(s => s.status === 'completed').length;
+  const skipped = primitiveStates.filter(s => s.status === 'skipped').length;
   const evaluating = primitiveStates.filter(s => s.status === 'evaluating').length;
   const errors = primitiveStates.filter(s => s.status === 'error').length;
   const pending = primitiveStates.filter(s => s.status === 'pending').length;
   const passed = primitiveStates.filter(s => s.status === 'completed' && s.result?.decision).length;
   const failed = primitiveStates.filter(s => s.status === 'completed' && !s.result?.decision).length;
+  const resolved = completed + skipped;
 
   // Debug logging
   console.log('📊 [Grid Stats]', {
@@ -103,6 +108,7 @@ export function RequirementsGrid({
     evaluationStatesCount: evaluationStates.length,
     primitiveStatesCount: primitiveStates.length,
     completed,
+    skipped,
     passed,
     failed,
     isRunning,
@@ -112,20 +118,29 @@ export function RequirementsGrid({
   // If evaluation status is 'completed', always show 100% (even if some nodes skipped)
   // If evaluation status is 'running' but all nodes are completed/pending (no 'evaluating'), treat as complete (short-circuit)
   const noNodesCurrentlyEvaluating = primitiveStates.every(s => s.status !== 'evaluating');
-  const hasCompletedNodes = completed > 0;
-  const isShortCircuited = (evaluationStatus === 'running' || isRunning) && noNodesCurrentlyEvaluating && hasCompletedNodes;
+  const hasResolvedNodes = resolved > 0;
+  const isShortCircuited =
+    (evaluationStatus === 'running' || isRunning) &&
+    noNodesCurrentlyEvaluating &&
+    hasResolvedNodes;
 
-  const progress = ((evaluationStatus === 'completed' || isShortCircuited) && totalNodes > 0) ? 100 :
-                   (totalNodes > 0 ? (completed / totalNodes) * 100 : 0);
+  const progress = (() => {
+    if (totalNodes === 0) return 0;
+    if (evaluationStatus === 'completed' || isShortCircuited) return 100;
+    return Math.min(100, (resolved / totalNodes) * 100);
+  })();
   const currentNode = primitiveStates.find(s => s.status === 'evaluating');
 
   // Show progress header if evaluation is running or has results
-  const showProgress = isRunning || completed > 0;
+  const showProgress = isRunning || hasResolvedNodes;
 
   // Calculate applicability status for Article 4
-  const hasResults = completed > 0;
+  const hasResults = hasResolvedNodes;
   // Check BOTH database status AND completion count (handles short-circuit optimization)
-  const allCompleted = (evaluationStatus === 'completed') || isShortCircuited || (completed === totalNodes && totalNodes > 0);
+  const allCompleted =
+    evaluationStatus === 'completed' ||
+    isShortCircuited ||
+    (resolved === totalNodes && totalNodes > 0);
   const isEvaluationFinished = allCompleted && !isRunning;
 
   // Get ROOT node evaluation result - this determines if the norm APPLIES or NOT
@@ -135,6 +150,7 @@ export function RequirementsGrid({
   console.log('🎯 [Applicability Check]', {
     evaluationStatus,
     completed,
+    skipped,
     totalNodes,
     allCompleted,
     isRunning,
@@ -171,7 +187,7 @@ export function RequirementsGrid({
                   <div className="w-2 h-2 bg-green-500 rounded-full" />
                 )}
                 <span className="text-[10px] font-semibold text-neutral-700">
-                  {evaluationStatus === 'completed' ? totalNodes : completed}/{totalNodes}
+                  {evaluationStatus === 'completed' ? totalNodes : resolved}/{totalNodes}
                 </span>
               </div>
 
@@ -198,6 +214,11 @@ export function RequirementsGrid({
                 {evaluating > 0 && (
                   <div className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-medium">
                     ⟳ {evaluating}
+                  </div>
+                )}
+                {skipped > 0 && (
+                  <div className="px-1.5 py-0.5 bg-neutral-100 text-neutral-500 rounded font-medium">
+                    ⊘ {skipped}
                   </div>
                 )}
                 {pending > 0 && (
