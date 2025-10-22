@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/types';
 
 type UseCase = Database['public']['Tables']['use_cases']['Row'];
@@ -10,7 +12,46 @@ interface UseCaseGalleryProps {
   onCreateNew: () => void;
 }
 
+interface UseCaseWithMetadata extends UseCase {
+  evaluation_count?: number;
+  latest_evaluation_date?: string | null;
+}
+
 export function UseCaseGallery({ useCases, onSelectUseCase, onCreateNew }: UseCaseGalleryProps) {
+  const [useCasesWithMetadata, setUseCasesWithMetadata] = useState<UseCaseWithMetadata[]>([]);
+
+  useEffect(() => {
+    async function loadMetadata() {
+      const enriched = await Promise.all(
+        useCases.map(async (useCase) => {
+          const { count } = await supabase
+            .from('evaluations')
+            .select('*', { count: 'exact', head: true })
+            .eq('use_case_id', useCase.id);
+
+          const { data: latestEval } = await supabase
+            .from('evaluations')
+            .select('created_at')
+            .eq('use_case_id', useCase.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          return {
+            ...useCase,
+            evaluation_count: count || 0,
+            latest_evaluation_date: latestEval?.created_at || null,
+          };
+        })
+      );
+      setUseCasesWithMetadata(enriched);
+    }
+
+    if (useCases.length > 0) {
+      loadMetadata();
+    }
+  }, [useCases]);
+
   if (useCases.length === 0) {
     return (
       <div className="flex items-center justify-center h-full p-12">
@@ -34,77 +75,136 @@ export function UseCaseGallery({ useCases, onSelectUseCase, onCreateNew }: UseCa
     );
   }
 
-  return (
-    <div className="h-full overflow-y-auto p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-neutral-900 mb-2 tracking-tight">
-            Your Use Cases
-          </h2>
-          <p className="text-neutral-600 text-[15px]">
-            {useCases.length} {useCases.length === 1 ? 'system' : 'systems'} documented
-          </p>
-        </div>
+  const displayData = useCasesWithMetadata.length > 0 ? useCasesWithMetadata : useCases;
 
-        {/* Use Case Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Create New Card */}
+  return (
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-7xl mx-auto p-8">
+        {/* Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-neutral-900 tracking-tight">
+              Use Cases
+            </h2>
+            <p className="text-sm text-neutral-600 mt-1">
+              {useCases.length} {useCases.length === 1 ? 'system' : 'systems'} documented
+            </p>
+          </div>
           <button
             onClick={onCreateNew}
-            className="group bg-white border-2 border-dashed border-neutral-300 rounded-xl p-6
-                     hover:border-neutral-400 hover:bg-neutral-50 transition-all duration-200
-                     flex flex-col items-center justify-center min-h-[200px] gap-3"
+            className="px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm
+                     font-medium hover:bg-neutral-800 transition-colors flex items-center gap-2"
           >
-            <div className="w-12 h-12 rounded-full bg-neutral-100 group-hover:bg-neutral-200
-                          flex items-center justify-center transition-colors">
-              <svg className="w-6 h-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </div>
-            <div className="text-[15px] font-medium text-neutral-700 group-hover:text-neutral-900">
-              Create New Use Case
-            </div>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            New Use Case
           </button>
+        </div>
 
-          {/* Existing Use Cases */}
-          {useCases.map((useCase) => (
-            <button
-              key={useCase.id}
-              onClick={() => onSelectUseCase(useCase.id)}
-              className="group bg-white border border-neutral-200 rounded-xl p-6
-                       hover:border-neutral-300 hover:shadow-md transition-all duration-200
-                       text-left flex flex-col min-h-[200px]"
-            >
-              <div className="flex-1">
-                <h3 className="text-[16px] font-semibold text-neutral-900 mb-2 line-clamp-2
-                             group-hover:text-blue-600 transition-colors">
-                  {useCase.title}
-                </h3>
-                <p className="text-[14px] text-neutral-600 leading-relaxed line-clamp-3">
-                  {useCase.description}
-                </p>
-              </div>
-
-              {/* Metadata Footer */}
-              <div className="mt-4 pt-4 border-t border-neutral-100 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {useCase.tags && useCase.tags.length > 0 && (
-                    <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded font-medium">
-                      {useCase.tags[0]}
+        {/* Table */}
+        <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-neutral-50 border-b border-neutral-200">
+              <tr>
+                <th className="text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider px-6 py-3">
+                  System
+                </th>
+                <th className="text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider px-6 py-3">
+                  Category
+                </th>
+                <th className="text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider px-6 py-3">
+                  Created
+                </th>
+                <th className="text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider px-6 py-3">
+                  Evaluations
+                </th>
+                <th className="text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider px-6 py-3">
+                  Status
+                </th>
+                <th className="text-right text-xs font-semibold text-neutral-700 uppercase tracking-wider px-6 py-3">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {displayData.map((useCase) => (
+                <tr
+                  key={useCase.id}
+                  className="hover:bg-neutral-50 transition-colors cursor-pointer"
+                  onClick={() => onSelectUseCase(useCase.id)}
+                >
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-neutral-900 line-clamp-1">
+                        {useCase.title}
+                      </span>
+                      <span className="text-xs text-neutral-500 line-clamp-1 mt-0.5">
+                        {useCase.description}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {useCase.tags && useCase.tags.length > 0 ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-neutral-100 text-neutral-700">
+                        {useCase.tags[0]}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-neutral-400">—</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-sm text-neutral-600">
+                      {new Date(useCase.created_at).toLocaleDateString('en', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
                     </span>
-                  )}
-                </div>
-                <div className="text-xs text-neutral-500">
-                  {new Date(useCase.created_at).toLocaleDateString('en', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}
-                </div>
-              </div>
-            </button>
-          ))}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-neutral-900">
+                        {(useCase as UseCaseWithMetadata).evaluation_count ?? '—'}
+                      </span>
+                      {(useCase as UseCaseWithMetadata).latest_evaluation_date && (
+                        <span className="text-xs text-neutral-500">
+                          Last: {new Date((useCase as UseCaseWithMetadata).latest_evaluation_date!).toLocaleDateString('en', {
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {(useCase as UseCaseWithMetadata).evaluation_count && (useCase as UseCaseWithMetadata).evaluation_count! > 0 ? (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                        Evaluated
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-neutral-100 text-neutral-600">
+                        <span className="w-1.5 h-1.5 rounded-full bg-neutral-400"></span>
+                        Pending
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectUseCase(useCase.id);
+                      }}
+                      className="text-sm text-neutral-600 hover:text-neutral-900 font-medium"
+                    >
+                      View →
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
