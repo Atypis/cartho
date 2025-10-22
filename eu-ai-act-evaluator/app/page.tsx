@@ -17,7 +17,9 @@ import { Breadcrumb } from '@/components/navigation/Breadcrumb';
 import { UseCaseCockpit } from '@/components/usecase/UseCaseCockpit';
 import { UseCaseCreator } from '@/components/usecase/UseCaseCreator';
 import { UseCaseGallery } from '@/components/usecase/UseCaseGallery';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { AppSidebar } from '@/components/app-sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/types';
 import type { PrescriptiveNorm, SharedPrimitive, EvaluationState, RequirementNode } from '@/lib/evaluation/types';
@@ -461,7 +463,7 @@ export default function Home() {
     : false;
 
   return (
-    <div className="flex h-screen bg-white">
+    <SidebarProvider>
       {/* Show Use Case Creator as fullscreen overlay */}
       {showUseCaseCreator && (
         <div className="fixed inset-0 bg-white z-50">
@@ -474,7 +476,7 @@ export default function Home() {
 
       {/* Left Panel: Sidebar (always visible when not creating use case) */}
       {!showUseCaseCreator && (
-        <Sidebar
+        <AppSidebar
           useCaseCount={useCases.length}
           onNavigateHome={() => {
             setCanvasView('welcome');
@@ -576,12 +578,16 @@ export default function Home() {
       )}
 
       {/* Right Panel: Main Content Area */}
-      <div className="flex-1 flex flex-col bg-neutral-50 overflow-hidden">
-        {/* Top Navigation Bar - only show for non-welcome views */}
-        {canvasView !== 'welcome' && (
-          <div className="bg-white border-b border-neutral-200 px-6 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+      {!showUseCaseCreator && (
+        <SidebarInset>
+          <div className="flex-1 flex flex-col bg-neutral-50 overflow-hidden">
+            {/* Top Navigation Bar - only show for non-welcome views */}
+            {canvasView !== 'welcome' && (
+              <div className="bg-white border-b border-neutral-200 px-6 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <SidebarTrigger className="-ml-1" />
+                    <Separator orientation="vertical" className="mr-2 h-4" />
                 {canvasView === 'evaluation' ? (
                 <>
                   {/* Back button from evaluation */}
@@ -716,7 +722,9 @@ export default function Home() {
             onViewEvaluation={handleViewEvaluation}
           />
         )}
-      </div>
-    </div>
+          </div>
+        </SidebarInset>
+      )}
+    </SidebarProvider>
   );
 }
