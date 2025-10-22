@@ -706,7 +706,8 @@ export default function Home() {
               )}
             </div>
           </div>
-        )}
+        </div>
+      )}
 
         {/* Canvas Area */}
         {canvasView === 'welcome' && (
