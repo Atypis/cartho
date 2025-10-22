@@ -271,13 +271,8 @@ export default function Home() {
     try {
       console.log(`🚀 [Run] Starting evaluation ${evaluationId}...`);
 
-      // Navigate to evaluation view and set it as selected
-      setSelectedEvaluationId(evaluationId);
-      setCanvasView('evaluation');
-
-      // Add to running set
-      setRunningEvaluations(prev => new Set(prev).add(evaluationId));
-      setEvaluationStatesMap(prev => new Map(prev).set(evaluationId, []));
+      // Pre-load all data BEFORE switching views (for seamless UX)
+      console.log(`📦 [Run] Pre-loading data...`);
 
       // Load use case description
       const { data: useCase } = await supabase
@@ -310,7 +305,6 @@ export default function Home() {
         totalNodeCount += expandedNodes.filter(n => n.kind === 'primitive').length;
       }
 
-      setTotalNodesMap(prev => new Map(prev).set(evaluationId, totalNodeCount));
       console.log(`📊 Total primitive nodes to evaluate: ${totalNodeCount}`);
 
       // Load evaluation metadata
@@ -325,6 +319,11 @@ export default function Home() {
         throw new Error('Failed to load evaluation metadata');
       }
 
+      // Now that all data is loaded, set up the UI state
+      setTotalNodesMap(prev => new Map(prev).set(evaluationId, totalNodeCount));
+      setRunningEvaluations(prev => new Set(prev).add(evaluationId));
+      setEvaluationStatesMap(prev => new Map(prev).set(evaluationId, []));
+
       // Set up evaluation data structure for display (with empty states initially)
       setEvaluationData({
         evaluation,
@@ -333,7 +332,11 @@ export default function Home() {
         evaluationStates: [],
       } as any);
 
-      console.log(`📊 [Run] Evaluation view initialized with ${allNodes.length} nodes`);
+      // NOW switch to evaluation view (data is ready, no loading screen!)
+      setSelectedEvaluationId(evaluationId);
+      setCanvasView('evaluation');
+
+      console.log(`✅ [Run] Evaluation view ready with ${allNodes.length} nodes`);
 
       // Start SSE stream
       const response = await fetch('/api/evaluate', {
@@ -418,8 +421,8 @@ export default function Home() {
   const handleViewEvaluation = (evaluationId: string) => {
     console.log(`👁️ [View] Navigating to evaluation ${evaluationId}`);
 
-    // Clear old evaluation data first to prevent showing stale data
-    setEvaluationData(null);
+    // Don't clear evaluation data - let new data replace it smoothly
+    // This prevents the jarring "Loading..." blank screen
     setSelectedNodeId(null);
 
     // Set the new evaluation ID and switch view
