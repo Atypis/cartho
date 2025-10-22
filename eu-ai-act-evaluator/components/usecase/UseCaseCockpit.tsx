@@ -66,12 +66,13 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [selectedPNs, setSelectedPNs] = useState<string[]>([]);
   const [triggering, setTriggering] = useState(false);
 
-  // Expanded PN state
-  const [expandedPNId, setExpandedPNId] = useState<string | null>(null);
-  const [expandedPNData, setExpandedPNData] = useState<any>(null);
+  // Tab system for IDE-style inspector (multiple open PNs)
+  const [openTabs, setOpenTabs] = useState<string[]>([]); // Array of open PN IDs
+  const [activeTab, setActiveTab] = useState<string | null>(null); // Currently visible tab
+  const [tabData, setTabData] = useState<Map<string, any>>(new Map()); // Cache data for each tab
 
-  // Ref to track current expandedPNId (for SSE handler closure)
-  const expandedPNIdRef = useRef<string | null>(expandedPNId);
+  // Ref to track current activeTab (for SSE handler closure)
+  const activeTabRef = useRef<string | null>(activeTab);
 
   // Evaluation history
   const [showHistory, setShowHistory] = useState(false);
@@ -86,10 +87,10 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [pnSelectedNodeMap, setPnSelectedNodeMap] = useState<Map<string, string | null>>(new Map());
   const pnSelectedNodeMapRef = useRef(pnSelectedNodeMap);
 
-  // Keep expandedPNId ref in sync with state (for SSE handler closure)
+  // Keep activeTab ref in sync with state (for SSE handler closure)
   useEffect(() => {
-    expandedPNIdRef.current = expandedPNId;
-  }, [expandedPNId]);
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
 
   useEffect(() => {
     pnSelectedNodeMapRef.current = pnSelectedNodeMap;
@@ -697,13 +698,17 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
                   autoSelectFromStates(pnId, states);
 
-                  // If this PN is currently expanded, also update its tree live!
-                  if (expandedPNIdRef.current === pnId) {
-                    setExpandedPNData({
-                      evaluation,
-                      nodes: expandedNodes,
-                      rootId: pnData.requirements.root,
-                      evaluationStates: states,
+                  // If this PN has an open tab, update its tree live!
+                  if (openTabs.includes(pnId)) {
+                    setTabData(prev => {
+                      const next = new Map(prev);
+                      next.set(pnId, {
+                        evaluation,
+                        nodes: expandedNodes,
+                        rootId: pnData.requirements.root,
+                        evaluationStates: states,
+                      });
+                      return next;
                     });
                   }
                 } else if (data.type === 'complete') {
@@ -860,27 +865,58 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     await handleExpandPN(pnId);
   };
 
-  const handleExpandPN = async (pnId: string) => {
-    if (expandedPNId === pnId) {
-      setExpandedPNId(null);
-      setExpandedPNData(null);
-      return;
-    }
-
+  // Tab management functions
+  const openTab = async (pnId: string) => {
     const pnStatus = pnStatuses.find(p => p.pnId === pnId);
     if (!pnStatus || !pnStatus.evaluationId) {
-      console.warn(`[Cockpit] Cannot expand ${pnId}: no evaluationId`);
+      console.warn(`[Cockpit] Cannot open ${pnId}: no evaluationId`);
       return;
     }
 
-    console.log(`[Cockpit] Expanding ${pnId}...`);
+    // If tab already open, just switch to it
+    if (openTabs.includes(pnId)) {
+      setActiveTab(pnId);
+      return;
+    }
 
-    // Load full evaluation data
+    console.log(`[Cockpit] Opening tab for ${pnId}...`);
+
+    // Load data for this tab
     await loadExpandedPNData(pnId, pnStatus.evaluationId);
-    setExpandedPNId(pnId);
 
-    // Note: Live updates handled by SSE stream in runInlineEvaluation
-    // No need for separate polling
+    // Add to tabs and make it active
+    setOpenTabs(prev => [...prev, pnId]);
+    setActiveTab(pnId);
+  };
+
+  const closeTab = (pnId: string) => {
+    setOpenTabs(prev => {
+      const newTabs = prev.filter(id => id !== pnId);
+
+      // If we closed the active tab, switch to another tab
+      if (activeTab === pnId) {
+        const index = prev.indexOf(pnId);
+        const newActiveTab = newTabs[index] || newTabs[index - 1] || null;
+        setActiveTab(newActiveTab);
+      }
+
+      return newTabs;
+    });
+
+    // Clear tab data
+    setTabData(prev => {
+      const next = new Map(prev);
+      next.delete(pnId);
+      return next;
+    });
+  };
+
+  const switchTab = (pnId: string) => {
+    setActiveTab(pnId);
+  };
+
+  const handleExpandPN = async (pnId: string) => {
+    await openTab(pnId);
   };
 
   // Load expanded PN data (used by handleExpandPN and live updates)
@@ -907,11 +943,17 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
       autoSelectFromStates(pnId, cachedStates, pnData.requirements.root);
 
-      setExpandedPNData({
+      const data = {
         evaluation,
         nodes: expandedNodes,
         rootId: pnData.requirements.root,
         evaluationStates: cachedStates, // ✅ Use live states from SSE
+      };
+
+      setTabData(prev => {
+        const next = new Map(prev);
+        next.set(pnId, data);
+        return next;
       });
       return;
     }
@@ -953,37 +995,22 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       `📋 [ExpandedData] Final states: ${completedCount} completed, ${skippedCount} skipped, ${evaluatingCount} evaluating`
     );
 
-    setExpandedPNData({
+    const data = {
       evaluation,
       nodes: reconstruction.nodes,
       rootId: pnData.requirements.root,
       evaluationStates,
+    };
+
+    setTabData(prev => {
+      const next = new Map(prev);
+      next.set(pnId, data);
+      return next;
     });
   };
 
-  // Start live updates for running evaluation
-  const startLiveUpdates = (pnId: string, evaluationId: string) => {
-    const pollInterval = setInterval(async () => {
-      // Check if still expanded
-      if (expandedPNId !== pnId) {
-        clearInterval(pollInterval);
-        return;
-      }
-
-      // Check if still running
-      const pnStatus = pnStatuses.find(p => p.pnId === pnId);
-      if (!pnStatus || pnStatus.status !== 'evaluating') {
-        console.log(`✅ [Live Updates] Stopping polling for ${pnId} - completed`);
-        clearInterval(pollInterval);
-        return;
-      }
-
-      // Reload the expanded data
-      await loadExpandedPNData(pnId, evaluationId);
-    }, 1000); // Poll every second
-
-    return () => clearInterval(pollInterval);
-  };
+  // Start live updates for running evaluation (deprecated - now using SSE live updates)
+  // Keeping this for reference but SSE streams handle live updates automatically
 
   // Calculate PN statuses
   const appliesPNs = pnStatuses.filter(p => p.status === 'applies');
@@ -1032,8 +1059,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
   return (
     <div className="h-full flex overflow-hidden">
-      {/* Main Content Area */}
-      <div className={`flex-1 overflow-y-auto transition-all duration-300 ${expandedPNId ? 'mr-2' : ''}`}>
+      {/* Main Content Area - Stable Width */}
+      <div className="flex-1 overflow-y-auto border-r border-neutral-200">
         <div className="max-w-4xl mx-auto px-6 py-4 space-y-4">
           {/* Use Case Header - Clean & Minimal */}
           {useCase ? (
@@ -1116,8 +1143,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
               <PNTable
                 title=""
                 pns={ungroupedAppliesPNs}
-                expandedPNId={expandedPNId}
-                expandedPNData={expandedPNData}
+                activeTab={activeTab}
                 onExpandPN={handleExpandPN}
                 type="applies"
                 showHeader={false}
@@ -1157,8 +1183,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
               <PNTable
                 title=""
                 pns={ungroupedNotApplicablePNs}
-                expandedPNId={expandedPNId}
-                expandedPNData={expandedPNData}
+                activeTab={activeTab}
                 onExpandPN={handleExpandPN}
                 type="not-applicable"
                 showHeader={false}
@@ -1227,14 +1252,14 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                   <div className="divide-y divide-neutral-100">
                     {pnIds.map(pnId => {
                       const pnStatus = pnStatuses.find(ps => ps.pnId === pnId);
-                      const isExpanded = expandedPNId === pnId;
+                      const isActive = activeTab === pnId;
 
                       return (
                         <div key={pnId}>
                           <button
                             onClick={() => handleExpandPN(pnId)}
                             className={`w-full text-left px-5 py-3 transition-colors flex items-center gap-3 ${
-                              isExpanded
+                              isActive
                                 ? 'bg-blue-50 border-l-2 border-blue-500'
                                 : 'hover:bg-neutral-50'
                             }`}
@@ -1294,8 +1319,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
               <PNTable
                 title=""
                 pns={ungroupedPendingPNs}
-                expandedPNId={expandedPNId}
-                expandedPNData={expandedPNData}
+                activeTab={activeTab}
                 onExpandPN={handleExpandPN}
                 type="pending"
                 showHeader={false}
@@ -1375,45 +1399,68 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         </div>
       </div>
 
-      {/* Right-Side Detail Panel - IDE Style */}
-      {expandedPNId && expandedPNData && (
-        <div className="w-[600px] flex-shrink-0 border-l border-neutral-200 bg-neutral-50 overflow-y-auto">
-          <div className="sticky top-0 z-10 bg-white border-b border-neutral-200 px-5 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="text-xs font-mono font-semibold text-neutral-900">
-                {expandedPNId}
-              </div>
-              <div className="text-xs text-neutral-500">
-                {pnStatuses.find(p => p.pnId === expandedPNId)?.title}
+      {/* Right-Side Inspector Panel - Always Visible IDE Style */}
+      <div className="w-[45%] flex-shrink-0 bg-neutral-50 flex flex-col overflow-hidden">
+        {/* Tab Bar */}
+        {openTabs.length > 0 ? (
+          <div className="border-b border-neutral-200 bg-white flex items-center overflow-x-auto">
+            {openTabs.map(pnId => (
+              <button
+                key={pnId}
+                onClick={() => switchTab(pnId)}
+                className={`group flex items-center gap-2 px-4 py-2.5 text-xs font-medium border-r border-neutral-200 transition-colors flex-shrink-0 ${
+                  activeTab === pnId
+                    ? 'bg-neutral-50 text-neutral-900'
+                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
+                }`}
+              >
+                <span className="font-mono">{pnId}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    closeTab(pnId);
+                  }}
+                  className="p-0.5 hover:bg-neutral-200 rounded transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        {/* Inspector Content */}
+        <div className="flex-1 overflow-y-auto">
+          {activeTab && tabData.has(activeTab) ? (
+            <div className="p-5">
+              <RequirementsGrid
+                nodes={tabData.get(activeTab)?.nodes || []}
+                rootId={tabData.get(activeTab)?.rootId || ''}
+                evaluationStates={tabData.get(activeTab)?.evaluationStates || []}
+                onNodeClick={(nodeId) => handleNodeSelection(activeTab, nodeId)}
+                selectedNodeId={pnSelectedNodeMap.get(activeTab) ?? null}
+                isRunning={pnStatuses.find(p => p.pnId === activeTab)?.status === 'evaluating'}
+                totalNodes={tabData.get(activeTab)?.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
+                evaluationStatus={pnStatuses.find(p => p.pnId === activeTab)?.status || tabData.get(activeTab)?.evaluation?.status || 'pending'}
+              />
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center p-12">
+              <div className="text-center max-w-sm">
+                <svg className="w-16 h-16 mx-auto mb-4 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h3 className="text-sm font-medium text-neutral-900 mb-2">No Obligation Selected</h3>
+                <p className="text-xs text-neutral-500 leading-relaxed">
+                  Select an obligation from the list to inspect its evaluation tree and requirements.
+                </p>
               </div>
             </div>
-            <button
-              onClick={() => {
-                setExpandedPNId(null);
-                setExpandedPNData(null);
-              }}
-              className="p-1.5 hover:bg-neutral-100 rounded transition-colors"
-            >
-              <svg className="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="p-5">
-            <RequirementsGrid
-              nodes={expandedPNData.nodes || []}
-              rootId={expandedPNData.rootId || ''}
-              evaluationStates={expandedPNData.evaluationStates || []}
-              onNodeClick={(nodeId) => handleNodeSelection(expandedPNId, nodeId)}
-              selectedNodeId={pnSelectedNodeMap.get(expandedPNId) ?? null}
-              isRunning={pnStatuses.find(p => p.pnId === expandedPNId)?.status === 'evaluating'}
-              totalNodes={expandedPNData.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
-              evaluationStatus={pnStatuses.find(p => p.pnId === expandedPNId)?.status || expandedPNData.evaluation?.status || 'pending'}
-            />
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -1422,8 +1469,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 function PNTable({
   title,
   pns,
-  expandedPNId,
-  expandedPNData,
+  activeTab,
   onExpandPN,
   type,
   showHeader = true,
@@ -1437,8 +1483,7 @@ function PNTable({
 }: {
   title: string;
   pns: PNStatus[];
-  expandedPNId: string | null;
-  expandedPNData: any;
+  activeTab: string | null;
   onExpandPN: (pnId: string) => void;
   type: 'applies' | 'not-applicable' | 'pending';
   showHeader?: boolean;
@@ -1475,7 +1520,7 @@ function PNTable({
 
       <div className="divide-y divide-neutral-100">
         {pns.map((pn) => {
-          const isExpanded = expandedPNId === pn.pnId;
+          const isActive = activeTab === pn.pnId;
           const isPending = pn.status === 'pending';
           const isEvaluating = pn.status === 'evaluating';
           const isCompleted = pn.status === 'applies' || pn.status === 'not-applicable';
@@ -1486,7 +1531,7 @@ function PNTable({
             <div key={pn.pnId}>
               {/* Row */}
               <div className={`w-full px-5 py-3 flex items-center gap-3 transition-colors ${
-                isExpanded
+                isActive
                   ? 'bg-blue-50 border-l-2 border-blue-500'
                   : 'hover:bg-neutral-50'
               }`}>
