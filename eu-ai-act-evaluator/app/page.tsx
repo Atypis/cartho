@@ -17,6 +17,7 @@ import { Breadcrumb } from '@/components/navigation/Breadcrumb';
 import { UseCaseCockpit } from '@/components/usecase/UseCaseCockpit';
 import { UseCaseCreator } from '@/components/usecase/UseCaseCreator';
 import { UseCaseGallery } from '@/components/usecase/UseCaseGallery';
+import { Sidebar } from '@/components/layout/Sidebar';
 import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/types';
 import type { PrescriptiveNorm, SharedPrimitive, EvaluationState, RequirementNode } from '@/lib/evaluation/types';
@@ -35,7 +36,6 @@ export default function Home() {
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [showAllChats, setShowAllChats] = useState(false);
-  const [showUseCasesList, setShowUseCasesList] = useState(false);
   const [useCases, setUseCases] = useState<UseCase[]>([]);
   const [showUseCaseCreator, setShowUseCaseCreator] = useState(false);
 
@@ -472,38 +472,19 @@ export default function Home() {
         </div>
       )}
 
-      {/* Left Panel: Minimal sidebar (only when not creating use case) */}
-      {!showUseCaseCreator && canvasView !== 'welcome' && (
-        <div className="w-[80px] border-r border-neutral-200 flex flex-col items-center py-4 gap-4">
-          {/* Home Button */}
-          <button
-            onClick={() => {
-              setCanvasView('welcome');
-              setSelectedEvaluationId(null);
-              setSelectedUseCaseId(null);
-              setEvaluationData(null);
-            }}
-            className="w-12 h-12 rounded-lg bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center
-                     transition-colors group"
-            title="Home"
-          >
-            <svg className="w-5 h-5 text-neutral-600 group-hover:text-neutral-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-          </button>
-
-          {/* New Use Case Button */}
-          <button
-            onClick={() => setShowUseCaseCreator(true)}
-            className="w-12 h-12 rounded-lg bg-neutral-900 hover:bg-neutral-800 flex items-center justify-center
-                     transition-colors group"
-            title="New Use Case"
-          >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
-        </div>
+      {/* Left Panel: Sidebar (always visible when not creating use case) */}
+      {!showUseCaseCreator && (
+        <Sidebar
+          useCaseCount={useCases.length}
+          onNavigateHome={() => {
+            setCanvasView('welcome');
+            setSelectedEvaluationId(null);
+            setSelectedUseCaseId(null);
+            setEvaluationData(null);
+          }}
+          onCreateNew={() => setShowUseCaseCreator(true)}
+          currentView={canvasView}
+        />
       )}
 
       {/* Old chat interface - keep for non-welcome views if needed */}
@@ -653,56 +634,6 @@ export default function Home() {
                 <h3 className="text-sm font-semibold text-neutral-900">
                   EU AI Act Compliance Evaluator
                 </h3>
-              )}
-            </div>
-
-            {/* Use Cases Button with Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowUseCasesList(!showUseCasesList)}
-                className="text-xs px-4 py-2 bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors font-medium flex items-center gap-2"
-              >
-                Use Cases
-                <svg
-                  className={`w-3 h-3 transition-transform ${showUseCasesList ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {/* Dropdown */}
-              {showUseCasesList && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg border border-neutral-200 shadow-xl z-50 max-h-96 overflow-y-auto">
-                  <div className="p-2">
-                    {useCases.length === 0 ? (
-                      <div className="px-4 py-8 text-center text-sm text-neutral-500">
-                        No use cases yet. Create one in the chat!
-                      </div>
-                    ) : (
-                      useCases.map((useCase) => (
-                        <button
-                          key={useCase.id}
-                          onClick={() => {
-                            setSelectedUseCaseId(useCase.id);
-                            setCanvasView('usecase-cockpit');
-                            setShowUseCasesList(false);
-                          }}
-                          className="block w-full text-left px-3 py-2 rounded hover:bg-neutral-50 transition-colors"
-                        >
-                          <div className="text-sm font-medium text-neutral-900 mb-1">
-                            {useCase.title}
-                          </div>
-                          <div className="text-xs text-neutral-500 line-clamp-2">
-                            {useCase.description}
-                          </div>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                </div>
               )}
             </div>
           </div>
