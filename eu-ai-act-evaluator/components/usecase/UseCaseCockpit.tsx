@@ -1273,7 +1273,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                               </div>
                             )}
                             <svg
-                              className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                              className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${isActive ? 'rotate-180' : ''}`}
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -1600,7 +1600,7 @@ function PNTable({
 
                     {(isCompleted || isEvaluating) && (
                       <svg
-                        className={`w-4 h-4 text-neutral-300 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        className={`w-4 h-4 text-neutral-300 transition-transform ${isActive ? 'rotate-180' : ''}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
