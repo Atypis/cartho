@@ -298,9 +298,9 @@ export async function POST(req: NextRequest) {
           )
         );
         await writer.close();
+      } finally {
+        releaseSharedCache();
       }
-    })().finally(() => {
-      releaseSharedCache();
     })();
 
     // Return streaming response
