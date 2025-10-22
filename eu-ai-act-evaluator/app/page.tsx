@@ -39,10 +39,9 @@ export default function Home() {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [showAllChats, setShowAllChats] = useState(false);
   const [useCases, setUseCases] = useState<UseCase[]>([]);
-  const [showUseCaseCreator, setShowUseCaseCreator] = useState(false);
 
   // Canvas state
-  const [canvasView, setCanvasView] = useState<'welcome' | 'evaluation' | 'usecase-cockpit'>('welcome');
+  const [canvasView, setCanvasView] = useState<'welcome' | 'evaluation' | 'usecase-cockpit' | 'creator'>('welcome');
   const [evaluationData, setEvaluationData] = useState<EvaluationResult | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEvaluationId, setSelectedEvaluationId] = useState<string | null>(null);
@@ -176,16 +175,13 @@ export default function Home() {
     // Reload use cases list
     await loadUseCases();
 
-    // Close creator
-    setShowUseCaseCreator(false);
-
     // Navigate to the use case cockpit
     setSelectedUseCaseId(useCaseId);
     setCanvasView('usecase-cockpit');
   };
 
   const handleCancelUseCaseCreator = () => {
-    setShowUseCaseCreator(false);
+    setCanvasView('welcome');
   };
 
   const loadEvaluationResults = async (evaluationId: string) => {
@@ -464,33 +460,21 @@ export default function Home() {
 
   return (
     <SidebarProvider>
-      {/* Show Use Case Creator as fullscreen overlay */}
-      {showUseCaseCreator && (
-        <div className="fixed inset-0 bg-white z-50">
-          <UseCaseCreator
-            onComplete={handleUseCaseCreated}
-            onCancel={handleCancelUseCaseCreator}
-          />
-        </div>
-      )}
-
-      {/* Left Panel: Sidebar (always visible when not creating use case) */}
-      {!showUseCaseCreator && (
-        <AppSidebar
-          useCaseCount={useCases.length}
-          onNavigateHome={() => {
-            setCanvasView('welcome');
-            setSelectedEvaluationId(null);
-            setSelectedUseCaseId(null);
-            setEvaluationData(null);
-          }}
-          onCreateNew={() => setShowUseCaseCreator(true)}
-          currentView={canvasView}
-        />
-      )}
+      {/* Left Panel: Sidebar */}
+      <AppSidebar
+        useCaseCount={useCases.length}
+        onNavigateHome={() => {
+          setCanvasView('welcome');
+          setSelectedEvaluationId(null);
+          setSelectedUseCaseId(null);
+          setEvaluationData(null);
+        }}
+        onCreateNew={() => setCanvasView('creator')}
+        currentView={canvasView}
+      />
 
       {/* Old chat interface - keep for non-welcome views if needed */}
-      {!showUseCaseCreator && false && (
+      {false && (
         <div className="w-[500px] border-r border-neutral-200 flex flex-col">
           <>
             {/* Header */}
@@ -500,7 +484,7 @@ export default function Home() {
                   Assistant
                 </h2>
                 <button
-                  onClick={() => setShowUseCaseCreator(true)}
+                  onClick={() => setCanvasView('creator')}
                   className="text-xs px-3 py-1.5 bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors font-medium"
                 >
                   New Use Case
@@ -578,8 +562,7 @@ export default function Home() {
       )}
 
       {/* Right Panel: Main Content Area */}
-      {!showUseCaseCreator && (
-        <SidebarInset>
+      <SidebarInset>
           <div className="flex-1 flex flex-col bg-neutral-50 overflow-hidden">
             {/* Top Navigation Bar - only show for non-welcome views */}
             {canvasView !== 'welcome' && (
@@ -636,6 +619,22 @@ export default function Home() {
                     {useCases.find(uc => uc.id === selectedUseCaseId)?.title || 'Use Case Cockpit'}
                   </h3>
                 </>
+              ) : canvasView === 'creator' ? (
+                <>
+                  {/* Back button from creator */}
+                  <button
+                    onClick={() => setCanvasView('welcome')}
+                    className="text-sm px-3 py-1.5 text-neutral-600 hover:text-neutral-900 transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back
+                  </button>
+                  <h3 className="text-sm font-semibold text-neutral-900">
+                    Create New Use Case
+                  </h3>
+                </>
               ) : (
                 <h3 className="text-sm font-semibold text-neutral-900">
                   EU AI Act Compliance Evaluator
@@ -654,8 +653,17 @@ export default function Home() {
               setSelectedUseCaseId(useCaseId);
               setCanvasView('usecase-cockpit');
             }}
-            onCreateNew={() => setShowUseCaseCreator(true)}
+            onCreateNew={() => setCanvasView('creator')}
           />
+        )}
+
+        {canvasView === 'creator' && (
+          <div className="h-full overflow-y-auto">
+            <UseCaseCreator
+              onComplete={handleUseCaseCreated}
+              onCancel={handleCancelUseCaseCreator}
+            />
+          </div>
         )}
 
         {canvasView === 'evaluation' && (
@@ -724,7 +732,6 @@ export default function Home() {
         )}
           </div>
         </SidebarInset>
-      )}
     </SidebarProvider>
   );
 }
