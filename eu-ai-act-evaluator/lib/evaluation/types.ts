@@ -7,6 +7,11 @@ export type Operator = 'allOf' | 'anyOf' | 'not' | 'xor';
 export type AnswerType = 'boolean';
 export type NodeStatus = 'pending' | 'evaluating' | 'completed' | 'error' | 'skipped';
 
+export interface SharedRequirementMetadata {
+  primitiveId: string;
+  nodeId: string;
+}
+
 export interface Question {
   prompt: string;
   answer_type: AnswerType;
@@ -44,6 +49,7 @@ export interface RequirementNode {
     point?: string;
     quote?: string;
   }>;
+  sharedRequirement?: SharedRequirementMetadata;
 }
 
 export interface PrescriptiveNorm {
@@ -100,6 +106,7 @@ export interface EvaluationResult {
   decision: boolean;
   confidence: number;
   reasoning: string;
+  citations?: unknown;
 }
 
 export interface EvaluationState {

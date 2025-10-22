@@ -12,6 +12,7 @@ import type {
   SharedPrimitive,
 } from './types';
 import { expandSharedRequirements } from './expand-shared';
+import type { SharedEvaluationCache } from './shared-cache';
 
 export class EvaluationEngine {
   private pn: PrescriptiveNorm;
@@ -19,17 +20,20 @@ export class EvaluationEngine {
   private nodeMap: Map<string, RequirementNode>;
   private evaluationStates: Map<string, EvaluationState>;
   private onStateUpdate?: (states: EvaluationState[]) => void;
+  private sharedCache?: SharedEvaluationCache;
 
   constructor(
     pn: PrescriptiveNorm,
     sharedPrimitives: SharedPrimitive[] = [],
-    onStateUpdate?: (states: EvaluationState[]) => void
+    onStateUpdate?: (states: EvaluationState[]) => void,
+    sharedCache?: SharedEvaluationCache
   ) {
     this.pn = pn;
     this.expandedNodes = expandSharedRequirements(pn.requirements.nodes, sharedPrimitives);
     this.nodeMap = new Map();
     this.evaluationStates = new Map();
     this.onStateUpdate = onStateUpdate;
+    this.sharedCache = sharedCache;
 
     // Build node map from PN
     this.buildNodeMap();
@@ -104,14 +108,32 @@ export class EvaluationEngine {
     // Build prompt from node data
     const prompt = this.buildPrompt(node, caseInput);
 
+    const sharedKey = this.getSharedRequirementKey(node);
+
     try {
       // Call LLM evaluation function
-      const result = await evaluateFn(prompt);
+      const rawResult = await (sharedKey && this.sharedCache
+        ? this.sharedCache.getOrEvaluate(sharedKey, async () => {
+            const sharedResult = await evaluateFn(prompt);
+            return { ...sharedResult, nodeId: '' };
+          })
+        : evaluateFn(prompt));
+
+      const result: EvaluationResult = {
+        ...rawResult,
+        nodeId: node.id,
+      };
+
+      if (rawResult.citations !== undefined) {
+        result.citations = Array.isArray(rawResult.citations)
+          ? [...rawResult.citations]
+          : rawResult.citations;
+      }
 
       // Update state with result
       this.updateState(node.id, {
         status: 'completed',
-        result: { ...result, nodeId: node.id },
+        result,
       });
 
       return result;
@@ -122,6 +144,19 @@ export class EvaluationEngine {
       });
       throw error;
     }
+  }
+
+  private getSharedRequirementKey(node: RequirementNode): string | null {
+    if (!node.sharedRequirement) {
+      return null;
+    }
+
+    const { primitiveId, nodeId } = node.sharedRequirement;
+    if (!primitiveId || !nodeId) {
+      return null;
+    }
+
+    return `${primitiveId}::${nodeId}`;
   }
 
   /**

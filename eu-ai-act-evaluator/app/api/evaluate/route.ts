@@ -8,6 +8,7 @@ import { OpenAI } from 'openai';
 import crypto from 'crypto';
 import { EvaluationEngine } from '@/lib/evaluation/engine';
 import type { PrescriptiveNorm, SharedPrimitive, EvaluationResult } from '@/lib/evaluation/types';
+import { InMemorySharedEvaluationCache } from '@/lib/evaluation/shared-cache';
 import { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
 
@@ -17,6 +18,56 @@ const openai = new OpenAI({
 
 // Simple in-memory cache for node evaluations within the process
 const evalCache = new Map<string, EvaluationResult>();
+
+type SharedEvaluationContext = {
+  cache: InMemorySharedEvaluationCache;
+  refCount: number;
+  cleanupTimer?: NodeJS.Timeout;
+};
+
+const SHARED_CONTEXT_TTL_MS = 5 * 60 * 1000;
+const sharedEvaluationContexts = new Map<string, SharedEvaluationContext>();
+
+function acquireSharedCache(evaluationId?: string | null) {
+  if (!evaluationId) {
+    return {
+      cache: new InMemorySharedEvaluationCache(),
+      release: () => {},
+    };
+  }
+
+  let context = sharedEvaluationContexts.get(evaluationId);
+  if (!context) {
+    context = {
+      cache: new InMemorySharedEvaluationCache(),
+      refCount: 0,
+    };
+    sharedEvaluationContexts.set(evaluationId, context);
+  }
+
+  context.refCount += 1;
+  if (context.cleanupTimer) {
+    clearTimeout(context.cleanupTimer);
+    context.cleanupTimer = undefined;
+  }
+
+  const release = () => {
+    const stored = sharedEvaluationContexts.get(evaluationId);
+    if (!stored) return;
+
+    stored.refCount -= 1;
+    if (stored.refCount <= 0 && !stored.cleanupTimer) {
+      stored.cleanupTimer = setTimeout(() => {
+        const latest = sharedEvaluationContexts.get(evaluationId);
+        if (latest && latest.refCount <= 0) {
+          sharedEvaluationContexts.delete(evaluationId);
+        }
+      }, SHARED_CONTEXT_TTL_MS);
+    }
+  };
+
+  return { cache: context.cache, release };
+}
 
 function sha256(s: string) {
   return crypto.createHash('sha256').update(s).digest('hex');
@@ -51,11 +102,15 @@ export async function POST(req: NextRequest) {
     // Track if writer is closed (prevent writing after completion)
     let writerClosed = false;
 
+    const { cache: sharedCache, release: releaseSharedCache } = acquireSharedCache(evaluationId);
+
     // Build set of primitive node IDs (to filter composites from DB writes)
     const primitiveNodeIds = new Set<string>();
     const tempEngine = new EvaluationEngine(
       prescriptiveNorm as PrescriptiveNorm,
-      sharedPrimitives as SharedPrimitive[] || []
+      sharedPrimitives as SharedPrimitive[] || [],
+      undefined,
+      sharedCache
     );
     // Access expanded nodes to identify primitives
     for (const node of (tempEngine as any).expandedNodes || []) {
@@ -123,7 +178,8 @@ export async function POST(req: NextRequest) {
                 writerClosed = true; // Mark as closed to prevent further attempts
               }
             }
-          }
+          },
+          sharedCache
         );
 
     console.log(`🔧 [API] Engine created, starting evaluation...`);
@@ -243,6 +299,8 @@ export async function POST(req: NextRequest) {
         );
         await writer.close();
       }
+    })().finally(() => {
+      releaseSharedCache();
     })();
 
     // Return streaming response

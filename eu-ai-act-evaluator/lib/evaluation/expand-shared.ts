@@ -17,7 +17,6 @@ export function expandSharedRequirements(
 ): RequirementNode[] {
   const sharedMap = new Map(sharedPrimitives.map(sp => [sp.id, sp]));
   const expandedNodes: RequirementNode[] = [];
-  const nodeIdMap = new Map<string, string>(); // Maps original ID to new expanded ID
 
   function expandNode(node: RequirementNode, parentPrefix: string = ''): RequirementNode {
     // If this is a primitive with a ref to a shared predicate, expand it
@@ -44,7 +43,8 @@ export function expandSharedRequirements(
         sharedRoot,
         sharedNodes,
         `${node.id}-expanded`,
-        sharedMap
+        sharedMap,
+        shared.id
       );
 
       // Add all expanded nodes to our collection
@@ -98,7 +98,8 @@ function expandSharedTree(
   rootNode: RequirementNode,
   allNodes: RequirementNode[],
   idPrefix: string,
-  sharedMap: Map<string, SharedPrimitive>
+  sharedMap: Map<string, SharedPrimitive>,
+  sharedPrimitiveId: string
 ): RequirementNode[] {
   const result: RequirementNode[] = [];
   const nodeMap = new Map(allNodes.map(n => [n.id, n]));
@@ -118,7 +119,8 @@ function expandSharedTree(
         sharedRoot,
         sharedNodes,
         newId,
-        sharedMap
+        sharedMap,
+        shared.id
       );
 
       result.push(...nestedExpanded);
@@ -132,6 +134,10 @@ function expandSharedTree(
         children: [nestedExpanded[0].id],
         sources: node.sources,
         context: node.context,
+        sharedRequirement: {
+          primitiveId: sharedPrimitiveId,
+          nodeId: node.id,
+        },
       };
 
       return compositeNode;
@@ -154,6 +160,10 @@ function expandSharedTree(
         ...node,
         id: newId,
         children: expandedChildren,
+        sharedRequirement: {
+          primitiveId: sharedPrimitiveId,
+          nodeId: node.id,
+        },
       };
     }
 
@@ -161,6 +171,10 @@ function expandSharedTree(
     return {
       ...node,
       id: newId,
+      sharedRequirement: {
+        primitiveId: sharedPrimitiveId,
+        nodeId: node.id,
+      },
     };
   }
 
