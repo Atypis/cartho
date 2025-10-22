@@ -11,7 +11,8 @@
  * Includes inline TREEMAXX expansion and evaluation history
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { RequirementsGrid } from '@/components/evaluation/RequirementsGrid';
 import { GroupCard } from '@/components/usecase/GroupCard';
 import { supabase } from '@/lib/supabase/client';
@@ -51,6 +52,7 @@ interface UseCaseCockpitProps {
 }
 
 export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluation }: UseCaseCockpitProps) {
+  const router = useRouter();
   const [useCase, setUseCase] = useState<UseCase | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -67,6 +69,9 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [expandedPNId, setExpandedPNId] = useState<string | null>(null);
   const [expandedPNData, setExpandedPNData] = useState<any>(null);
 
+  // Ref to track current expandedPNId (for SSE handler closure)
+  const expandedPNIdRef = useRef<string | null>(expandedPNId);
+
   // Evaluation history
   const [showHistory, setShowHistory] = useState(false);
   const [evaluationHistory, setEvaluationHistory] = useState<Evaluation[]>([]);
@@ -75,6 +80,12 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [runningEvaluations, setRunningEvaluations] = useState<Set<string>>(new Set());
   const [evaluationProgress, setEvaluationProgress] = useState<Map<string, { current: number, total: number }>>(new Map());
   const [evaluationBundles, setEvaluationBundles] = useState<Map<string, any>>(new Map()); // Cache bundles to avoid repeated fetches
+  const [evaluationStatesMap, setEvaluationStatesMap] = useState<Map<string, EvaluationState[]>>(new Map()); // Live states from SSE streams
+
+  // Keep expandedPNId ref in sync with state (for SSE handler closure)
+  useEffect(() => {
+    expandedPNIdRef.current = expandedPNId;
+  }, [expandedPNId]);
 
   // Load PN catalog
   useEffect(() => {
@@ -530,8 +541,16 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 if (data.type === 'progress') {
                   console.log(`📊 [SSE Progress] ${pnId}: ${data.states.filter((s: any) => s.status === 'completed').length} nodes completed`);
 
-                  // If this PN is currently expanded, update its tree live!
-                  if (expandedPNId === pnId) {
+                  // ✅ ALWAYS cache states in memory (even if PN not expanded)
+                  setEvaluationStatesMap(prev => {
+                    const next = new Map(prev);
+                    next.set(pnId, data.states);
+                    return next;
+                  });
+
+                  // If this PN is currently expanded, also update its tree live!
+                  // Use ref to avoid stale closure (SSE handler created once but expandedPNId changes)
+                  if (expandedPNIdRef.current === pnId) {
                     const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, bundle.sharedPrimitives || []);
 
                     setExpandedPNData({
@@ -551,8 +570,41 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                     return next;
                   });
 
-                  // Reload to show final results
-                  await loadUseCaseAndEvaluations();
+                  // Clear progress tracking
+                  setEvaluationProgress(prev => {
+                    const next = new Map(prev);
+                    next.delete(evaluation.id);
+                    return next;
+                  });
+
+                  // Clear memory cache for this PN (data now in DB)
+                  setEvaluationStatesMap(prev => {
+                    const next = new Map(prev);
+                    next.delete(pnId);
+                    return next;
+                  });
+
+                  // Retry logic to handle DB replication lag
+                  const reloadWithRetry = async (attempts = 0) => {
+                    await loadUseCaseAndEvaluations();
+
+                    // Check if evaluation still appears as running
+                    const { data: checkEval } = await supabase
+                      .from('evaluations')
+                      .select('status')
+                      .eq('id', evaluation.id)
+                      .single();
+
+                    if (checkEval?.status === 'running' && attempts < 3) {
+                      console.log(`⏳ [SSE Complete] Evaluation still "running" in DB, retrying in 1s (attempt ${attempts + 1}/3)`);
+                      setTimeout(() => reloadWithRetry(attempts + 1), 1000);
+                    } else {
+                      console.log(`✅ [SSE Complete] Reload successful, status: ${checkEval?.status}`);
+                    }
+                  };
+
+                  // Wait 1s for DB replication, then reload with retry
+                  setTimeout(() => reloadWithRetry(), 1000);
                 } else if (data.type === 'error') {
                   throw new Error(data.error);
                 }
@@ -653,6 +705,36 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   // Load expanded PN data (used by handleExpandPN and live updates)
   const loadExpandedPNData = async (pnId: string, evaluationId: string) => {
     console.log(`📂 [ExpandedData] Loading data for ${pnId}, evaluation ${evaluationId}`);
+
+    // Check memory cache first (for running evaluations)
+    const cachedStates = evaluationStatesMap.get(pnId);
+    if (cachedStates && cachedStates.length > 0) {
+      console.log(`⚡ [ExpandedData] Using cached live states (${cachedStates.length} states)`);
+
+      // Load minimal data (just nodes structure)
+      const { data: evaluation } = await supabase
+        .from('evaluations')
+        .select('*')
+        .eq('id', evaluationId)
+        .single();
+
+      const bundleRes = await fetch(`/api/prescriptive/bundle?pnIds=${encodeURIComponent(pnId)}`);
+      const bundle = await bundleRes.json();
+      const pnData = bundle.pns[0];
+      const sharedPrimitives = bundle.sharedPrimitives || [];
+      const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
+
+      setExpandedPNData({
+        evaluation,
+        nodes: expandedNodes,
+        rootId: pnData.requirements.root,
+        evaluationStates: cachedStates, // ✅ Use live states from SSE
+      });
+      return;
+    }
+
+    // Fallback to DB (for completed/old evaluations)
+    console.log(`💾 [ExpandedData] Loading from database`);
 
     const { data: evaluation } = await supabase
       .from('evaluations')
@@ -866,6 +948,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 onExpandPN={handleExpandPN}
                 type="applies"
                 showHeader={false}
+                useCaseId={useCaseId}
               />
             )}
           </div>
@@ -904,6 +987,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 onExpandPN={handleExpandPN}
                 type="not-applicable"
                 showHeader={false}
+                useCaseId={useCaseId}
               />
             )}
           </div>
@@ -1051,6 +1135,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 onTogglePN={handleTogglePN}
                 onEvaluateSelected={handleEvaluateSelectedPNs}
                 onEvaluateAll={() => handleEvaluateAllPendingPNs(ungroupedPendingPNs.map(p => p.pnId))}
+                useCaseId={useCaseId}
               />
             )}
           </div>
@@ -1134,7 +1219,8 @@ function PNTable({
   selectedPNs = [],
   onTogglePN,
   onEvaluateSelected,
-  onEvaluateAll
+  onEvaluateAll,
+  useCaseId
 }: {
   title: string;
   pns: PNStatus[];
@@ -1147,7 +1233,9 @@ function PNTable({
   onTogglePN?: (pnId: string) => void;
   onEvaluateSelected?: () => void;
   onEvaluateAll?: () => void;
+  useCaseId?: string;
 }) {
+  const router = useRouter();
   const getBorderColor = () => {
     if (type === 'applies') return 'border-green-200';
     if (type === 'not-applicable') return 'border-neutral-200';
@@ -1199,6 +1287,17 @@ function PNTable({
                   <div className="w-3.5 h-3.5 flex-shrink-0">
                     <div className="w-3.5 h-3.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                   </div>
+                )}
+
+                {/* Standalone evaluation button for pending PNs */}
+                {isPending && !isEvaluating && (
+                  <button
+                    onClick={() => router.push(`/evaluation-standalone?pnId=${pn.pnId}&useCaseId=${useCaseId}`)}
+                    className="text-[10px] px-2 py-0.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded font-medium transition-colors flex-shrink-0"
+                    title="Open in standalone evaluation page (old working pattern)"
+                  >
+                    Test
+                  </button>
                 )}
 
                 {/* Clickable area for expansion */}

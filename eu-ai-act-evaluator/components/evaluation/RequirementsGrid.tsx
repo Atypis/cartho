@@ -108,9 +108,14 @@ export function RequirementsGrid({
     isRunning,
   });
 
-  // Progress calculation: If evaluation is complete, show 100% (handles short-circuit skips)
-  // Otherwise calculate based on actually completed nodes
-  const progress = (evaluationStatus === 'completed' && totalNodes > 0) ? 100 :
+  // Progress calculation: Handle short-circuit optimization
+  // If evaluation status is 'completed', always show 100% (even if some nodes skipped)
+  // If evaluation status is 'running' but all nodes are completed/pending (no 'evaluating'), treat as complete (short-circuit)
+  const noNodesCurrentlyEvaluating = primitiveStates.every(s => s.status !== 'evaluating');
+  const hasCompletedNodes = completed > 0;
+  const isShortCircuited = (evaluationStatus === 'running' || isRunning) && noNodesCurrentlyEvaluating && hasCompletedNodes;
+
+  const progress = ((evaluationStatus === 'completed' || isShortCircuited) && totalNodes > 0) ? 100 :
                    (totalNodes > 0 ? (completed / totalNodes) * 100 : 0);
   const currentNode = primitiveStates.find(s => s.status === 'evaluating');
 
@@ -120,7 +125,7 @@ export function RequirementsGrid({
   // Calculate applicability status for Article 4
   const hasResults = completed > 0;
   // Check BOTH database status AND completion count (handles short-circuit optimization)
-  const allCompleted = (evaluationStatus === 'completed') || (completed === totalNodes && totalNodes > 0);
+  const allCompleted = (evaluationStatus === 'completed') || isShortCircuited || (completed === totalNodes && totalNodes > 0);
   const isEvaluationFinished = allCompleted && !isRunning;
 
   // Get ROOT node evaluation result - this determines if the norm APPLIES or NOT

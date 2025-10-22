@@ -48,6 +48,9 @@ export async function POST(req: NextRequest) {
     // Track which nodes we've already written (prevents duplicates)
     const writtenNodes = new Set<string>();
 
+    // Track if writer is closed (prevent writing after completion)
+    let writerClosed = false;
+
     // Build set of primitive node IDs (to filter composites from DB writes)
     const primitiveNodeIds = new Set<string>();
     const tempEngine = new EvaluationEngine(
@@ -109,10 +112,17 @@ export async function POST(req: NextRequest) {
               }
             }
 
-            // Stream progress update
-            await writer.write(
-              encoder.encode(`data: ${JSON.stringify({ type: 'progress', states })}\n\n`)
-            );
+            // Stream progress update (only if writer not closed)
+            if (!writerClosed) {
+              try {
+                await writer.write(
+                  encoder.encode(`data: ${JSON.stringify({ type: 'progress', states })}\n\n`)
+                );
+              } catch (error) {
+                console.error('⚠️  [API] Failed to write progress (stream likely closed):', error);
+                writerClosed = true; // Mark as closed to prevent further attempts
+              }
+            }
           }
         );
 
@@ -201,6 +211,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Send final result
+        writerClosed = true; // Mark as closed BEFORE closing
         await writer.write(
           encoder.encode(`data: ${JSON.stringify({ type: 'complete', result })}\n\n`)
         );
@@ -221,6 +232,7 @@ export async function POST(req: NextRequest) {
           console.log(`❌ [DB] Marked evaluation ${evaluationId} as failed`);
         }
 
+        writerClosed = true; // Mark as closed BEFORE closing
         await writer.write(
           encoder.encode(
             `data: ${JSON.stringify({
