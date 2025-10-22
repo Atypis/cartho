@@ -82,11 +82,18 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [evaluationProgress, setEvaluationProgress] = useState<Map<string, { current: number, total: number }>>(new Map());
   const [evaluationBundles, setEvaluationBundles] = useState<Map<string, any>>(new Map()); // Cache bundles to avoid repeated fetches
   const [evaluationStatesMap, setEvaluationStatesMap] = useState<Map<string, EvaluationState[]>>(new Map()); // Live states from SSE streams
+  const [livePNStatusMap, setLivePNStatusMap] = useState<Map<string, PNStatus>>(new Map());
 
   // Keep expandedPNId ref in sync with state (for SSE handler closure)
   useEffect(() => {
     expandedPNIdRef.current = expandedPNId;
   }, [expandedPNId]);
+
+  // Reset live overlays when switching use cases
+  useEffect(() => {
+    setLivePNStatusMap(new Map());
+    setEvaluationStatesMap(new Map());
+  }, [useCaseId]);
 
   // Load PN catalog
   useEffect(() => {
@@ -317,6 +324,14 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       }
     }
 
+    const mergedStatusMap = new Map(statusMap);
+    livePNStatusMap.forEach((liveStatus, pnId) => {
+      mergedStatusMap.set(pnId, liveStatus);
+      if (liveStatus.evaluationId && liveStatus.status !== 'evaluating') {
+        nextRunningEvaluations.delete(liveStatus.evaluationId);
+      }
+    });
+
     setRunningEvaluations(nextRunningEvaluations);
     setEvaluationProgress(prev => {
       const next = new Map(prev);
@@ -328,7 +343,46 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       return next;
     });
 
-    setPNStatuses(Array.from(statusMap.values()));
+    const orderedStatuses: PNStatus[] = availablePNs.map(pn => {
+      const status = mergedStatusMap.get(pn.id);
+      if (status) return status;
+      return {
+        pnId: pn.id,
+        article: pn.article || pn.id.replace('PN-', ''),
+        title: pn.title || pn.id,
+        status: 'pending',
+      };
+    });
+
+    setPNStatuses(orderedStatuses);
+  };
+
+  const publishLiveStatus = (pnStatus: PNStatus) => {
+    setLivePNStatusMap(prev => {
+      const next = new Map(prev);
+      next.set(pnStatus.pnId, pnStatus);
+      return next;
+    });
+
+    if (availablePNs.length === 0) {
+      return;
+    }
+
+    setPNStatuses(prev => {
+      const statusMap = new Map(prev.map(status => [status.pnId, status]));
+      statusMap.set(pnStatus.pnId, pnStatus);
+
+      return availablePNs.map(pn => {
+        const status = statusMap.get(pn.id);
+        if (status) return status;
+        return {
+          pnId: pn.id,
+          article: pn.article || pn.id.replace('PN-', ''),
+          title: pn.title || pn.id,
+          status: 'pending',
+        };
+      });
+    });
   };
 
   const triggerEvaluation = async () => {
@@ -519,6 +573,14 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
         console.log(`🎯 [Inline Eval] Starting evaluation for ${pnId}`);
 
+        const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, bundle.sharedPrimitives || []);
+        const primitiveNodes = expandedNodes.filter((n: any) => n.kind === 'primitive');
+        const primitiveNodeIds = new Set(primitiveNodes.map((node: any) => node.id));
+        const totalPrimitiveNodes = primitiveNodes.length;
+        const pnMeta = availablePNs.find(p => p.id === pnId);
+        const pnArticle = pnMeta?.article || pnId.replace('PN-', '');
+        const pnTitle = pnMeta?.title || pnId;
+
         try {
           // Start SSE stream
           const response = await fetch('/api/evaluate', {
@@ -557,25 +619,50 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 const data = JSON.parse(line.slice(6));
 
                 if (data.type === 'progress') {
-                  console.log(`📊 [SSE Progress] ${pnId}: ${data.states.filter((s: any) => s.status === 'completed').length} nodes completed`);
+                  const states = data.states as EvaluationState[];
+                  const resolvedCount = states.reduce((count, state) => {
+                    if (!primitiveNodeIds.has(state.nodeId)) return count;
+                    if (state.status === 'completed' || state.status === 'skipped') {
+                      return count + 1;
+                    }
+                    return count;
+                  }, 0);
+
+                  console.log(`📊 [SSE Progress] ${pnId}: ${resolvedCount}/${totalPrimitiveNodes}`);
 
                   // ✅ ALWAYS cache states in memory (even if PN not expanded)
                   setEvaluationStatesMap(prev => {
                     const next = new Map(prev);
-                    next.set(pnId, data.states);
+                    next.set(pnId, states);
                     return next;
                   });
 
-                  // If this PN is currently expanded, also update its tree live!
-                  // Use ref to avoid stale closure (SSE handler created once but expandedPNId changes)
-                  if (expandedPNIdRef.current === pnId) {
-                    const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, bundle.sharedPrimitives || []);
+                  setEvaluationProgress(prev => {
+                    const next = new Map(prev);
+                    next.set(evaluation.id, {
+                      current: resolvedCount,
+                      total: totalPrimitiveNodes,
+                    });
+                    return next;
+                  });
 
+                  publishLiveStatus({
+                    pnId,
+                    article: pnArticle,
+                    title: pnTitle,
+                    status: 'evaluating',
+                    evaluationId: evaluation.id,
+                    progressCurrent: resolvedCount,
+                    progressTotal: totalPrimitiveNodes,
+                  });
+
+                  // If this PN is currently expanded, also update its tree live!
+                  if (expandedPNIdRef.current === pnId) {
                     setExpandedPNData({
                       evaluation,
                       nodes: expandedNodes,
                       rootId: pnData.requirements.root,
-                      evaluationStates: data.states,
+                      evaluationStates: states,
                     });
                   }
                 } else if (data.type === 'complete') {
@@ -595,11 +682,44 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                     return next;
                   });
 
-                  // Clear memory cache for this PN (data now in DB)
-                  setEvaluationStatesMap(prev => {
-                    const next = new Map(prev);
-                    next.delete(pnId);
-                    return next;
+                  const finalStates: EvaluationState[] = (data.result?.states || []) as EvaluationState[];
+                  const statesForPN = finalStates.length > 0 ? finalStates : (evaluationStatesMap.get(pnId) || []);
+
+                  if (statesForPN.length > 0) {
+                    setEvaluationStatesMap(prev => {
+                      const next = new Map(prev);
+                      next.set(pnId, statesForPN);
+                      return next;
+                    });
+                  }
+
+                  const resolvedCount = statesForPN.reduce((count, state) => {
+                    if (!primitiveNodeIds.has(state.nodeId)) return count;
+                    if (state.status === 'completed' || state.status === 'skipped') {
+                      return count + 1;
+                    }
+                    return count;
+                  }, 0);
+
+                  const rootState = statesForPN.find(s => s.nodeId === pnData.requirements.root);
+                  const rootDecision = rootState?.result?.decision;
+
+                  const finalStatusType: PNStatus['status'] = rootDecision === true
+                    ? 'applies'
+                    : rootDecision === false
+                      ? 'not-applicable'
+                      : 'evaluating';
+
+                  publishLiveStatus({
+                    pnId,
+                    article: pnArticle,
+                    title: pnTitle,
+                    status: finalStatusType,
+                    evaluationId: evaluation.id,
+                    evaluatedAt: new Date().toISOString(),
+                    rootDecision: rootDecision ?? undefined,
+                    progressCurrent: resolvedCount,
+                    progressTotal: totalPrimitiveNodes,
                   });
 
                   // Retry logic to handle DB replication lag
