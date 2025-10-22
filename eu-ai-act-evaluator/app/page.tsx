@@ -591,8 +591,8 @@ export default function Home() {
               )}
             </div>
           </>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Right Panel: Main Content Area */}
       <div className="flex-1 flex flex-col bg-neutral-50 overflow-hidden">
