@@ -15,6 +15,7 @@ import { ChatInterface } from '@/components/chat/ChatInterface';
 import { RequirementsGrid } from '@/components/evaluation/RequirementsGrid';
 import { Breadcrumb } from '@/components/navigation/Breadcrumb';
 import { UseCaseCockpit } from '@/components/usecase/UseCaseCockpit';
+import { UseCaseCreator } from '@/components/usecase/UseCaseCreator';
 import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/types';
 import type { PrescriptiveNorm, SharedPrimitive, EvaluationState, RequirementNode } from '@/lib/evaluation/types';
@@ -35,6 +36,7 @@ export default function Home() {
   const [showAllChats, setShowAllChats] = useState(false);
   const [showUseCasesList, setShowUseCasesList] = useState(false);
   const [useCases, setUseCases] = useState<UseCase[]>([]);
+  const [showUseCaseCreator, setShowUseCaseCreator] = useState(false);
 
   // Canvas state
   const [canvasView, setCanvasView] = useState<'welcome' | 'evaluation' | 'usecase-cockpit'>('welcome');
@@ -163,6 +165,24 @@ export default function Home() {
       await loadChatSessions();
       setActiveSessionId(data.id);
     }
+  };
+
+  const handleUseCaseCreated = async (useCaseId: string) => {
+    console.log(`✅ Use case created: ${useCaseId}`);
+
+    // Reload use cases list
+    await loadUseCases();
+
+    // Close creator
+    setShowUseCaseCreator(false);
+
+    // Navigate to the use case cockpit
+    setSelectedUseCaseId(useCaseId);
+    setCanvasView('usecase-cockpit');
+  };
+
+  const handleCancelUseCaseCreator = () => {
+    setShowUseCaseCreator(false);
   };
 
   const loadEvaluationResults = async (evaluationId: string) => {
@@ -438,22 +458,32 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-white">
-      {/* Left Panel: Chat */}
+      {/* Left Panel: Chat or Use Case Creator */}
       <div className="w-[500px] border-r border-neutral-200 flex flex-col">
-        {/* Header */}
-        <div className="border-b border-neutral-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-neutral-900 uppercase tracking-wide">
-              Assistant
-            </h2>
-            <button
-              onClick={createNewSession}
-              className="text-xs px-3 py-1.5 bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors font-medium"
-            >
-              New Chat
-            </button>
+        {/* Show Use Case Creator if active */}
+        {showUseCaseCreator ? (
+          <div className="flex-1 overflow-hidden">
+            <UseCaseCreator
+              onComplete={handleUseCaseCreated}
+              onCancel={handleCancelUseCaseCreator}
+            />
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Header */}
+            <div className="border-b border-neutral-200 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-neutral-900 uppercase tracking-wide">
+                  Assistant
+                </h2>
+                <button
+                  onClick={() => setShowUseCaseCreator(true)}
+                  className="text-xs px-3 py-1.5 bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors font-medium"
+                >
+                  New Use Case
+                </button>
+              </div>
+            </div>
 
         {/* Chat History - Expandable */}
         {chatSessions.length > 1 && (
@@ -510,16 +540,18 @@ export default function Home() {
           </div>
         )}
 
-        {/* Active Chat Interface */}
-        <div className="flex-1 overflow-hidden">
-          {activeSessionId ? (
-            <ChatInterface sessionId={activeSessionId} />
-          ) : (
-            <div className="flex items-center justify-center h-full text-neutral-500 text-sm">
-              Loading...
+            {/* Active Chat Interface */}
+            <div className="flex-1 overflow-hidden">
+              {activeSessionId ? (
+                <ChatInterface sessionId={activeSessionId} />
+              ) : (
+                <div className="flex items-center justify-center h-full text-neutral-500 text-sm">
+                  Loading...
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/* Right Panel: Main Content Area */}
@@ -643,16 +675,15 @@ export default function Home() {
                 EU AI Act Compliance Evaluator
               </h2>
               <p className="text-neutral-600 leading-relaxed mb-8">
-                Use the assistant to document AI systems and evaluate them against
-                prescriptive norms from the EU AI Act. Results appear here.
+                Document your AI systems and evaluate them against prescriptive norms from the EU AI Act.
               </p>
-              <div className="grid grid-cols-2 gap-4 text-left">
+              <div className="grid grid-cols-2 gap-4 text-left mb-8">
                 <div className="bg-white p-4 rounded-lg border border-neutral-200">
                   <div className="text-sm font-semibold text-neutral-900 mb-1">
                     Document Use Cases
                   </div>
                   <div className="text-xs text-neutral-600">
-                    Describe your AI system to the assistant
+                    Create structured AI system descriptions
                   </div>
                 </div>
                 <div className="bg-white p-4 rounded-lg border border-neutral-200">
@@ -664,6 +695,14 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+              <button
+                onClick={() => setShowUseCaseCreator(true)}
+                className="px-8 py-3 bg-neutral-900 text-white rounded-lg text-[15px]
+                         font-medium hover:bg-neutral-800 transition-all duration-200
+                         hover:scale-[1.02] active:scale-[0.98] shadow-sm"
+              >
+                Create Your First Use Case
+              </button>
             </div>
           </div>
         )}
