@@ -1033,46 +1033,68 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   return (
     <div className="h-full overflow-y-auto">
       <div className="max-w-5xl mx-auto px-6 py-4 space-y-4">
-        {/* Use Case Header with Inline Stats */}
-        <div className="bg-white rounded-lg border border-neutral-200 p-4">
-          {useCase ? (
-            <>
-              <h1 className="text-base font-bold text-neutral-900 mb-1">
-                {useCase.title}
-              </h1>
-              <p className="text-sm text-neutral-600 mb-3">
-                {useCase.description}
-              </p>
-              <div className="flex items-center justify-between">
-                {useCase.tags && useCase.tags.length > 0 && (
-                  <div className="flex gap-2">
-                    {useCase.tags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="text-xs px-2 py-1 bg-neutral-100 text-neutral-700 rounded font-medium"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+        {/* Use Case Header - Redesigned */}
+        {useCase ? (
+          <div className="space-y-3">
+            {/* Title & Stats Row */}
+            <div className="bg-white rounded-lg border border-neutral-200 p-5">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-xl font-semibold text-neutral-900 mb-1 tracking-tight">
+                    {useCase.title}
+                  </h1>
+                  {useCase.tags && useCase.tags.length > 0 && (
+                    <div className="flex gap-2 mt-2">
+                      {useCase.tags.map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-neutral-100 text-neutral-700"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Visual Stats Cards */}
+                <div className="flex gap-2">
+                  <div className="flex flex-col items-center justify-center px-4 py-2.5 rounded-lg bg-green-50 border border-green-200 min-w-[70px]">
+                    <div className="text-2xl font-bold text-green-700">{appliesPNs.length}</div>
+                    <div className="text-[10px] font-medium text-green-600 uppercase tracking-wide">Apply</div>
                   </div>
-                )}
-                {/* Compact Inline Stats */}
-                <div className="flex items-center gap-4 text-xs font-medium">
-                  <span className="text-green-700">✓ {appliesPNs.length} Apply</span>
-                  <span className="text-neutral-500">✗ {notApplicablePNs.length} N/A</span>
-                  <span className="text-blue-700">○ {pendingPNs.length} Pending</span>
+                  <div className="flex flex-col items-center justify-center px-4 py-2.5 rounded-lg bg-neutral-50 border border-neutral-200 min-w-[70px]">
+                    <div className="text-2xl font-bold text-neutral-500">{notApplicablePNs.length}</div>
+                    <div className="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">N/A</div>
+                  </div>
+                  <div className="flex flex-col items-center justify-center px-4 py-2.5 rounded-lg bg-blue-50 border border-blue-200 min-w-[70px]">
+                    <div className="text-2xl font-bold text-blue-700">{pendingPNs.length}</div>
+                    <div className="text-[10px] font-medium text-blue-600 uppercase tracking-wide">Pending</div>
+                  </div>
                 </div>
               </div>
-            </>
-          ) : (
-            <>
-              {/* Loading skeleton */}
-              <div className="h-6 bg-neutral-100 rounded animate-pulse mb-2 w-3/4"></div>
-              <div className="h-4 bg-neutral-100 rounded animate-pulse mb-2 w-full"></div>
-              <div className="h-4 bg-neutral-100 rounded animate-pulse w-5/6"></div>
-            </>
-          )}
-        </div>
+
+              {/* Description - Truncated with Expand */}
+              <div className="prose prose-sm max-w-none">
+                <p className="text-sm text-neutral-600 leading-relaxed line-clamp-3">
+                  {useCase.description}
+                </p>
+                {useCase.description && useCase.description.length > 200 && (
+                  <button className="text-xs text-blue-600 hover:text-blue-700 font-medium mt-1">
+                    Read more →
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg border border-neutral-200 p-5">
+            {/* Loading skeleton */}
+            <div className="h-7 bg-neutral-100 rounded animate-pulse mb-3 w-3/4"></div>
+            <div className="h-4 bg-neutral-100 rounded animate-pulse mb-2 w-full"></div>
+            <div className="h-4 bg-neutral-100 rounded animate-pulse w-5/6"></div>
+          </div>
+        )}
 
         {/* Loading skeleton for PN sections */}
         {loading && (
@@ -1172,10 +1194,10 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
         {/* EVALUATIONS IN PROGRESS Section */}
         {runningEvaluations.size > 0 && (
-          <div className="space-y-2">
-            <h2 className="text-sm font-bold text-blue-700 uppercase tracking-wide px-1 flex items-center gap-2">
-              <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              ⟳ EVALUATIONS IN PROGRESS
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-neutral-900 uppercase tracking-wide px-1 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              In Progress
             </h2>
 
             {Array.from(runningEvaluations).map(evaluationId => {
@@ -1188,86 +1210,89 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 pnIds.includes(ps.pnId) && ps.evaluationId === evaluationId
               );
 
+              const progressPercent = progress ? (progress.current / progress.total) * 100 : 0;
+
               return (
-                <div key={evaluationId} className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-300 overflow-hidden">
-                  <div className="px-4 py-3">
+                <div key={evaluationId} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+                  {/* Elegant Progress Header */}
+                  <div className="px-5 py-4 border-b border-neutral-100">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="text-xs font-bold text-blue-900">
-                          Evaluating {pnIds.length} obligation{pnIds.length !== 1 ? 's' : ''}
+                        <div className="text-sm font-medium text-neutral-900">
+                          {pnIds.length} {pnIds.length === 1 ? 'Obligation' : 'Obligations'}
                         </div>
                         {progress && (
-                          <div className="text-xs font-medium text-blue-700">
-                            {progress.current}/{progress.total} complete
+                          <div className="text-xs text-neutral-500 font-medium">
+                            {progress.current} of {progress.total}
                           </div>
                         )}
                       </div>
-                      <div className="text-[10px] text-blue-600 font-mono">
-                        ID: {evaluationId.slice(0, 8)}...
-                      </div>
+                      {progress && (
+                        <div className="text-sm font-semibold text-blue-600">
+                          {Math.round(progressPercent)}%
+                        </div>
+                      )}
                     </div>
 
-                    {/* Progress bar */}
+                    {/* Refined Progress Bar */}
                     {progress && (
-                      <div className="mb-3">
-                        <div className="flex-1 bg-blue-200 rounded-full h-2">
-                          <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 rounded-full"
-                            style={{ width: `${(progress.current / progress.total) * 100}%` }}
-                          />
-                        </div>
+                      <div className="relative h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                        <div
+                          className="absolute inset-y-0 left-0 bg-blue-500 transition-all duration-500 ease-out rounded-full"
+                          style={{ width: `${progressPercent}%` }}
+                        />
                       </div>
                     )}
+                  </div>
 
-                    {/* List of PNs being evaluated */}
-                    <div className="space-y-1">
-                      {pnIds.map(pnId => {
-                        const pnStatus = pnStatuses.find(ps => ps.pnId === pnId);
-                        const isExpanded = expandedPNId === pnId;
+                  {/* List of PNs being evaluated */}
+                  <div className="divide-y divide-neutral-100">
+                    {pnIds.map(pnId => {
+                      const pnStatus = pnStatuses.find(ps => ps.pnId === pnId);
+                      const isExpanded = expandedPNId === pnId;
 
-                        return (
-                          <div key={pnId}>
-                            <button
-                              onClick={() => handleExpandPN(pnId)}
-                              className="w-full text-left px-3 py-2 bg-white/50 hover:bg-white rounded border border-blue-200 hover:border-blue-300 transition-colors flex items-center gap-2"
-                            >
-                              <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-                              <div className="text-xs font-mono font-semibold text-blue-900">{pnId}</div>
-                              <div className="text-[10px] text-blue-600 flex-1">{pnStatus?.title || 'Evaluating...'}</div>
-                              {pnStatus?.progressCurrent !== undefined && pnStatus.progressTotal && (
-                                <div className="text-xs text-blue-700 font-medium">
-                                  {pnStatus.progressCurrent}/{pnStatus.progressTotal}
-                                </div>
-                              )}
-                              <svg
-                                className={`w-3.5 h-3.5 text-blue-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-
-                            {/* Inline TREEMAXX expansion for running evaluation */}
-                            {isExpanded && expandedPNData && (
-                              <div className="mt-2 bg-white rounded border border-blue-300 px-4 py-3">
-                                <RequirementsGrid
-                                  nodes={expandedPNData.nodes || []}
-                                  rootId={expandedPNData.rootId || ''}
-                                  evaluationStates={expandedPNData.evaluationStates || []}
-                                  onNodeClick={(nodeId) => handleNodeSelection(pnId, nodeId)}
-                                  selectedNodeId={pnSelectedNodeMap.get(pnId) ?? null}
-                                  isRunning={pnStatus?.status === 'evaluating'}
-                                  totalNodes={expandedPNData.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
-                                  evaluationStatus={pnStatus?.status || expandedPNData.evaluation?.status || 'running'}
-                                />
+                      return (
+                        <div key={pnId}>
+                          <button
+                            onClick={() => handleExpandPN(pnId)}
+                            className="w-full text-left px-5 py-3 hover:bg-neutral-50 transition-colors flex items-center gap-3"
+                          >
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse flex-shrink-0" />
+                            <div className="text-xs font-mono font-semibold text-neutral-900">{pnId}</div>
+                            <div className="text-xs text-neutral-600 flex-1 truncate">{pnStatus?.title || 'Evaluating...'}</div>
+                            {pnStatus?.progressCurrent !== undefined && pnStatus.progressTotal && (
+                              <div className="text-xs text-neutral-500 font-medium tabular-nums">
+                                {pnStatus.progressCurrent}/{pnStatus.progressTotal}
                               </div>
                             )}
-                          </div>
-                        );
-                      })}
-                    </div>
+                            <svg
+                              className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+
+                          {/* Inline TREEMAXX expansion for running evaluation */}
+                          {isExpanded && expandedPNData && (
+                            <div className="border-t border-neutral-100 bg-neutral-50 px-5 py-4">
+                              <RequirementsGrid
+                                nodes={expandedPNData.nodes || []}
+                                rootId={expandedPNData.rootId || ''}
+                                evaluationStates={expandedPNData.evaluationStates || []}
+                                onNodeClick={(nodeId) => handleNodeSelection(pnId, nodeId)}
+                                selectedNodeId={pnSelectedNodeMap.get(pnId) ?? null}
+                                isRunning={pnStatus?.status === 'evaluating'}
+                                totalNodes={expandedPNData.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
+                                evaluationStatus={pnStatus?.status || expandedPNData.evaluation?.status || 'running'}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -1453,22 +1478,22 @@ function PNTable({
           return (
             <div key={pn.pnId}>
               {/* Row */}
-              <div className="w-full px-4 py-2 flex items-center gap-3 hover:bg-neutral-50 transition-colors">
+              <div className="w-full px-5 py-3 flex items-center gap-3 hover:bg-neutral-50 transition-colors">
                 {/* Checkbox for pending PNs (not evaluating) */}
                 {showCheckbox && (
                   <input
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => onTogglePN(pn.pnId)}
-                    className="w-3.5 h-3.5 text-neutral-900 rounded flex-shrink-0"
+                    className="w-4 h-4 text-neutral-900 rounded flex-shrink-0"
                     onClick={(e) => e.stopPropagation()}
                   />
                 )}
 
                 {/* Running indicator for evaluating PNs */}
                 {isEvaluating && (
-                  <div className="w-3.5 h-3.5 flex-shrink-0">
-                    <div className="w-3.5 h-3.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                   </div>
                 )}
 
@@ -1476,7 +1501,7 @@ function PNTable({
                 {isPending && !isEvaluating && (
                   <button
                     onClick={() => router.push(`/evaluation-standalone?pnId=${pn.pnId}&useCaseId=${useCaseId}`)}
-                    className="text-[10px] px-2 py-0.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded font-medium transition-colors flex-shrink-0"
+                    className="text-[10px] px-2 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded font-medium transition-colors flex-shrink-0"
                     title="Open in standalone evaluation page (old working pattern)"
                   >
                     Test
@@ -1489,21 +1514,21 @@ function PNTable({
                   disabled={isPending}
                   className="flex-1 flex items-center justify-between text-left disabled:cursor-default"
                 >
-                  <div className="flex items-center gap-3 flex-1">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="text-xs font-mono font-semibold text-neutral-900">
                       {pn.pnId}
                     </div>
-                    <div className="text-[10px] text-neutral-500">
+                    <div className="text-[10px] text-neutral-400 uppercase tracking-wider">
                       Art. {pn.article}
                     </div>
-                    <div className="text-xs text-neutral-900 flex-1">
+                    <div className="text-sm text-neutral-700 flex-1 truncate">
                       {pn.title}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4 flex-shrink-0">
                     {pn.evaluatedAt && (
-                      <div className="text-xs text-neutral-500">
+                      <div className="text-xs text-neutral-400">
                         {new Date(pn.evaluatedAt).toLocaleDateString('en', {
                           month: 'short',
                           day: 'numeric'
@@ -1512,20 +1537,14 @@ function PNTable({
                     )}
 
                     {pn.progressCurrent !== undefined && pn.progressTotal && (
-                      <div className={`text-xs font-medium ${isEvaluating ? 'text-blue-600' : 'text-neutral-600'}`}>
-                        ⟳ {pn.progressCurrent}/{pn.progressTotal}
-                      </div>
-                    )}
-
-                    {isEvaluating && (
-                      <div className="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-medium animate-pulse">
-                        Running
+                      <div className={`text-xs font-medium tabular-nums ${isEvaluating ? 'text-blue-600' : 'text-neutral-500'}`}>
+                        {pn.progressCurrent}/{pn.progressTotal}
                       </div>
                     )}
 
                     {(isCompleted || isEvaluating) && (
                       <svg
-                        className={`w-4 h-4 text-neutral-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        className={`w-4 h-4 text-neutral-300 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -1539,7 +1558,7 @@ function PNTable({
 
               {/* Expanded TREEMAXX View */}
               {isExpanded && expandedPNData && (
-                <div className="border-t border-neutral-100 bg-neutral-50 px-4 py-3">
+                <div className="border-t border-neutral-100 bg-neutral-50 px-5 py-4">
                   <RequirementsGrid
                     nodes={expandedPNData.nodes || []}
                     rootId={expandedPNData.rootId || ''}
@@ -1559,11 +1578,11 @@ function PNTable({
 
       {/* Action Buttons for Pending PNs */}
       {type === 'pending' && pns.length > 0 && (onEvaluateSelected || onEvaluateAll) && (
-        <div className="border-t border-neutral-200 px-4 py-3 bg-neutral-50 flex items-center gap-2">
+        <div className="border-t border-neutral-200 px-5 py-3 bg-neutral-50 flex items-center gap-3">
           {onEvaluateSelected && selectedPNs.length > 0 && (
             <button
               onClick={onEvaluateSelected}
-              className="text-xs px-4 py-1.5 bg-neutral-900 text-white rounded hover:bg-neutral-800 transition-colors font-medium"
+              className="text-sm px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors font-medium"
             >
               Evaluate Selected ({selectedPNs.length})
             </button>
@@ -1572,7 +1591,7 @@ function PNTable({
           {onEvaluateAll && (
             <button
               onClick={onEvaluateAll}
-              className="text-xs px-4 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium"
+              className="text-sm px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
               Evaluate All ({pns.length})
             </button>
@@ -1583,9 +1602,9 @@ function PNTable({
               onClick={() => {
                 selectedPNs.forEach(pnId => onTogglePN?.(pnId));
               }}
-              className="text-xs px-3 py-1.5 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded transition-colors"
+              className="text-sm px-4 py-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
             >
-              Deselect All
+              Clear Selection
             </button>
           )}
         </div>

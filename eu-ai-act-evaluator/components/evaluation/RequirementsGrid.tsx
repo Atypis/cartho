@@ -171,59 +171,50 @@ export function RequirementsGrid({
 
   return (
     <div className="space-y-3">
-      {/* Compact Stats Bar - Cockpit Style */}
+      {/* Compact Stats Bar - Refined */}
       {showProgress && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded border border-blue-200 overflow-hidden">
-          <div className="px-3 py-2 flex items-center justify-between gap-3">
+        <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+          <div className="px-4 py-3 flex items-center justify-between gap-4">
             {/* Left: Status & Progress */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 {isRunning ? (
-                  <div className="relative">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-                    <div className="absolute inset-0 w-2 h-2 bg-blue-600 rounded-full animate-ping opacity-75" />
-                  </div>
+                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
                 ) : (
-                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
                 )}
-                <span className="text-[10px] font-semibold text-neutral-700">
+                <span className="text-xs font-medium text-neutral-700 tabular-nums">
                   {evaluationStatus === 'completed' ? totalNodes : resolved}/{totalNodes}
                 </span>
               </div>
 
               {/* Inline Progress Bar */}
-              <div className="flex-1 bg-blue-200 rounded-full h-1 min-w-[80px] max-w-[150px]">
+              <div className="flex-1 bg-neutral-100 rounded-full h-1.5 min-w-[100px] max-w-[200px]">
                 <div
-                  className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 rounded-full"
+                  className="h-full bg-blue-500 transition-all duration-500 ease-out rounded-full"
                   style={{ width: `${progress}%` }}
                 />
               </div>
 
+              <span className="text-xs font-semibold text-blue-600 tabular-nums min-w-[3ch]">
+                {Math.round(progress)}%
+              </span>
+
               {/* Stats Pills - Compact */}
-              <div className="flex items-center gap-1 text-[10px]">
+              <div className="flex items-center gap-1.5 text-[10px]">
                 {passed > 0 && (
-                  <div className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded font-medium">
-                    ✓ {passed}
+                  <div className="px-2 py-0.5 bg-green-50 text-green-700 rounded font-medium border border-green-200">
+                    {passed}
                   </div>
                 )}
                 {failed > 0 && (
-                  <div className="px-1.5 py-0.5 bg-red-100 text-red-700 rounded font-medium">
-                    ✗ {failed}
-                  </div>
-                )}
-                {evaluating > 0 && (
-                  <div className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-medium">
-                    ⟳ {evaluating}
+                  <div className="px-2 py-0.5 bg-red-50 text-red-700 rounded font-medium border border-red-200">
+                    {failed}
                   </div>
                 )}
                 {skipped > 0 && (
-                  <div className="px-1.5 py-0.5 bg-neutral-100 text-neutral-500 rounded font-medium">
-                    ⊘ {skipped}
-                  </div>
-                )}
-                {pending > 0 && (
-                  <div className="px-1.5 py-0.5 bg-neutral-100 text-neutral-600 rounded font-medium">
-                    {pending}
+                  <div className="px-2 py-0.5 bg-neutral-50 text-neutral-500 rounded font-medium border border-neutral-200">
+                    {skipped}
                   </div>
                 )}
               </div>
@@ -231,8 +222,8 @@ export function RequirementsGrid({
 
             {/* Right: Current Node (if running) */}
             {currentNode && (
-              <div className="flex items-center gap-1.5 text-[10px] text-neutral-700 truncate max-w-md">
-                <div className="w-2.5 h-2.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              <div className="flex items-center gap-2 text-xs text-neutral-600 truncate max-w-md">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse flex-shrink-0" />
                 <span className="truncate font-mono">{currentNode.nodeId}</span>
               </div>
             )}
@@ -240,10 +231,10 @@ export function RequirementsGrid({
             {/* Expand Button */}
             <button
               onClick={() => setProgressExpanded(!progressExpanded)}
-              className="p-0.5 hover:bg-blue-100 rounded transition-colors flex-shrink-0"
+              className="p-1 hover:bg-neutral-50 rounded transition-colors flex-shrink-0"
             >
               <svg
-                className={`w-3.5 h-3.5 text-neutral-500 transition-transform duration-200 ${
+                className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
                   progressExpanded ? 'rotate-180' : ''
                 }`}
                 fill="none"
@@ -257,17 +248,17 @@ export function RequirementsGrid({
 
           {/* Expanded Details */}
           {progressExpanded && (
-            <div className="border-t border-blue-200 bg-white/50 px-3 py-2 text-[10px]">
-              <div className="grid grid-cols-2 gap-2">
+            <div className="border-t border-neutral-100 bg-neutral-50 px-4 py-3 text-xs">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <span className="text-neutral-500 uppercase tracking-wide font-semibold">Status:</span>
-                  <span className="ml-2 text-neutral-900">
+                  <span className="text-neutral-500 uppercase tracking-wide font-medium text-[10px]">Status</span>
+                  <div className="text-neutral-900 font-medium mt-0.5">
                     {isRunning ? 'In Progress' : 'Complete'}
-                  </span>
+                  </div>
                 </div>
                 <div>
-                  <span className="text-neutral-500 uppercase tracking-wide font-semibold">Progress:</span>
-                  <span className="ml-2 text-neutral-900">{progress.toFixed(0)}%</span>
+                  <span className="text-neutral-500 uppercase tracking-wide font-medium text-[10px]">Completed</span>
+                  <div className="text-neutral-900 font-medium mt-0.5 tabular-nums">{resolved} of {totalNodes}</div>
                 </div>
               </div>
             </div>
@@ -288,21 +279,21 @@ export function RequirementsGrid({
 
               {/* Status Badge - Only show final status when complete */}
               {isEvaluationFinished && (
-                <div className={`ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold ${
-                  applicabilityStatus === 'applies' ? 'bg-green-500 text-white' :
-                  applicabilityStatus === 'does-not-apply' ? 'bg-red-500 text-white' :
-                  'bg-neutral-400 text-white'
+                <div className={`ml-auto flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold ${
+                  applicabilityStatus === 'applies' ? 'bg-green-50 text-green-700 border border-green-200' :
+                  applicabilityStatus === 'does-not-apply' ? 'bg-neutral-50 text-neutral-700 border border-neutral-200' :
+                  'bg-neutral-50 text-neutral-700 border border-neutral-200'
                 }`}>
-                  {applicabilityStatus === 'applies' ? 'REQUIREMENT APPLIES' :
-                   applicabilityStatus === 'does-not-apply' ? 'REQUIREMENT DOES NOT APPLY' :
-                   'UNKNOWN'}
+                  {applicabilityStatus === 'applies' ? 'Applies' :
+                   applicabilityStatus === 'does-not-apply' ? 'Does Not Apply' :
+                   'Unknown'}
                 </div>
               )}
 
               {(isRunning || !isEvaluationFinished) && hasResults && (
-                <div className="ml-auto flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[10px] font-bold bg-blue-500 text-white">
-                  <div className="w-2 h-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  EVALUATION IN PROGRESS
+                <div className="ml-auto flex items-center gap-2 px-3 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                  Evaluating
                 </div>
               )}
             </div>
@@ -344,14 +335,14 @@ export function RequirementsGrid({
 
               {/* Applicability Result - Only show when complete */}
               {isEvaluationFinished && applicabilityStatus === 'applies' && (
-                <div className="bg-green-50 border-l-4 border-green-600 rounded-r p-3">
-                  <div className="font-bold text-green-900 mb-1.5 text-[10px] uppercase tracking-wide">
-                    ✓ This Obligation Applies
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="font-semibold text-green-900 mb-2 text-sm">
+                    This Obligation Applies
                   </div>
-                  <div className="text-green-900 text-xs leading-relaxed mb-2">
+                  <div className="text-green-900 text-xs leading-relaxed mb-2 opacity-90">
                     Based on the evaluation, <strong>Article 4 AI Literacy obligations apply to your AI system.</strong>
                   </div>
-                  <div className="text-green-900 text-xs leading-relaxed">
+                  <div className="text-green-900 text-xs leading-relaxed opacity-90">
                     <strong>What this means:</strong> You must implement measures to ensure sufficient AI literacy
                     among your staff and persons dealing with the operation and use of your AI system.
                   </div>
@@ -359,11 +350,11 @@ export function RequirementsGrid({
               )}
 
               {isEvaluationFinished && applicabilityStatus === 'does-not-apply' && (
-                <div className="bg-neutral-50 border-l-4 border-neutral-400 rounded-r p-3">
-                  <div className="font-bold text-neutral-900 mb-1.5 text-[10px] uppercase tracking-wide">
-                    ✗ This Obligation Does Not Apply
+                <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                  <div className="font-semibold text-neutral-900 mb-2 text-sm">
+                    This Obligation Does Not Apply
                   </div>
-                  <div className="text-neutral-900 text-xs leading-relaxed">
+                  <div className="text-neutral-700 text-xs leading-relaxed">
                     Based on the evaluation, <strong>Article 4 AI Literacy obligations do not apply to your AI system.</strong>
                     You are not required to implement AI literacy measures under this specific obligation.
                   </div>
@@ -371,12 +362,12 @@ export function RequirementsGrid({
               )}
 
               {!isEvaluationFinished && (isRunning || hasResults) && (
-                <div className="bg-blue-50 border-l-4 border-blue-600 rounded-r p-3">
-                  <div className="font-bold text-blue-900 mb-1.5 text-[10px] uppercase tracking-wide flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="font-semibold text-blue-900 mb-2 text-sm flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                     Evaluation In Progress
                   </div>
-                  <div className="text-blue-900 text-xs leading-relaxed">
+                  <div className="text-blue-900 text-xs leading-relaxed opacity-90">
                     AI is currently evaluating whether Article 4 obligations apply to your AI system.
                     The result will be determined once the evaluation is complete.
                   </div>
