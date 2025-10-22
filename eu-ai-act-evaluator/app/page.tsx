@@ -16,6 +16,7 @@ import { RequirementsGrid } from '@/components/evaluation/RequirementsGrid';
 import { Breadcrumb } from '@/components/navigation/Breadcrumb';
 import { UseCaseCockpit } from '@/components/usecase/UseCaseCockpit';
 import { UseCaseCreator } from '@/components/usecase/UseCaseCreator';
+import { UseCaseGallery } from '@/components/usecase/UseCaseGallery';
 import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/types';
 import type { PrescriptiveNorm, SharedPrimitive, EvaluationState, RequirementNode } from '@/lib/evaluation/types';
@@ -461,17 +462,53 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-white">
-      {/* Left Panel: Chat or Use Case Creator */}
-      <div className="w-[500px] border-r border-neutral-200 flex flex-col">
-        {/* Show Use Case Creator if active */}
-        {showUseCaseCreator ? (
-          <div className="flex-1 overflow-hidden">
-            <UseCaseCreator
-              onComplete={handleUseCaseCreated}
-              onCancel={handleCancelUseCaseCreator}
-            />
-          </div>
-        ) : (
+      {/* Show Use Case Creator as fullscreen overlay */}
+      {showUseCaseCreator && (
+        <div className="fixed inset-0 bg-white z-50">
+          <UseCaseCreator
+            onComplete={handleUseCaseCreated}
+            onCancel={handleCancelUseCaseCreator}
+          />
+        </div>
+      )}
+
+      {/* Left Panel: Minimal sidebar (only when not creating use case) */}
+      {!showUseCaseCreator && canvasView !== 'welcome' && (
+        <div className="w-[80px] border-r border-neutral-200 flex flex-col items-center py-4 gap-4">
+          {/* Home Button */}
+          <button
+            onClick={() => {
+              setCanvasView('welcome');
+              setSelectedEvaluationId(null);
+              setSelectedUseCaseId(null);
+              setEvaluationData(null);
+            }}
+            className="w-12 h-12 rounded-lg bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center
+                     transition-colors group"
+            title="Home"
+          >
+            <svg className="w-5 h-5 text-neutral-600 group-hover:text-neutral-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </button>
+
+          {/* New Use Case Button */}
+          <button
+            onClick={() => setShowUseCaseCreator(true)}
+            className="w-12 h-12 rounded-lg bg-neutral-900 hover:bg-neutral-800 flex items-center justify-center
+                     transition-colors group"
+            title="New Use Case"
+          >
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Old chat interface - keep for non-welcome views if needed */}
+      {!showUseCaseCreator && false && (
+        <div className="w-[500px] border-r border-neutral-200 flex flex-col">
           <>
             {/* Header */}
             <div className="border-b border-neutral-200 px-6 py-4">
@@ -559,11 +596,12 @@ export default function Home() {
 
       {/* Right Panel: Main Content Area */}
       <div className="flex-1 flex flex-col bg-neutral-50 overflow-hidden">
-        {/* Top Navigation Bar */}
-        <div className="bg-white border-b border-neutral-200 px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {canvasView === 'evaluation' ? (
+        {/* Top Navigation Bar - only show for non-welcome views */}
+        {canvasView !== 'welcome' && (
+          <div className="bg-white border-b border-neutral-200 px-6 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {canvasView === 'evaluation' ? (
                 <>
                   {/* Back button from evaluation */}
                   <button
@@ -668,46 +706,18 @@ export default function Home() {
               )}
             </div>
           </div>
-        </div>
+        )}
 
         {/* Canvas Area */}
         {canvasView === 'welcome' && (
-          <div className="flex items-center justify-center h-full p-12">
-            <div className="text-center max-w-xl">
-              <h2 className="text-3xl font-semibold text-neutral-900 mb-4 tracking-tight">
-                EU AI Act Compliance Evaluator
-              </h2>
-              <p className="text-neutral-600 leading-relaxed mb-8">
-                Document your AI systems and evaluate them against prescriptive norms from the EU AI Act.
-              </p>
-              <div className="grid grid-cols-2 gap-4 text-left mb-8">
-                <div className="bg-white p-4 rounded-lg border border-neutral-200">
-                  <div className="text-sm font-semibold text-neutral-900 mb-1">
-                    Document Use Cases
-                  </div>
-                  <div className="text-xs text-neutral-600">
-                    Create structured AI system descriptions
-                  </div>
-                </div>
-                <div className="bg-white p-4 rounded-lg border border-neutral-200">
-                  <div className="text-sm font-semibold text-neutral-900 mb-1">
-                    Trigger Evaluations
-                  </div>
-                  <div className="text-xs text-neutral-600">
-                    Check compliance against prescriptive norms
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowUseCaseCreator(true)}
-                className="px-8 py-3 bg-neutral-900 text-white rounded-lg text-[15px]
-                         font-medium hover:bg-neutral-800 transition-all duration-200
-                         hover:scale-[1.02] active:scale-[0.98] shadow-sm"
-              >
-                Create Your First Use Case
-              </button>
-            </div>
-          </div>
+          <UseCaseGallery
+            useCases={useCases}
+            onSelectUseCase={(useCaseId) => {
+              setSelectedUseCaseId(useCaseId);
+              setCanvasView('usecase-cockpit');
+            }}
+            onCreateNew={() => setShowUseCaseCreator(true)}
+          />
         )}
 
         {canvasView === 'evaluation' && (

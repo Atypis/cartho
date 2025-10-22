@@ -28,68 +28,45 @@ export function CompletionSummary({ formData, analysis, onProceed }: CompletionS
 
       {/* Use Case Summary Card */}
       <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-6 mb-8">
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-4 mb-6">
           <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
             <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-[16px] font-semibold text-neutral-900 mb-2">
+            <h3 className="text-[16px] font-semibold text-neutral-900 mb-1">
               {formData.title}
             </h3>
-            <p className="text-[14px] text-neutral-600 leading-relaxed line-clamp-3">
-              {formData.description}
-            </p>
           </div>
         </div>
 
-        {/* Extracted Information Summary */}
-        {analysis.extractedInfo && (
-          <div className="mt-6 pt-6 border-t border-neutral-200 grid grid-cols-2 gap-4">
-            {analysis.extractedInfo.systemPurpose && (
-              <div>
-                <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">
-                  Purpose
-                </div>
-                <div className="text-[13px] text-neutral-700">
-                  {analysis.extractedInfo.systemPurpose.substring(0, 80)}
-                  {analysis.extractedInfo.systemPurpose.length > 80 ? '...' : ''}
-                </div>
-              </div>
-            )}
-            {analysis.extractedInfo.geographicScope && (
-              <div>
-                <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">
-                  Geographic Scope
-                </div>
-                <div className="text-[13px] text-neutral-700">
-                  {analysis.extractedInfo.geographicScope}
+        {/* Structured Summary Sections */}
+        {analysis.structuredSummary && analysis.structuredSummary.length > 0 ? (
+          <div className="space-y-4">
+            {analysis.structuredSummary.map((section, index) => (
+              <div key={index} className="flex gap-3">
+                {section.icon && (
+                  <div className="flex-shrink-0 text-2xl leading-none mt-0.5">
+                    {section.icon}
+                  </div>
+                )}
+                <div className="flex-1">
+                  <div className="text-[13px] font-semibold text-neutral-900 mb-1">
+                    {section.title}
+                  </div>
+                  <div className="text-[14px] text-neutral-600 leading-relaxed">
+                    {section.content}
+                  </div>
                 </div>
               </div>
-            )}
-            {analysis.extractedInfo.userRole && (
-              <div>
-                <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">
-                  Your Role
-                </div>
-                <div className="text-[13px] text-neutral-700">
-                  {analysis.extractedInfo.userRole}
-                </div>
-              </div>
-            )}
-            {analysis.extractedInfo.technicalDetails && (
-              <div>
-                <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1">
-                  Technical Approach
-                </div>
-                <div className="text-[13px] text-neutral-700">
-                  {analysis.extractedInfo.technicalDetails.substring(0, 80)}
-                  {analysis.extractedInfo.technicalDetails.length > 80 ? '...' : ''}
-                </div>
-              </div>
-            )}
+            ))}
           </div>
+        ) : (
+          /* Fallback to old format if no structured summary */
+          <p className="text-[14px] text-neutral-600 leading-relaxed">
+            {formData.description}
+          </p>
         )}
       </div>
 

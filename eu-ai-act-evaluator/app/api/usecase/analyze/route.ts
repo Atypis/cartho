@@ -48,6 +48,20 @@ IMPORTANT GUIDELINES:
 - Don't ask more than 5 clarification questions total
 - Only generate questions for areas that are "needs_clarification" or "missing"
 
+Additionally, create a structured summary by organizing the information into 3-5 semantic sections.
+Each section should have:
+- A clear, concise title (2-4 words)
+- Content summarizing what you learned in that area (1-3 sentences)
+- An optional emoji icon that represents the section
+
+Example sections might be:
+- "Core Functionality" with icon "⚙️"
+- "Technical Stack" with icon "🔧"
+- "Business Context" with icon "🏢"
+- "Geographic Scope" with icon "🌍"
+
+Be flexible and create sections that best organize THIS specific use case's information.
+
 Return your analysis in this EXACT JSON format:
 {
   "completeness": <number 0-100, overall completeness score>,
@@ -97,6 +111,13 @@ Return your analysis in this EXACT JSON format:
       "question": "<specific, clear question in plain language>",
       "context": "<optional: why you're asking, to help the user understand>",
       "status": "needs_clarification" | "missing"
+    }
+  ],
+  "structuredSummary": [
+    {
+      "title": "<section title>",
+      "content": "<1-3 sentences>",
+      "icon": "<emoji>"
     }
   ],
   "isComplete": <true if completeness >= 70 and no critical gaps, false otherwise>

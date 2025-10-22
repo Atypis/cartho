@@ -28,6 +28,12 @@ export interface ClarificationAnswers {
   [questionId: string]: string;
 }
 
+export interface StructuredSection {
+  title: string;
+  content: string;
+  icon?: string; // Optional emoji icon
+}
+
 export interface UseCaseAnalysis {
   completeness: number; // 0-100
   extractedInfo: {
@@ -40,4 +46,5 @@ export interface UseCaseAnalysis {
   coverageAreas: CoverageArea[];
   clarificationQuestions: ClarificationQuestion[];
   isComplete: boolean;
+  structuredSummary?: StructuredSection[]; // AI-generated semantic sections
 }
