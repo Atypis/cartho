@@ -83,16 +83,23 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [evaluationBundles, setEvaluationBundles] = useState<Map<string, any>>(new Map()); // Cache bundles to avoid repeated fetches
   const [evaluationStatesMap, setEvaluationStatesMap] = useState<Map<string, EvaluationState[]>>(new Map()); // Live states from SSE streams
   const [livePNStatusMap, setLivePNStatusMap] = useState<Map<string, PNStatus>>(new Map());
+  const [pnSelectedNodeMap, setPnSelectedNodeMap] = useState<Map<string, string | null>>(new Map());
+  const pnSelectedNodeMapRef = useRef(pnSelectedNodeMap);
 
   // Keep expandedPNId ref in sync with state (for SSE handler closure)
   useEffect(() => {
     expandedPNIdRef.current = expandedPNId;
   }, [expandedPNId]);
 
+  useEffect(() => {
+    pnSelectedNodeMapRef.current = pnSelectedNodeMap;
+  }, [pnSelectedNodeMap]);
+
   // Reset live overlays when switching use cases
   useEffect(() => {
     setLivePNStatusMap(new Map());
     setEvaluationStatesMap(new Map());
+    setPnSelectedNodeMap(new Map());
   }, [useCaseId]);
 
   // Load PN catalog
@@ -385,6 +392,38 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     });
   };
 
+  const setPNSelection = (pnId: string, nodeId: string | null) => {
+    setPnSelectedNodeMap(prev => {
+      const current = prev.get(pnId) ?? null;
+      if (current === nodeId) {
+        return prev;
+      }
+      const next = new Map(prev);
+      next.set(pnId, nodeId);
+      return next;
+    });
+  };
+
+  const autoSelectFromStates = (pnId: string, states: EvaluationState[], fallback?: string | null) => {
+    const evaluatingState = states.find(state => state.status === 'evaluating');
+    if (evaluatingState) {
+      if ((pnSelectedNodeMapRef.current.get(pnId) ?? null) !== evaluatingState.nodeId) {
+        setPNSelection(pnId, evaluatingState.nodeId);
+      }
+      return;
+    }
+
+    if (fallback !== undefined) {
+      if ((pnSelectedNodeMapRef.current.get(pnId) ?? null) !== fallback) {
+        setPNSelection(pnId, fallback);
+      }
+    }
+  };
+
+  const handleNodeSelection = (pnId: string, nodeId: string | null) => {
+    setPNSelection(pnId, nodeId);
+  };
+
   const triggerEvaluation = async () => {
     if (selectedPNs.length === 0) return;
     setTriggering(true);
@@ -656,6 +695,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                     progressTotal: totalPrimitiveNodes,
                   });
 
+                  autoSelectFromStates(pnId, states);
+
                   // If this PN is currently expanded, also update its tree live!
                   if (expandedPNIdRef.current === pnId) {
                     setExpandedPNData({
@@ -721,6 +762,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                     progressCurrent: resolvedCount,
                     progressTotal: totalPrimitiveNodes,
                   });
+
+                  autoSelectFromStates(pnId, statesForPN, pnData.requirements.root);
 
                   // Retry logic to handle DB replication lag
                   const reloadWithRetry = async (attempts = 0) => {
@@ -862,6 +905,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       const sharedPrimitives = bundle.sharedPrimitives || [];
       const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, sharedPrimitives);
 
+      autoSelectFromStates(pnId, cachedStates, pnData.requirements.root);
+
       setExpandedPNData({
         evaluation,
         nodes: expandedNodes,
@@ -897,6 +942,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
     const reconstruction = reconstructEvaluation(pnData, sharedPrimitives, results || []);
     const evaluationStates = reconstruction.states;
+
+    autoSelectFromStates(pnId, evaluationStates, pnData.requirements.root);
 
     const completedCount = evaluationStates.filter(s => s.status === 'completed').length;
     const skippedCount = evaluationStates.filter(s => s.status === 'skipped').length;
@@ -1057,6 +1104,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 type="applies"
                 showHeader={false}
                 useCaseId={useCaseId}
+                pnSelectedNodeMap={pnSelectedNodeMap}
+                onSelectNode={handleNodeSelection}
               />
             )}
           </div>
@@ -1096,6 +1145,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 type="not-applicable"
                 showHeader={false}
                 useCaseId={useCaseId}
+                pnSelectedNodeMap={pnSelectedNodeMap}
+                onSelectNode={handleNodeSelection}
               />
             )}
           </div>
@@ -1187,11 +1238,11 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                                   nodes={expandedPNData.nodes || []}
                                   rootId={expandedPNData.rootId || ''}
                                   evaluationStates={expandedPNData.evaluationStates || []}
-                                  onNodeClick={() => {}}
-                                  selectedNodeId={null}
-                                  isRunning={true}
+                                  onNodeClick={(nodeId) => handleNodeSelection(pnId, nodeId)}
+                                  selectedNodeId={pnSelectedNodeMap.get(pnId) ?? null}
+                                  isRunning={pnStatus?.status === 'evaluating'}
                                   totalNodes={expandedPNData.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
-                                  evaluationStatus={expandedPNData.evaluation?.status || 'running'}
+                                  evaluationStatus={pnStatus?.status || expandedPNData.evaluation?.status || 'running'}
                                 />
                               </div>
                             )}
@@ -1244,6 +1295,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 onEvaluateSelected={handleEvaluateSelectedPNs}
                 onEvaluateAll={() => handleEvaluateAllPendingPNs(ungroupedPendingPNs.map(p => p.pnId))}
                 useCaseId={useCaseId}
+                pnSelectedNodeMap={pnSelectedNodeMap}
+                onSelectNode={handleNodeSelection}
               />
             )}
           </div>
@@ -1328,7 +1381,9 @@ function PNTable({
   onTogglePN,
   onEvaluateSelected,
   onEvaluateAll,
-  useCaseId
+  useCaseId,
+  pnSelectedNodeMap,
+  onSelectNode,
 }: {
   title: string;
   pns: PNStatus[];
@@ -1342,6 +1397,8 @@ function PNTable({
   onEvaluateSelected?: () => void;
   onEvaluateAll?: () => void;
   useCaseId?: string;
+  pnSelectedNodeMap: Map<string, string | null>;
+  onSelectNode: (pnId: string, nodeId: string | null) => void;
 }) {
   const router = useRouter();
   const getBorderColor = () => {
@@ -1469,11 +1526,11 @@ function PNTable({
                     nodes={expandedPNData.nodes || []}
                     rootId={expandedPNData.rootId || ''}
                     evaluationStates={expandedPNData.evaluationStates || []}
-                    onNodeClick={() => {}}
-                    selectedNodeId={null}
-                    isRunning={false}
+                    onNodeClick={(nodeId) => onSelectNode(pn.pnId, nodeId)}
+                    selectedNodeId={pnSelectedNodeMap.get(pn.pnId) ?? null}
+                    isRunning={pn.status === 'evaluating'}
                     totalNodes={expandedPNData.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
-                    evaluationStatus={expandedPNData.evaluation?.status}
+                    evaluationStatus={pn.status}
                   />
                 </div>
               )}
