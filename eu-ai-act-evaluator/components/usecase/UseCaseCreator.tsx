@@ -41,11 +41,7 @@ export function UseCaseCreator({ onComplete, onCancel }: UseCaseCreatorProps) {
       .insert({
         title: data.title,
         description: data.description,
-        analysis_metadata: {
-          completeness: analysisData.completeness,
-          extractedInfo: analysisData.extractedInfo,
-          coverageAreas: analysisData.coverageAreas,
-        },
+        tags: [], // Default empty tags array
       })
       .select()
       .single();
