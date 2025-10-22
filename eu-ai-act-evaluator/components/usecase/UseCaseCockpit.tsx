@@ -1031,24 +1031,24 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   }
 
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="max-w-5xl mx-auto px-6 py-4 space-y-4">
-        {/* Use Case Header - Redesigned */}
-        {useCase ? (
-          <div className="space-y-3">
-            {/* Title & Stats Row */}
-            <div className="bg-white rounded-lg border border-neutral-200 p-5">
-              <div className="flex items-start justify-between gap-4 mb-4">
+    <div className="h-full flex overflow-hidden">
+      {/* Main Content Area */}
+      <div className={`flex-1 overflow-y-auto transition-all duration-300 ${expandedPNId ? 'mr-2' : ''}`}>
+        <div className="max-w-4xl mx-auto px-6 py-4 space-y-4">
+          {/* Use Case Header - Clean & Minimal */}
+          {useCase ? (
+            <div className="space-y-3">
+              <div className="flex items-baseline justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-xl font-semibold text-neutral-900 mb-1 tracking-tight">
+                  <h1 className="text-lg font-semibold text-neutral-900 tracking-tight">
                     {useCase.title}
                   </h1>
                   {useCase.tags && useCase.tags.length > 0 && (
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-2 mt-1.5">
                       {useCase.tags.map((tag, idx) => (
                         <span
                           key={idx}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-neutral-100 text-neutral-700"
+                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-neutral-100 text-neutral-600"
                         >
                           {tag}
                         </span>
@@ -1057,44 +1057,22 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                   )}
                 </div>
 
-                {/* Visual Stats Cards */}
-                <div className="flex gap-2">
-                  <div className="flex flex-col items-center justify-center px-4 py-2.5 rounded-lg bg-green-50 border border-green-200 min-w-[70px]">
-                    <div className="text-2xl font-bold text-green-700">{appliesPNs.length}</div>
-                    <div className="text-[10px] font-medium text-green-600 uppercase tracking-wide">Apply</div>
-                  </div>
-                  <div className="flex flex-col items-center justify-center px-4 py-2.5 rounded-lg bg-neutral-50 border border-neutral-200 min-w-[70px]">
-                    <div className="text-2xl font-bold text-neutral-500">{notApplicablePNs.length}</div>
-                    <div className="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">N/A</div>
-                  </div>
-                  <div className="flex flex-col items-center justify-center px-4 py-2.5 rounded-lg bg-blue-50 border border-blue-200 min-w-[70px]">
-                    <div className="text-2xl font-bold text-blue-700">{pendingPNs.length}</div>
-                    <div className="text-[10px] font-medium text-blue-600 uppercase tracking-wide">Pending</div>
-                  </div>
+                {/* Inline Minimal Stats */}
+                <div className="flex items-center gap-3 text-sm font-medium flex-shrink-0">
+                  <span className="text-green-700">{appliesPNs.length} Apply</span>
+                  <span className="text-neutral-400">•</span>
+                  <span className="text-neutral-500">{notApplicablePNs.length} N/A</span>
+                  <span className="text-neutral-400">•</span>
+                  <span className="text-neutral-600">{pendingPNs.length} Pending</span>
                 </div>
               </div>
-
-              {/* Description - Truncated with Expand */}
-              <div className="prose prose-sm max-w-none">
-                <p className="text-sm text-neutral-600 leading-relaxed line-clamp-3">
-                  {useCase.description}
-                </p>
-                {useCase.description && useCase.description.length > 200 && (
-                  <button className="text-xs text-blue-600 hover:text-blue-700 font-medium mt-1">
-                    Read more →
-                  </button>
-                )}
-              </div>
             </div>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg border border-neutral-200 p-5">
-            {/* Loading skeleton */}
-            <div className="h-7 bg-neutral-100 rounded animate-pulse mb-3 w-3/4"></div>
-            <div className="h-4 bg-neutral-100 rounded animate-pulse mb-2 w-full"></div>
-            <div className="h-4 bg-neutral-100 rounded animate-pulse w-5/6"></div>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-baseline justify-between gap-4">
+              <div className="h-6 bg-neutral-100 rounded animate-pulse w-1/3"></div>
+              <div className="h-5 bg-neutral-100 rounded animate-pulse w-1/4"></div>
+            </div>
+          )}
 
         {/* Loading skeleton for PN sections */}
         {loading && (
@@ -1255,7 +1233,11 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                         <div key={pnId}>
                           <button
                             onClick={() => handleExpandPN(pnId)}
-                            className="w-full text-left px-5 py-3 hover:bg-neutral-50 transition-colors flex items-center gap-3"
+                            className={`w-full text-left px-5 py-3 transition-colors flex items-center gap-3 ${
+                              isExpanded
+                                ? 'bg-blue-50 border-l-2 border-blue-500'
+                                : 'hover:bg-neutral-50'
+                            }`}
                           >
                             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse flex-shrink-0" />
                             <div className="text-xs font-mono font-semibold text-neutral-900">{pnId}</div>
@@ -1274,22 +1256,6 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                           </button>
-
-                          {/* Inline TREEMAXX expansion for running evaluation */}
-                          {isExpanded && expandedPNData && (
-                            <div className="border-t border-neutral-100 bg-neutral-50 px-5 py-4">
-                              <RequirementsGrid
-                                nodes={expandedPNData.nodes || []}
-                                rootId={expandedPNData.rootId || ''}
-                                evaluationStates={expandedPNData.evaluationStates || []}
-                                onNodeClick={(nodeId) => handleNodeSelection(pnId, nodeId)}
-                                selectedNodeId={pnSelectedNodeMap.get(pnId) ?? null}
-                                isRunning={pnStatus?.status === 'evaluating'}
-                                totalNodes={expandedPNData.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
-                                evaluationStatus={pnStatus?.status || expandedPNData.evaluation?.status || 'running'}
-                              />
-                            </div>
-                          )}
                         </div>
                       );
                     })}
@@ -1406,7 +1372,48 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
             )}
           </div>
         )}
+        </div>
       </div>
+
+      {/* Right-Side Detail Panel - IDE Style */}
+      {expandedPNId && expandedPNData && (
+        <div className="w-[600px] flex-shrink-0 border-l border-neutral-200 bg-neutral-50 overflow-y-auto">
+          <div className="sticky top-0 z-10 bg-white border-b border-neutral-200 px-5 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="text-xs font-mono font-semibold text-neutral-900">
+                {expandedPNId}
+              </div>
+              <div className="text-xs text-neutral-500">
+                {pnStatuses.find(p => p.pnId === expandedPNId)?.title}
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setExpandedPNId(null);
+                setExpandedPNData(null);
+              }}
+              className="p-1.5 hover:bg-neutral-100 rounded transition-colors"
+            >
+              <svg className="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="p-5">
+            <RequirementsGrid
+              nodes={expandedPNData.nodes || []}
+              rootId={expandedPNData.rootId || ''}
+              evaluationStates={expandedPNData.evaluationStates || []}
+              onNodeClick={(nodeId) => handleNodeSelection(expandedPNId, nodeId)}
+              selectedNodeId={pnSelectedNodeMap.get(expandedPNId) ?? null}
+              isRunning={pnStatuses.find(p => p.pnId === expandedPNId)?.status === 'evaluating'}
+              totalNodes={expandedPNData.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
+              evaluationStatus={pnStatuses.find(p => p.pnId === expandedPNId)?.status || expandedPNData.evaluation?.status || 'pending'}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1478,7 +1485,11 @@ function PNTable({
           return (
             <div key={pn.pnId}>
               {/* Row */}
-              <div className="w-full px-5 py-3 flex items-center gap-3 hover:bg-neutral-50 transition-colors">
+              <div className={`w-full px-5 py-3 flex items-center gap-3 transition-colors ${
+                isExpanded
+                  ? 'bg-blue-50 border-l-2 border-blue-500'
+                  : 'hover:bg-neutral-50'
+              }`}>
                 {/* Checkbox for pending PNs (not evaluating) */}
                 {showCheckbox && (
                   <input
@@ -1555,22 +1566,6 @@ function PNTable({
                   </div>
                 </button>
               </div>
-
-              {/* Expanded TREEMAXX View */}
-              {isExpanded && expandedPNData && (
-                <div className="border-t border-neutral-100 bg-neutral-50 px-5 py-4">
-                  <RequirementsGrid
-                    nodes={expandedPNData.nodes || []}
-                    rootId={expandedPNData.rootId || ''}
-                    evaluationStates={expandedPNData.evaluationStates || []}
-                    onNodeClick={(nodeId) => onSelectNode(pn.pnId, nodeId)}
-                    selectedNodeId={pnSelectedNodeMap.get(pn.pnId) ?? null}
-                    isRunning={pn.status === 'evaluating'}
-                    totalNodes={expandedPNData.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
-                    evaluationStatus={pn.status}
-                  />
-                </div>
-              )}
             </div>
           );
         })}
