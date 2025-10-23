@@ -563,7 +563,7 @@ export default function Home() {
 
       {/* Right Panel: Main Content Area */}
       <SidebarInset>
-          <div className="flex-1 flex flex-col bg-neutral-50 overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden">
             {/* Top Navigation Bar - only show for non-welcome views */}
             {canvasView !== 'welcome' && (
               <div className="bg-white border-b border-neutral-200 px-6 py-3">

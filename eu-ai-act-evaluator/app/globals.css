@@ -191,11 +191,11 @@ body {
     );
 }
 
-/* Ensure main content area gets clean papyrus background */
+/* Main content area gets light brown papyrus background */
 [data-theme="medieval"] main,
 [data-theme="medieval"] [class*="SidebarInset"],
 [data-theme="medieval"] .sidebar-inset {
-  background-color: #F4E5C2 !important; /* Clean papyrus */
+  background-color: #EBD9BD !important; /* Light brown papyrus */
 }
 
 /* Ensure ALL main content text is dark and readable - CRITICAL FIX */
