@@ -6,7 +6,7 @@
  * Deep dive into a single obligation with tabs for different aspects
  */
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,7 +40,7 @@ interface ObligationDetail {
   history: any[];
 }
 
-export default function ObligationDetailPage({ params }: { params: { id: string } }) {
+export default function ObligationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [detail, setDetail] = useState<ObligationDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,14 +52,16 @@ export default function ObligationDetailPage({ params }: { params: { id: string 
   const [evaluationStates, setEvaluationStates] = useState<EvaluationState[]>([]);
   const [expandedNodes, setExpandedNodes] = useState<any[]>([]);
 
+  const { id } = React.use(params);
+
   useEffect(() => {
     loadObligationDetail();
-  }, [params.id]);
+  }, [id]);
 
   const loadObligationDetail = async () => {
     try {
       // Load obligation details
-      const res = await fetch(`/api/obligations/${params.id}`);
+      const res = await fetch(`/api/obligations/${id}`);
       if (res.ok) {
         const data = await res.json();
         setDetail(data);
@@ -310,7 +312,7 @@ export default function ObligationDetailPage({ params }: { params: { id: string 
 
             <TabsContent value="controls" className="mt-0">
               <ControlsTab
-                obligationId={params.id}
+                obligationId={id}
                 pnId={obligation.pn_id}
                 isApplicable={obligation.applicability_state === 'applies'}
               />
