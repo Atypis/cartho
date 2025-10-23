@@ -182,13 +182,12 @@ export class EvaluationEngine {
     // Add case facts
     prompt += `## Case Facts\n${caseInput}\n\n`;
 
-    // Add instructions
+    // Add instructions (concise and unambiguous)
     prompt += `## Task\n`;
-    prompt += `Based on the case facts and legal context above, determine if the requirement is satisfied.\n\n`;
-    prompt += `Respond with:\n`;
-    prompt += `1. Decision: YES or NO\n`;
-    prompt += `2. Confidence: A number between 0.0 and 1.0\n`;
-    prompt += `3. Reasoning: 2-3 sentences citing specific facts from the case\n`;
+    prompt += `Answer the Question as written by applying the Case Facts to the Legal Context. Do not decide overall compliance or apply exceptions—this is handled elsewhere.\n`;
+    prompt += `Return only JSON: {"decision":boolean,"confidence":number,"reasoning":string}.\n`;
+    prompt += `Semantics: decision=true means YES to the Question; decision=false means NO.\n`;
+    prompt += `Provide brief reasoning (1–2 sentences).\n`;
 
     return prompt;
   }

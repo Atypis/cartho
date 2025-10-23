@@ -238,6 +238,47 @@ export interface Database {
           changed_at?: string;
         };
       };
+      shared_requirement_assessments: {
+        Row: {
+          id: string;
+          use_case_id: string;
+          shared_key: string;
+          decision: boolean;
+          confidence: number;
+          reasoning: string;
+          citations: any;
+          source_evaluation_id: string | null;
+          pn_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          use_case_id: string;
+          shared_key: string;
+          decision: boolean;
+          confidence: number;
+          reasoning: string;
+          citations?: any;
+          source_evaluation_id?: string | null;
+          pn_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          use_case_id?: string;
+          shared_key?: string;
+          decision?: boolean;
+          confidence?: number;
+          reasoning?: string;
+          citations?: any;
+          source_evaluation_id?: string | null;
+          pn_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 }

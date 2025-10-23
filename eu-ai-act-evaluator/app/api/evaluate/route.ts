@@ -8,7 +8,7 @@ import { OpenAI } from 'openai';
 import crypto from 'crypto';
 import { EvaluationEngine } from '@/lib/evaluation/engine';
 import type { PrescriptiveNorm, SharedPrimitive, EvaluationResult } from '@/lib/evaluation/types';
-import { InMemorySharedEvaluationCache } from '@/lib/evaluation/shared-cache';
+import { InMemorySharedEvaluationCache, PerUseCasePersistentSharedCache } from '@/lib/evaluation/shared-cache';
 import { NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabase/client';
 
@@ -25,49 +25,7 @@ type SharedEvaluationContext = {
   cleanupTimer?: NodeJS.Timeout;
 };
 
-const SHARED_CONTEXT_TTL_MS = 5 * 60 * 1000;
-const sharedEvaluationContexts = new Map<string, SharedEvaluationContext>();
-
-function acquireSharedCache(evaluationId?: string | null) {
-  if (!evaluationId) {
-    return {
-      cache: new InMemorySharedEvaluationCache(),
-      release: () => {},
-    };
-  }
-
-  let context = sharedEvaluationContexts.get(evaluationId);
-  if (!context) {
-    context = {
-      cache: new InMemorySharedEvaluationCache(),
-      refCount: 0,
-    };
-    sharedEvaluationContexts.set(evaluationId, context);
-  }
-
-  context.refCount += 1;
-  if (context.cleanupTimer) {
-    clearTimeout(context.cleanupTimer);
-    context.cleanupTimer = undefined;
-  }
-
-  const release = () => {
-    const stored = sharedEvaluationContexts.get(evaluationId);
-    if (!stored) return;
-
-    stored.refCount -= 1;
-    if (stored.refCount <= 0 && !stored.cleanupTimer) {
-      stored.cleanupTimer = setTimeout(() => {
-        const latest = sharedEvaluationContexts.get(evaluationId);
-        if (latest && latest.refCount <= 0) {
-          sharedEvaluationContexts.delete(evaluationId);
-        }
-      }, SHARED_CONTEXT_TTL_MS);
-    }
-  };
-
-  return { cache: context.cache, release };
-}
+// Legacy per-evaluation in-memory shared cache helper removed.
 
 function sha256(s: string) {
   return crypto.createHash('sha256').update(s).digest('hex');
@@ -207,7 +165,24 @@ export async function POST(req: NextRequest) {
     // Track if writer is closed (prevent writing after completion)
     let writerClosed = false;
 
-    const { cache: sharedCache, release: releaseSharedCache } = acquireSharedCache(evaluationId);
+    // Determine use_case_id for persistent, per-use-case shared requirement cache
+    let useCaseId: string | null = null;
+    if (evaluationId) {
+      const { data: evalMeta } = await supabase
+        .from('evaluations')
+        .select('use_case_id')
+        .eq('id', evaluationId)
+        .single();
+      useCaseId = evalMeta?.use_case_id ?? null;
+    }
+
+    const sharedCache = useCaseId
+      ? new PerUseCasePersistentSharedCache({
+          useCaseId,
+          sourceEvaluationId: evaluationId,
+          pnId: (prescriptiveNorm as PrescriptiveNorm).id,
+        })
+      : new InMemorySharedEvaluationCache();
 
     // Build set of primitive node IDs (to filter composites from DB writes)
     const primitiveNodeIds = new Set<string>();
@@ -294,7 +269,9 @@ export async function POST(req: NextRequest) {
     // Define evaluation function that calls GPT-5-mini
     const evaluateWithGPT5 = async (prompt: string): Promise<EvaluationResult> => {
       requestCount++;
-      const key = sha256(prompt);
+      // Salt the prompt hash with useCaseId to avoid cross-use-case collisions
+      const salt = useCaseId || evaluationId || 'global';
+      const key = sha256(`${salt}::${prompt}`);
       const cached = evalCache.get(key);
       if (cached) {
         console.log(`⚡ [Cache] Hit for request #${requestCount}`);
@@ -309,7 +286,7 @@ export async function POST(req: NextRequest) {
           {
             role: 'system',
             content:
-              'You are a legal expert evaluating compliance with the EU AI Act. Respond ONLY with a single JSON object: {"decision":boolean,"confidence":number,"reasoning":string}. Confidence in [0,1].',
+              'You answer one legal Question per call. Output only JSON: {"decision":boolean,"confidence":number,"reasoning":string}. Semantics: decision=true means YES to the Question; decision=false means NO. Do not decide overall compliance or apply exceptions—just answer the Question from the provided facts and context. confidence in [0,1].',
           },
           {
             role: 'user',
@@ -413,7 +390,7 @@ export async function POST(req: NextRequest) {
         );
         await writer.close();
       } finally {
-        releaseSharedCache();
+        // nothing to release for persistent cache
       }
     })();
 
