@@ -6,7 +6,7 @@
  * Use-case-centric view with expandable rows showing obligations
  */
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +30,7 @@ import {
 import { StatusBadge } from '@/components/compliance/shared/StatusBadge';
 import { RiskBadge } from '@/components/compliance/shared/RiskBadge';
 import { DueDateBadge } from '@/components/compliance/shared/DueDateBadge';
-import { ChevronLeft, ChevronDown, ChevronRight, Filter, Eye, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronDown, ChevronRight, Filter, AlertCircle } from 'lucide-react';
 import type { Database } from '@/lib/supabase/types';
 
 type ObligationInstance = Database['public']['Tables']['obligation_instances']['Row'];
@@ -250,10 +250,9 @@ export default function ObligationsRegistryPage() {
                     const complianceRate = getComplianceRate(uc.summary);
 
                     return (
-                      <>
+                      <React.Fragment key={uc.use_case_id}>
                         {/* Main Row */}
                         <TableRow
-                          key={uc.use_case_id}
                           className="cursor-pointer hover:bg-gray-50"
                           onClick={() => toggleUseCase(uc.use_case_id)}
                         >
@@ -337,92 +336,75 @@ export default function ObligationsRegistryPage() {
                           </TableCell>
                         </TableRow>
 
-                        {/* Expanded Row - Nested Obligations Table */}
+                        {/* Expanded Row - Nested Obligations */}
                         {isExpanded && (
                           <TableRow>
                             <TableCell colSpan={6} className="bg-gray-50 p-0">
                               <div className="p-6">
-                                <h3 className="text-sm font-semibold text-gray-900 mb-4">
-                                  Obligations for {uc.use_case_title}
+                                <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+                                  {uc.obligations.length} Obligation{uc.obligations.length !== 1 ? 's' : ''}
                                 </h3>
-                                <div className="border rounded-lg bg-white">
-                                  <Table>
-                                    <TableHeader>
-                                      <TableRow>
-                                        <TableHead>PN ID</TableHead>
-                                        <TableHead>Title</TableHead>
-                                        <TableHead>Applicability</TableHead>
-                                        <TableHead>Implementation</TableHead>
-                                        <TableHead>Risk</TableHead>
-                                        <TableHead>Due Date</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                      </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                      {uc.obligations.map((obl) => (
-                                        <TableRow key={obl.id} className="hover:bg-gray-50">
-                                          <TableCell className="font-mono text-sm">
-                                            {obl.pn_id}
+                                <div className="space-y-2">
+                                  {uc.obligations.map((obl) => (
+                                    <div
+                                      key={obl.id}
+                                      onClick={() => router.push(`/compliance-center/obligations/${obl.id}`)}
+                                      className="bg-white border rounded-lg p-4 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group"
+                                    >
+                                      <div className="flex items-start justify-between gap-4">
+                                        {/* Left: PN Info */}
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center gap-2 mb-2">
+                                            <span className="font-mono text-sm font-semibold text-gray-900">
+                                              {obl.pn_id}
+                                            </span>
                                             {obl.pn_article && (
-                                              <span className="text-gray-500 ml-1">
-                                                (Art. {obl.pn_article})
+                                              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                                                Article {obl.pn_article}
                                               </span>
                                             )}
-                                          </TableCell>
-                                          <TableCell>
-                                            <p className="text-sm font-medium text-gray-900">
-                                              {obl.pn_title || 'No title'}
-                                            </p>
-                                          </TableCell>
-                                          <TableCell>
+                                          </div>
+                                          <p className="text-sm font-medium text-gray-900 mb-3">
+                                            {obl.pn_title || 'No title available'}
+                                          </p>
+
+                                          {/* Status Badges Row */}
+                                          <div className="flex flex-wrap items-center gap-2">
                                             <StatusBadge
                                               type="applicability"
                                               status={obl.applicability_state}
                                             />
-                                          </TableCell>
-                                          <TableCell>
-                                            {obl.implementation_state ? (
+                                            {obl.implementation_state && (
                                               <StatusBadge
                                                 type="implementation"
                                                 status={obl.implementation_state}
                                               />
-                                            ) : (
-                                              <span className="text-gray-400 text-sm">—</span>
                                             )}
-                                          </TableCell>
-                                          <TableCell>
-                                            <RiskBadge level={obl.risk_level} />
-                                          </TableCell>
-                                          <TableCell>
-                                            {obl.due_date ? (
+                                            {obl.risk_level && (
+                                              <RiskBadge level={obl.risk_level} showIcon />
+                                            )}
+                                            {obl.due_date && (
                                               <DueDateBadge dueDate={obl.due_date} />
-                                            ) : (
-                                              <span className="text-gray-400 text-sm">—</span>
                                             )}
-                                          </TableCell>
-                                          <TableCell className="text-right">
-                                            <Button
-                                              size="sm"
-                                              variant="ghost"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                router.push(`/compliance-center/obligations/${obl.id}`);
-                                              }}
-                                            >
-                                              <Eye className="w-4 h-4 mr-1" />
-                                              View
-                                            </Button>
-                                          </TableCell>
-                                        </TableRow>
-                                      ))}
-                                    </TableBody>
-                                  </Table>
+                                          </div>
+                                        </div>
+
+                                        {/* Right: Action Button */}
+                                        <div className="flex-shrink-0">
+                                          <div className="flex items-center gap-2 text-blue-600 group-hover:text-blue-700">
+                                            <span className="text-sm font-medium">View Details</span>
+                                            <ChevronRight className="w-4 h-4" />
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
                             </TableCell>
                           </TableRow>
                         )}
-                      </>
+                      </React.Fragment>
                     );
                   })}
                 </TableBody>
