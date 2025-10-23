@@ -75,6 +75,12 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const activeTabRef = useRef<string | null>(activeTab);
   // Ref to track current openTabs (avoid stale captures inside SSE loop)
   const openTabsRef = useRef<string[]>(openTabs);
+  // Helper: politely auto-follow current PN when no tab chosen by user
+  const politelyActivateTab = (pnId: string) => {
+    if (!activeTabRef.current) {
+      setActiveTab(pnId);
+    }
+  };
 
   // Evaluation history
   const [showHistory, setShowHistory] = useState(false);
@@ -704,6 +710,18 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
                   autoSelectFromStates(pnId, states);
 
+                  // Ensure the inspector follows the currently evaluated PN
+                  // 1) Open the tab if not already
+                  if (!openTabsRef.current.includes(pnId)) {
+                    // Load data directly and open tab without relying on pnStatuses
+                    await loadExpandedPNData(pnId, evaluation.id);
+                    setOpenTabs(prev => (prev.includes(pnId) ? prev : [...prev, pnId]));
+                    politelyActivateTab(pnId);
+                  } else {
+                    // 2) If no tab selected yet, make this one active for a smooth follow
+                    politelyActivateTab(pnId);
+                  }
+
                   // If this PN has an open tab, update its tree live (using ref to avoid stale closure)
                   if (openTabsRef.current.includes(pnId)) {
                     setTabData(prev => {
@@ -775,6 +793,9 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                   });
 
                   autoSelectFromStates(pnId, statesForPN, pnData.requirements.root);
+
+                  // Keep focus on the PN tab if it's open and no other tab was explicitly chosen
+                  politelyActivateTab(pnId);
 
                   // Ensure any open inspector tab reflects the final state as soon as it arrives
                   if (openTabsRef.current.includes(pnId)) {
@@ -1252,7 +1273,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
               const progressPercent = progress ? (progress.current / progress.total) * 100 : 0;
 
               return (
-                <div key={evaluationId} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+                <div data-progress-card key={evaluationId} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
                   {/* Elegant Progress Header */}
                   <div className="px-5 py-4 border-b border-neutral-100">
                     <div className="flex items-center justify-between mb-3">

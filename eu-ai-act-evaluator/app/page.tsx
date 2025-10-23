@@ -381,6 +381,12 @@ export default function Home() {
                 }
                 return prev;
               });
+
+              // Auto-follow the currently evaluating node in the grid
+              const current = (data.states as EvaluationState[]).find(s => s.status === 'evaluating');
+              if (current) {
+                setSelectedNodeId(current.nodeId);
+              }
             } else if (data.type === 'complete') {
               console.log('✅ [Evaluation] Complete!');
               console.log(`📊 [Complete] Total states: ${data.result.states.length}`);
