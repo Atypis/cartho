@@ -41,3 +41,13 @@ Instead of deleting, you can disable servers temporarily:
 - Default MCP output limit: 25,000 tokens
 - Can be adjusted with `MAX_MCP_OUTPUT_TOKENS` setting
 - Recommended value for reduced usage: 5000-10000 tokens
+
+## Supabase Project
+
+### Active Project for EU AI Act Evaluator
+- **Project Name**: Cartho
+- **Project ID**: `oejdvywncxhnhquytwnh`
+- **Region**: eu-central-1
+- **Status**: ACTIVE_HEALTHY
+
+When using Supabase MCP tools (migrations, queries, etc.), always use this project ID.
