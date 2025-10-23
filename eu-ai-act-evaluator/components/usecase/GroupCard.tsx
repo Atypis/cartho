@@ -114,15 +114,15 @@ export function GroupCard({
         onClick={() => setExpanded(!expanded)}
         className="w-full px-4 py-3 flex items-center justify-between hover:bg-neutral-50 transition-colors text-left"
       >
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <h3 className="text-sm font-semibold text-neutral-900">{group.title}</h3>
-            <span className="text-[10px] text-neutral-500">
+            <h3 className="text-sm font-semibold text-neutral-900 truncate">{group.title}</h3>
+            <span className="text-[10px] text-neutral-500 flex-shrink-0">
               {totalObligations} obligations
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-neutral-600">{group.description}</span>
+          <div className="flex items-center gap-2 text-xs flex-wrap">
+            <span className="text-neutral-600 break-words">{group.description}</span>
             {groupStatus === 'pending' && (
               <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-medium">
                 Pending Evaluation

@@ -271,9 +271,9 @@ export function RequirementsGrid({
         <div ref={summaryCardRef} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
           {/* Header */}
           <div className="px-4 py-2 flex items-center justify-between gap-3 bg-neutral-50 border-b border-neutral-200">
-            <div className="flex items-center gap-2 flex-1">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               {/* Title */}
-              <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
+              <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-wide break-words">
                 Article 4: AI Literacy Obligation
               </h4>
 
@@ -318,13 +318,13 @@ export function RequirementsGrid({
 
           {/* Expanded Content */}
           {summaryExpanded && (
-            <div className="px-4 py-3 space-y-3 text-xs">
+            <div className="px-4 py-3 space-y-3 text-xs w-full min-w-0">
               {/* Obligation Overview - Always visible */}
-              <div>
+              <div className="min-w-0">
                 <div className="font-bold text-neutral-900 mb-1.5 text-[10px] uppercase tracking-wide">
                   Legal Obligation Under EU AI Act
                 </div>
-                <div className="text-neutral-700 text-xs leading-relaxed bg-neutral-50 rounded p-3 border border-neutral-200">
+                <div className="text-neutral-700 text-xs leading-relaxed bg-neutral-50 rounded p-3 border border-neutral-200 break-words">
                   Providers and deployers of AI systems shall take measures to ensure, to their best extent,
                   a <strong>sufficient level of AI literacy</strong> of their staff and other persons dealing
                   with the operation and use of AI systems on their behalf, taking into account their technical
