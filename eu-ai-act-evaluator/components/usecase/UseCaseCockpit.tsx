@@ -56,6 +56,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const router = useRouter();
   const [useCase, setUseCase] = useState<UseCase | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false); // For background reloads without skeleton
 
   // Description editing
   const [isEditingDescription, setIsEditingDescription] = useState(false);
@@ -118,20 +119,20 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const reloadInFlightRef = useRef(false);
   const reloadQueuedRef = useRef(false);
 
-  const performReload = async () => {
+  const performReload = async (isInitialLoad = false) => {
     if (reloadInFlightRef.current) {
       reloadQueuedRef.current = true;
       return;
     }
     reloadInFlightRef.current = true;
     try {
-      await loadUseCaseAndEvaluations();
+      await loadUseCaseAndEvaluations(isInitialLoad);
     } finally {
       reloadInFlightRef.current = false;
       if (reloadQueuedRef.current) {
         reloadQueuedRef.current = false;
         // run again immediately to process the queued request
-        performReload();
+        performReload(false); // Subsequent reloads are never initial
       }
     }
   };
@@ -194,7 +195,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   useEffect(() => {
     console.log(`🏗️ [Cockpit] Component mounted/updated for use case: ${useCaseId}, availablePNs: ${availablePNs.length}`);
     if (!useCaseId) return;
-    loadUseCaseAndEvaluations();
+    loadUseCaseAndEvaluations(true); // Initial load
 
     // Real-time subscription
     const subscription = supabase
@@ -212,8 +213,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     };
   }, [useCaseId, availablePNs.length]); // Add availablePNs.length to re-trigger when catalog loads
 
-  const loadUseCaseAndEvaluations = async () => {
-    console.log(`📂 [Cockpit] loadUseCaseAndEvaluations called for use case: ${useCaseId}`);
+  const loadUseCaseAndEvaluations = async (isInitialLoad = false) => {
+    console.log(`📂 [Cockpit] loadUseCaseAndEvaluations called for use case: ${useCaseId}, isInitialLoad: ${isInitialLoad}`);
     console.log(`📂 [Cockpit] Available PNs count: ${availablePNs.length}`);
 
     if (availablePNs.length === 0) {
@@ -222,8 +223,14 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       return;
     }
 
-    setLoading(true);
-    console.log(`🔄 [Cockpit] Loading use case data...`);
+    // Only show skeleton on initial load; use isRefreshing for background updates
+    if (isInitialLoad) {
+      setLoading(true);
+      console.log(`🔄 [Cockpit] Initial load - showing skeleton...`);
+    } else {
+      setIsRefreshing(true);
+      console.log(`🔄 [Cockpit] Background refresh - keeping UI visible...`);
+    }
 
     // Load use case
     const { data: useCaseData, error: ucError } = await supabase
@@ -235,6 +242,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     if (ucError || !useCaseData) {
       console.error('Error loading use case:', ucError);
       setLoading(false);
+      setIsRefreshing(false);
       return;
     }
     setUseCase(useCaseData);
@@ -255,6 +263,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     await buildPNStatusMapOptimized(evaluations || []);
     console.log(`✅ [Cockpit] buildPNStatusMapOptimized completed`);
     setLoading(false);
+    setIsRefreshing(false);
   };
 
   const buildPNStatusMapOptimized = async (evaluations: Evaluation[]) => {
@@ -683,16 +692,20 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       }
       const bundle = await bundleRes.json();
 
-      // Trigger evaluation for each PN with SSE stream consumption
-      const evaluationPromises = pnIds.map(async (pnId, i) => {
+      // ✅ Sequential evaluation to avoid overwhelming SSE streams
+      // (Previously: unbounded concurrency caused UI blank/freeze)
+      console.log(`📋 [Inline Eval] Starting SEQUENTIAL evaluation of ${pnIds.length} obligations...`);
+
+      for (let i = 0; i < pnIds.length; i++) {
+        const pnId = pnIds[i];
         const pnData = bundle.pns[i];
 
         if (!pnData) {
           console.warn(`⚠️ [Inline Eval] No data for ${pnId}, skipping`);
-          return;
+          continue;
         }
 
-        console.log(`🎯 [Inline Eval] Starting evaluation for ${pnId}`);
+        console.log(`🎯 [Inline Eval] [${i + 1}/${pnIds.length}] Starting evaluation for ${pnId}`);
 
         const expandedNodes = expandSharedRequirements(pnData.requirements.nodes, bundle.sharedPrimitives || []);
         const primitiveNodes = expandedNodes.filter((n: any) => n.kind === 'primitive');
@@ -780,15 +793,30 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                   autoSelectFromStates(pnId, states);
 
                   // Ensure the inspector follows the currently evaluated PN
-                  // 1) Open the tab if not already
+                  // In batch mode (multiple PNs), keep only ONE tab open to avoid DOM bloat
+                  const isBatchMode = pnIds.length > 1;
+
                   if (!openTabsRef.current.includes(pnId)) {
                     // Load data directly and open tab without relying on pnStatuses
                     await loadExpandedPNData(pnId, evaluation.id);
-                    setOpenTabs(prev => (prev.includes(pnId) ? prev : [...prev, pnId]));
-                    politelyActivateTab(pnId);
+
+                    if (isBatchMode) {
+                      // ✅ Batch mode: REPLACE tabs (keep only current PN)
+                      setOpenTabs([pnId]);
+                      setActiveTab(pnId);
+                      console.log(`📑 [Batch Tab] Switched to ${pnId} (replacing tabs)`);
+                    } else {
+                      // Single evaluation: accumulate tabs
+                      setOpenTabs(prev => (prev.includes(pnId) ? prev : [...prev, pnId]));
+                      politelyActivateTab(pnId);
+                    }
                   } else {
-                    // 2) If no tab selected yet, make this one active for a smooth follow
-                    politelyActivateTab(pnId);
+                    // Tab already open, just activate it
+                    if (isBatchMode) {
+                      setActiveTab(pnId);
+                    } else {
+                      politelyActivateTab(pnId);
+                    }
                   }
 
                   // If this PN has an open tab, update its tree live (using ref to avoid stale closure)
@@ -880,8 +908,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                     });
                   }
 
-                  // Coalesced single reload shortly after completion; realtime will also update
-                  scheduleReload('sse-complete', 300);
+                  // ❌ REMOVED: Per-PN completion reload (caused UI blank during batch)
+                  // scheduleReload('sse-complete', 300);
                 } else if (data.type === 'error') {
                   throw new Error(data.error);
                 }
@@ -890,22 +918,17 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
           }
         } catch (error) {
           console.error(`❌ [Inline Eval] Error evaluating ${pnId}:`, error);
-          throw error;
+          // Continue to next PN even if this one fails
         }
-      });
+      }
 
-      console.log(`✅ [Inline Eval] All ${pnIds.length} SSE streams started`);
+      console.log(`✅ [Inline Eval] All ${pnIds.length} evaluations completed sequentially`);
 
       // Clear selection
       setSelectedPNs([]);
 
-      // Coalesce a reload to reflect "evaluating" status without duplicate loads
-      scheduleReload('sse-start-evaluating', 0);
-
-      // Wait for all evaluations to complete (in background)
-      Promise.all(evaluationPromises).catch(error => {
-        console.error('❌ [Inline Eval] One or more evaluations failed:', error);
-      });
+      // Single reload after all evaluations complete
+      scheduleReload('batch-complete', 500);
 
     } catch (error: any) {
       console.error('Failed to run inline evaluation:', error);
