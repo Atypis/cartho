@@ -166,52 +166,50 @@ body {
   --sidebar-ring: var(--pixel-seal-gold);
 }
 
-/* Apply pixel fonts and aged papyrus background when medieval theme is active */
+/* Apply pixel fonts and clean papyrus background when medieval theme is active */
 [data-theme="medieval"] body {
   font-family: var(--font-sans);
   font-size: 18px;
   line-height: 1.5;
   letter-spacing: 0.01em;
-  background-color: #E8D5B5; /* Slightly darker aged papyrus */
+  background-color: #F4E5C2; /* Clean light papyrus for better contrast */
   background-image:
-    /* Subtle fiber texture */
+    /* Very subtle fiber texture */
     repeating-linear-gradient(
       0deg,
       transparent,
       transparent 2px,
-      rgba(139, 111, 71, 0.04) 2px,
-      rgba(139, 111, 71, 0.04) 4px
+      rgba(139, 111, 71, 0.02) 2px,
+      rgba(139, 111, 71, 0.02) 4px
     ),
     repeating-linear-gradient(
       90deg,
       transparent,
       transparent 2px,
-      rgba(139, 111, 71, 0.04) 2px,
-      rgba(139, 111, 71, 0.04) 4px
-    ),
-    /* Age spots and stains */
-    radial-gradient(
-      circle at 10% 20%,
-      rgba(139, 111, 71, 0.06) 0%,
-      transparent 5%
-    ),
-    radial-gradient(
-      circle at 90% 80%,
-      rgba(139, 111, 71, 0.05) 0%,
-      transparent 8%
-    ),
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(139, 111, 71, 0.03) 0%,
-      transparent 15%
+      rgba(139, 111, 71, 0.02) 2px,
+      rgba(139, 111, 71, 0.02) 4px
     );
 }
 
-/* Ensure main content area gets papyrus background */
+/* Ensure main content area gets clean papyrus background */
 [data-theme="medieval"] main,
 [data-theme="medieval"] [class*="SidebarInset"],
 [data-theme="medieval"] .sidebar-inset {
-  background-color: var(--pixel-papyrus-bg);
+  background-color: #F4E5C2 !important; /* Clean papyrus */
+}
+
+/* Ensure ALL main content text is dark and readable - CRITICAL FIX */
+[data-theme="medieval"] main *:not([class*="sidebar"]),
+[data-theme="medieval"] table *,
+[data-theme="medieval"] p,
+[data-theme="medieval"] span:not([class*="sidebar"]),
+[data-theme="medieval"] div:not([class*="sidebar"]),
+[data-theme="medieval"] h1:not([class*="sidebar"]),
+[data-theme="medieval"] h2:not([class*="sidebar"]),
+[data-theme="medieval"] h3:not([class*="sidebar"]),
+[data-theme="medieval"] a:not([class*="sidebar"]),
+[data-theme="medieval"] li:not([class*="sidebar"]) {
+  color: #1A1210 !important; /* Near-black for maximum readability */
 }
 
 [data-theme="medieval"] h1,
@@ -247,64 +245,51 @@ body {
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
 }
 
-/* Medieval Button Styles - Wax Seal Effect */
+/* Medieval Button Styles - Wax Seal Effect with thick borders */
 [data-theme="medieval"] button,
 [data-theme="medieval"] [role="button"] {
-  border-width: 3px;
-  border-style: solid;
-  box-shadow: 2px 2px 0 var(--pixel-shadow);
-  transition: all 0.1s ease;
+  border-width: 3px !important;
+  border-style: solid !important;
+  border-color: #5C3A21 !important; /* Dark brown border */
+  box-shadow: 3px 3px 0 rgba(26, 18, 16, 0.3) !important;
+  transition: all 0.15s ease !important;
+  font-weight: 600 !important;
 }
 
 [data-theme="medieval"] button:hover,
 [data-theme="medieval"] [role="button"]:hover {
-  transform: translateY(-1px);
-  box-shadow: 3px 3px 0 var(--pixel-shadow);
+  transform: translateY(-1px) !important;
+  box-shadow: 4px 4px 0 rgba(26, 18, 16, 0.3) !important;
+  border-color: #4A2511 !important; /* Darker on hover */
 }
 
 [data-theme="medieval"] button:active,
 [data-theme="medieval"] [role="button"]:active {
-  transform: translateY(2px);
-  box-shadow: 1px 1px 0 var(--pixel-shadow);
+  transform: translateY(2px) !important;
+  box-shadow: 1px 1px 0 rgba(26, 18, 16, 0.3) !important;
 }
 
-/* Medieval Card Styles - Parchment Scroll with decorative corners */
+/* Medieval Card Styles - Clean parchment scroll with decorative corners */
 [data-theme="medieval"] [class*="card"]:not([class*="sidebar"]),
 [data-theme="medieval"] [data-card],
 [data-theme="medieval"] .card {
   position: relative !important;
   border-width: 4px !important;
   border-style: double !important;
-  border-color: #8B6F47 !important; /* Darker border for contrast */
+  border-color: #5C3A21 !important; /* Dark brown border */
   box-shadow:
-    4px 4px 0 var(--pixel-shadow),
-    inset 1px 1px 0 rgba(255, 255, 255, 0.3),
-    inset -1px -1px 0 rgba(0, 0, 0, 0.1) !important;
-  background-color: #F5E6D3 !important; /* Warmer parchment */
+    4px 4px 0 rgba(26, 18, 16, 0.2),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.4),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.05) !important;
+  background-color: #FBF5ED !important; /* Very light clean parchment */
   background-image:
     /* Subtle paper texture */
     repeating-linear-gradient(
       0deg,
       transparent,
       transparent 2px,
-      rgba(139, 111, 71, 0.03) 2px,
-      rgba(139, 111, 71, 0.03) 4px
-    ),
-    /* Aged spots */
-    radial-gradient(
-      circle at 20% 30%,
-      rgba(139, 111, 71, 0.05) 0%,
-      transparent 3%
-    ),
-    radial-gradient(
-      circle at 80% 70%,
-      rgba(139, 111, 71, 0.04) 0%,
-      transparent 4%
-    ),
-    radial-gradient(
-      circle at 60% 10%,
-      rgba(139, 111, 71, 0.03) 0%,
-      transparent 2%
+      rgba(139, 111, 71, 0.02) 2px,
+      rgba(139, 111, 71, 0.02) 4px
     ) !important;
   padding: 24px !important;
 }
@@ -348,30 +333,31 @@ body {
   display: block !important;
 }
 
-/* Medieval Input Styles - Manuscript Entry with ink line */
+/* Medieval Input Styles - Clean manuscript entry with writing lines */
 [data-theme="medieval"] input,
 [data-theme="medieval"] textarea,
 [data-theme="medieval"] select {
-  border-width: 2px !important;
+  border-width: 3px !important;
   border-style: solid !important;
-  border-color: #8B6F47 !important;
+  border-color: #8B6F47 !important; /* Medium brown */
   box-shadow:
-    inset 2px 2px 3px rgba(26, 18, 16, 0.15),
-    0 1px 0 rgba(255, 255, 255, 0.5) !important;
-  background-color: #FAF5ED !important; /* Very light parchment */
+    inset 2px 2px 3px rgba(26, 18, 16, 0.1),
+    0 2px 0 rgba(255, 255, 255, 0.6) !important;
+  background-color: #FFFFFF !important; /* Pure white for maximum readability */
   background-image:
-    /* Horizontal writing lines */
+    /* Subtle horizontal writing lines */
     repeating-linear-gradient(
       180deg,
       transparent,
       transparent 30px,
-      rgba(139, 111, 71, 0.1) 30px,
-      rgba(139, 111, 71, 0.1) 31px
+      rgba(139, 111, 71, 0.08) 30px,
+      rgba(139, 111, 71, 0.08) 31px
     ) !important;
-  color: var(--pixel-ink-black) !important;
+  color: #1A1210 !important; /* Dark text */
   font-family: var(--font-sans) !important;
-  padding: 12px 16px !important;
+  padding: 14px 18px !important;
   transition: all 0.2s ease !important;
+  font-weight: 500 !important;
 }
 
 [data-theme="medieval"] input:focus,
@@ -396,47 +382,50 @@ body {
   opacity: 0.6;
 }
 
-/* Medieval Table Styles - Ledger with better contrast */
+/* Medieval Table Styles - Clean ledger with maximum readability */
 [data-theme="medieval"] table {
   border-collapse: separate !important;
   border-spacing: 0 !important;
-  border: 3px double var(--pixel-ink-black) !important;
-  background-color: var(--pixel-papyrus-bg) !important;
+  border: 4px double #5C3A21 !important; /* Thicker dark brown border */
+  background-color: #FFFFFF !important;
+  box-shadow: 3px 3px 0 rgba(26, 18, 16, 0.15) !important;
 }
 
 [data-theme="medieval"] thead {
-  background-color: #D4AF37 !important; /* Gold header for contrast */
-  border-bottom: 3px solid var(--pixel-ink-black) !important;
+  background-color: #D4AF37 !important; /* Gold header */
+  border-bottom: 4px solid #5C3A21 !important;
 }
 
 [data-theme="medieval"] th {
   background-color: #D4AF37 !important; /* Gold header */
-  color: var(--pixel-ink-black) !important;
-  border: 2px solid var(--pixel-ink-black) !important;
+  color: #1A1210 !important; /* Dark text on gold */
+  border: 2px solid #5C3A21 !important; /* Dark brown borders */
   font-family: var(--font-heading) !important;
   text-transform: uppercase !important;
   letter-spacing: 0.1em !important;
   font-size: 0.8em !important;
-  padding: 12px 16px !important;
+  padding: 14px 18px !important;
   font-weight: bold !important;
 }
 
 [data-theme="medieval"] tbody tr {
-  background-color: #F9F2E3 !important; /* Lighter rows */
+  background-color: #FFF9F0 !important; /* Near-white for readability */
+  transition: background-color 0.2s ease !important;
 }
 
 [data-theme="medieval"] tbody tr:nth-child(even) {
-  background-color: #EFE2C8 !important; /* Alternating darker rows */
+  background-color: #F9F5EB !important; /* Very light cream alternating */
 }
 
 [data-theme="medieval"] tbody tr:hover {
-  background-color: #E8D4A8 !important; /* Hover effect */
+  background-color: #F5E6D3 !important; /* Light parchment on hover */
 }
 
 [data-theme="medieval"] td {
-  border: 1px solid var(--pixel-parchment-border) !important;
-  padding: 12px 16px !important;
-  color: var(--pixel-ink-black) !important;
+  border: 2px solid #C4A574 !important; /* Parchment border */
+  padding: 14px 18px !important;
+  color: #1A1210 !important; /* Dark black text */
+  font-weight: 500 !important;
 }
 
 /* Medieval Badge Styles - Wax Seals */
