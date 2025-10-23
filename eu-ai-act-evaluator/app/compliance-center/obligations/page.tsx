@@ -232,16 +232,16 @@ export default function ObligationsRegistryPage() {
               </Button>
             </div>
           ) : (
-            <div className="bg-white rounded-lg border">
-              <Table>
+            <div className="bg-white rounded-lg border overflow-x-auto">
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[50px]"></TableHead>
-                    <TableHead>Use Case</TableHead>
-                    <TableHead className="text-center">Obligations</TableHead>
-                    <TableHead className="text-center">Compliance Rate</TableHead>
-                    <TableHead>Status Summary</TableHead>
-                    <TableHead className="text-center">Risk Issues</TableHead>
+                    <TableHead className="w-[300px]">Use Case</TableHead>
+                    <TableHead className="text-center w-[100px]">Obligations</TableHead>
+                    <TableHead className="w-[200px]">Compliance Rate</TableHead>
+                    <TableHead className="w-[250px]">Status Summary</TableHead>
+                    <TableHead className="text-center w-[150px]">Risk Issues</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -264,11 +264,11 @@ export default function ObligationsRegistryPage() {
                             )}
                           </TableCell>
                           <TableCell>
-                            <div>
-                              <p className="font-semibold text-gray-900">
+                            <div className="max-w-[300px]">
+                              <p className="font-semibold text-gray-900 truncate">
                                 {uc.use_case_title}
                               </p>
-                              <p className="text-sm text-gray-600 line-clamp-1">
+                              <p className="text-sm text-gray-600 truncate">
                                 {uc.use_case_description}
                               </p>
                             </div>
