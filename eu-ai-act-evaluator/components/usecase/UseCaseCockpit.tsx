@@ -1397,7 +1397,99 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
           {/* Main Content - Single Page Layout */}
           {!loading && (
             <div className="space-y-4">
-              {/* RUNNING EVALUATIONS Section */}
+              {/* RESULTS SECTIONS - Top Position (The Answer) */}
+              {/* APPLIES Section - Open by default (Critical obligations!) */}
+              {(appliesGroups.length > 0 || ungroupedAppliesPNs.length > 0) && (
+                <details open className="group">
+                  <summary className="cursor-pointer flex items-center justify-between px-1 py-2 hover:bg-neutral-50 rounded transition-colors">
+                    <h2 className="text-sm font-bold text-green-700 uppercase tracking-wide flex items-center gap-2">
+                      <span>✓ Obligations That Apply ({appliesPNs.length})</span>
+                    </h2>
+                    <svg
+                      className="w-4 h-4 text-neutral-400 transition-transform group-open:rotate-180"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="mt-2 space-y-2">
+                    {appliesGroups.map(group => (
+                      <TaskRow
+                        key={group.id}
+                        group={group}
+                        groupPNStatuses={pnStatuses.filter(ps => group.members.includes(ps.pnId))}
+                        sharedPrimitives={sharedPrimitives}
+                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                        onViewDetails={handleViewPN}
+                      />
+                    ))}
+                    {ungroupedAppliesPNs.map(pn => (
+                      <TaskRow
+                        key={pn.pnId}
+                        pnStatus={pn}
+                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                        onViewDetails={handleViewPN}
+                      />
+                    ))}
+                  </div>
+                </details>
+              )}
+
+              {/* DOES NOT APPLY Section - Collapsed by default (Less critical) */}
+              {(notApplicableGroups.length > 0 || ungroupedNotApplicablePNs.length > 0) && (
+                <details className="group">
+                  <summary className="cursor-pointer flex items-center justify-between px-1 py-2 hover:bg-neutral-50 rounded transition-colors">
+                    <h2 className="text-sm font-bold text-neutral-600 uppercase tracking-wide flex items-center gap-2">
+                      <span>✗ Obligations That Do Not Apply ({notApplicablePNs.length})</span>
+                    </h2>
+                    <svg
+                      className="w-4 h-4 text-neutral-400 transition-transform group-open:rotate-180"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="mt-2 space-y-2">
+                    {notApplicableGroups.map(group => (
+                      <TaskRow
+                        key={group.id}
+                        group={group}
+                        groupPNStatuses={pnStatuses.filter(ps => group.members.includes(ps.pnId))}
+                        sharedPrimitives={sharedPrimitives}
+                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                        onViewDetails={handleViewPN}
+                      />
+                    ))}
+                    {ungroupedNotApplicablePNs.map(pn => (
+                      <TaskRow
+                        key={pn.pnId}
+                        pnStatus={pn}
+                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                        onViewDetails={handleViewPN}
+                      />
+                    ))}
+                  </div>
+                </details>
+              )}
+
+              {/* Empty Results State */}
+              {appliesPNs.length === 0 && notApplicablePNs.length === 0 && allPendingTasks.length === 0 && runningEvaluations.size === 0 && (
+                <div className="bg-white rounded-lg border border-neutral-200 p-8 text-center">
+                  <div className="text-neutral-400 mb-2">
+                    <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-sm font-semibold text-neutral-900 mb-1">No Obligations</h3>
+                  <p className="text-xs text-neutral-600">This use case has no obligations to evaluate.</p>
+                </div>
+              )}
+
+              {/* RUNNING EVALUATIONS - Middle Position (The Work) */}
               {runningEvaluations.size > 0 && (
                 <div className="space-y-3">
                   <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide flex items-center gap-2">
@@ -1462,7 +1554,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 </div>
               )}
 
-              {/* PENDING Section with Evaluate All CTA */}
+              {/* PENDING EVALUATION - Bottom Position (The Action) */}
               {allPendingTasks.length > 0 ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -1506,106 +1598,18 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                   ))}
                 </div>
               ) : (
-                <div className="bg-white rounded-lg border border-neutral-200 p-8 text-center">
-                  <div className="text-green-600 mb-2">
-                    <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                /* All Complete State */
+                runningEvaluations.size === 0 && (appliesPNs.length > 0 || notApplicablePNs.length > 0) && (
+                  <div className="bg-white rounded-lg border border-neutral-200 p-8 text-center">
+                    <div className="text-green-600 mb-2">
+                      <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-sm font-semibold text-neutral-900 mb-1">All Evaluations Complete!</h3>
+                    <p className="text-xs text-neutral-600">Review your results above.</p>
                   </div>
-                  <h3 className="text-sm font-semibold text-neutral-900 mb-1">All Evaluations Complete!</h3>
-                  <p className="text-xs text-neutral-600">Review your results in the sections below.</p>
-                </div>
-              )}
-
-              {/* RESULTS SECTIONS - Collapsed by Default */}
-              {/* APPLIES Section */}
-              {(appliesGroups.length > 0 || ungroupedAppliesPNs.length > 0) && (
-                <details className="group">
-                  <summary className="cursor-pointer flex items-center justify-between px-1 py-2 hover:bg-neutral-50 rounded transition-colors">
-                    <h2 className="text-sm font-bold text-green-700 uppercase tracking-wide flex items-center gap-2">
-                      <span>✓ Obligations That Apply ({appliesPNs.length})</span>
-                    </h2>
-                    <svg
-                      className="w-4 h-4 text-neutral-400 transition-transform group-open:rotate-180"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </summary>
-                  <div className="mt-2 space-y-2">
-                    {appliesGroups.map(group => (
-                      <TaskRow
-                        key={group.id}
-                        group={group}
-                        groupPNStatuses={pnStatuses.filter(ps => group.members.includes(ps.pnId))}
-                        sharedPrimitives={sharedPrimitives}
-                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
-                        onViewDetails={handleViewPN}
-                      />
-                    ))}
-                    {ungroupedAppliesPNs.map(pn => (
-                      <TaskRow
-                        key={pn.pnId}
-                        pnStatus={pn}
-                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
-                        onViewDetails={handleViewPN}
-                      />
-                    ))}
-                  </div>
-                </details>
-              )}
-
-              {/* DOES NOT APPLY Section */}
-              {(notApplicableGroups.length > 0 || ungroupedNotApplicablePNs.length > 0) && (
-                <details className="group">
-                  <summary className="cursor-pointer flex items-center justify-between px-1 py-2 hover:bg-neutral-50 rounded transition-colors">
-                    <h2 className="text-sm font-bold text-neutral-600 uppercase tracking-wide flex items-center gap-2">
-                      <span>✗ Obligations That Do Not Apply ({notApplicablePNs.length})</span>
-                    </h2>
-                    <svg
-                      className="w-4 h-4 text-neutral-400 transition-transform group-open:rotate-180"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </summary>
-                  <div className="mt-2 space-y-2">
-                    {notApplicableGroups.map(group => (
-                      <TaskRow
-                        key={group.id}
-                        group={group}
-                        groupPNStatuses={pnStatuses.filter(ps => group.members.includes(ps.pnId))}
-                        sharedPrimitives={sharedPrimitives}
-                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
-                        onViewDetails={handleViewPN}
-                      />
-                    ))}
-                    {ungroupedNotApplicablePNs.map(pn => (
-                      <TaskRow
-                        key={pn.pnId}
-                        pnStatus={pn}
-                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
-                        onViewDetails={handleViewPN}
-                      />
-                    ))}
-                  </div>
-                </details>
-              )}
-
-              {appliesPNs.length === 0 && notApplicablePNs.length === 0 && (
-                <div className="bg-white rounded-lg border border-neutral-200 p-8 text-center">
-                  <div className="text-neutral-400 mb-2">
-                    <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-sm font-semibold text-neutral-900 mb-1">No Results Yet</h3>
-                  <p className="text-xs text-neutral-600">Evaluate pending obligations to see results here.</p>
-                </div>
+                )
               )}
             </div>
           )}
