@@ -456,21 +456,27 @@ body {
   color: var(--sidebar-foreground) !important;
 }
 
-/* Force light text on all sidebar elements */
+/* SIDEBAR TEXT - Force light cream text on all sidebar elements (HIGHEST PRIORITY) */
+[data-theme="medieval"] [class*="sidebar"],
 [data-theme="medieval"] [class*="sidebar"] *,
+[data-theme="medieval"] aside,
 [data-theme="medieval"] aside * {
-  color: var(--sidebar-foreground) !important;
+  color: #F4E5C2 !important; /* Light cream text on dark oak */
 }
 
 /* Sidebar buttons need special treatment */
 [data-theme="medieval"] [class*="sidebar"] button,
-[data-theme="medieval"] [class*="sidebar"] [role="button"] {
-  color: var(--sidebar-foreground) !important;
+[data-theme="medieval"] [class*="sidebar"] [role="button"],
+[data-theme="medieval"] [class*="sidebar"] button *,
+[data-theme="medieval"] [class*="sidebar"] [role="button"] * {
+  color: #F4E5C2 !important; /* Light cream */
   border-color: #6B4728 !important; /* Lighter wood tone */
 }
 
 [data-theme="medieval"] [class*="sidebar"] button:hover,
-[data-theme="medieval"] [class*="sidebar"] [role="button"]:hover {
+[data-theme="medieval"] [class*="sidebar"] [role="button"]:hover,
+[data-theme="medieval"] [class*="sidebar"] button:hover *,
+[data-theme="medieval"] [class*="sidebar"] [role="button"]:hover * {
   background-color: #5C3A21 !important; /* Medium wood on hover */
   color: var(--pixel-seal-gold) !important; /* Gold text on hover */
 }
