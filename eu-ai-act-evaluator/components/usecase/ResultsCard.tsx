@@ -62,60 +62,38 @@ export function ResultsCard({
       {/* Card Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-8 py-6 text-left"
+        className="w-full px-4 py-3 text-left"
       >
-        <div className="flex items-start justify-between gap-8">
+        <div className="flex items-center justify-between gap-4">
           {/* Content */}
-          <div className="flex-1 min-w-0">
-            {/* Count - The Hero */}
-            <div className={`text-5xl font-bold tracking-tight ${accentColor} mb-1`}>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Count */}
+            <div className={`text-2xl font-bold tabular-nums ${accentColor}`}>
               {totalCount}
             </div>
 
-            {/* Label */}
-            <div className="text-base font-medium text-neutral-900 mb-3">
-              {type === 'applies' ? 'Obligations Apply' : 'Obligations Do Not Apply'}
-            </div>
-
-            {/* Metadata - Whispers */}
-            {!isExpanded && (
-              <div className="text-sm text-neutral-400 space-x-3">
-                {/* Composition */}
-                {(groupCount > 0 || individualCount > 0) && (
-                  <span>
-                    {[
-                      groupCount > 0 && `${groupCount} ${groupCount === 1 ? 'group' : 'groups'}`,
-                      individualCount > 0 && `${individualCount} individual`
-                    ].filter(Boolean).join(', ')}
-                  </span>
-                )}
-
-                {/* Articles */}
-                {articles.length > 0 && (
-                  <span>
-                    ·
-                  </span>
-                )}
-                {articles.length > 0 && (
-                  <span>
-                    {articles.length === 1 ? `Article ${articles[0]}` : `${articles.length} articles`}
-                  </span>
-                )}
-
-                {/* Date */}
-                {mostRecentDate && (
-                  <>
-                    <span>·</span>
-                    <span>{mostRecentDate}</span>
-                  </>
-                )}
+            {/* Label + Metadata */}
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-neutral-900">
+                {type === 'applies' ? 'Obligations Apply' : 'Obligations Do Not Apply'}
               </div>
-            )}
+
+              {!isExpanded && (
+                <div className="text-xs text-neutral-400 truncate">
+                  {[
+                    groupCount > 0 && `${groupCount} ${groupCount === 1 ? 'group' : 'groups'}`,
+                    individualCount > 0 && `${individualCount} individual`,
+                    articles.length > 0 && (articles.length === 1 ? `Art. ${articles[0]}` : `${articles.length} articles`),
+                    mostRecentDate
+                  ].filter(Boolean).join(' · ')}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Chevron - Subtle Affordance */}
-          <div className={`text-neutral-400 transition-transform mt-2 ${isExpanded ? 'rotate-180' : ''}`}>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Chevron */}
+          <div className={`text-neutral-400 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-180' : ''}`}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
@@ -124,7 +102,7 @@ export function ResultsCard({
 
       {/* Card Content */}
       {isExpanded && (
-        <div className="px-8 pb-6 pt-2 space-y-2">
+        <div className="px-4 pb-3 pt-1 space-y-2 border-t border-neutral-100">
           {/* Groups */}
           {groups.map(group => (
             <TaskRow
