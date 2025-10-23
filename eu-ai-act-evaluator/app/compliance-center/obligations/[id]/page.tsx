@@ -15,6 +15,7 @@ import { StatusBadge } from '@/components/compliance/shared/StatusBadge';
 import { RiskBadge } from '@/components/compliance/shared/RiskBadge';
 import { DueDateBadge } from '@/components/compliance/shared/DueDateBadge';
 import { RequirementsGrid } from '@/components/evaluation/RequirementsGrid';
+import { ControlsTab } from '@/components/compliance/controls/ControlsTab';
 import { ChevronLeft, ExternalLink, RefreshCw } from 'lucide-react';
 import { reconstructEvaluation } from '@/lib/evaluation/reconstruct';
 import type { Database } from '@/lib/supabase/types';
@@ -210,9 +211,9 @@ export default function ObligationDetailPage({ params }: { params: { id: string 
           <div className="bg-white border-b px-8">
             <TabsList>
               <TabsTrigger value="evaluation">Evaluation</TabsTrigger>
-              <TabsTrigger value="controls" disabled>
+              <TabsTrigger value="controls">
                 Controls
-                <span className="ml-2 text-xs text-gray-500">(Phase 2)</span>
+                <span className="ml-2 text-xs text-green-600">✨ Demo</span>
               </TabsTrigger>
               <TabsTrigger value="evidence" disabled>
                 Evidence
@@ -301,6 +302,14 @@ export default function ObligationDetailPage({ params }: { params: { id: string 
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+            <TabsContent value="controls" className="mt-0">
+              <ControlsTab
+                obligationId={params.id}
+                pnId={obligation.pn_id}
+                isApplicable={obligation.applicability_state === 'applies'}
+              />
             </TabsContent>
 
             <TabsContent value="history" className="mt-0">

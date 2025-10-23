@@ -57,6 +57,10 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [useCase, setUseCase] = useState<UseCase | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Description editing
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedDescription, setEditedDescription] = useState('');
+
   // PN catalog and status
   const [groups, setGroups] = useState<Group[]>([]);
   const [availablePNs, setAvailablePNs] = useState<any[]>([]);
@@ -1163,6 +1167,27 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                   <span className="text-neutral-600">{pendingPNs.length} Pending</span>
                 </div>
               </div>
+
+              {/* Use Case Description */}
+              {useCase.description && (
+                <div className="bg-white rounded-lg border border-neutral-200 p-4">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <h3 className="text-sm font-semibold text-neutral-900">Description</h3>
+                    <button
+                      className="text-xs text-neutral-600 hover:text-neutral-900 transition-colors"
+                      onClick={() => {
+                        // TODO: Implement edit functionality
+                        alert('Edit functionality coming soon');
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className="text-sm text-neutral-700 leading-relaxed whitespace-pre-wrap">
+                    {useCase.description}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex items-baseline justify-between gap-4">

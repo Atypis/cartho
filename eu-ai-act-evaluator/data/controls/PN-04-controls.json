@@ -1,0 +1,192 @@
+{
+  "pn_id": "PN-04",
+  "title": "AI Literacy Compliance Controls",
+  "description": "Controls to demonstrate compliance with Article 4 AI literacy obligations",
+  "controls": [
+    {
+      "id": "PN-04-C1",
+      "key": "training-program",
+      "title": "Establish AI Literacy Training Program",
+      "description": "Develop and maintain a comprehensive AI literacy training program tailored to staff roles and responsibilities",
+      "category": "program",
+      "required": true,
+      "guidance": "Create a structured training program covering: (1) Basic AI concepts and terminology, (2) AI capabilities and limitations, (3) Ethical considerations, (4) Legal obligations under the EU AI Act, (5) Organization's specific AI systems and their use cases. Tailor content to different roles (technical staff, managers, end-users).",
+      "implementation_steps": [
+        "Conduct training needs assessment across different roles",
+        "Develop role-specific curricula and materials",
+        "Identify qualified trainers (internal or external)",
+        "Establish training schedule and format (online/in-person)",
+        "Create training documentation and resources"
+      ],
+      "evidence_types": [
+        "Training curriculum documents",
+        "Training schedules",
+        "Trainer qualifications",
+        "Training materials (slides, videos, handbooks)"
+      ],
+      "effort_estimate": "High - Initial setup requires 2-4 weeks"
+    },
+    {
+      "id": "PN-04-C2",
+      "key": "training-completion",
+      "title": "Track Training Completion and Attendance",
+      "description": "Maintain records of all staff training participation and completion",
+      "category": "documentation",
+      "required": true,
+      "guidance": "Implement a system to track: (1) Who has completed training, (2) When training was completed, (3) Training modules/topics covered, (4) Assessment results if applicable. Use Learning Management System (LMS) or equivalent tracking mechanism.",
+      "implementation_steps": [
+        "Select or configure training tracking system (LMS)",
+        "Define completion criteria for each training module",
+        "Implement automated attendance/completion tracking",
+        "Create reporting dashboards for compliance monitoring",
+        "Establish data retention policies for training records"
+      ],
+      "evidence_types": [
+        "Training completion certificates",
+        "Attendance records",
+        "LMS reports",
+        "Individual training histories"
+      ],
+      "effort_estimate": "Medium - 1-2 weeks for system setup"
+    },
+    {
+      "id": "PN-04-C3",
+      "key": "competency-assessment",
+      "title": "Conduct Competency Assessments",
+      "description": "Evaluate staff understanding and retention of AI literacy concepts through assessments",
+      "category": "assessment",
+      "required": false,
+      "guidance": "Develop and administer assessments to verify staff comprehension. Can include: (1) Knowledge tests or quizzes, (2) Practical scenario exercises, (3) Role-playing situations, (4) Case study discussions. Establish minimum passing scores and remediation procedures for non-passing staff.",
+      "implementation_steps": [
+        "Design assessment questions and scoring criteria",
+        "Set minimum competency thresholds",
+        "Implement assessment delivery mechanism",
+        "Create remediation plans for failed assessments",
+        "Document assessment results"
+      ],
+      "evidence_types": [
+        "Assessment questions/tests",
+        "Individual assessment scores",
+        "Pass/fail statistics",
+        "Remediation records"
+      ],
+      "effort_estimate": "Medium - 1 week for initial development"
+    },
+    {
+      "id": "PN-04-C4",
+      "key": "role-based-requirements",
+      "title": "Define Role-Based Training Requirements",
+      "description": "Establish specific AI literacy requirements tailored to each job role and responsibility level",
+      "category": "program",
+      "required": true,
+      "guidance": "Create a training matrix mapping roles to required competencies. Consider: (1) Technical staff (developers, data scientists) - deep technical understanding, (2) Operational staff - system operation and monitoring, (3) Management - strategic and compliance aspects, (4) End-users - basic usage and limitations, (5) Support staff - troubleshooting and user assistance.",
+      "implementation_steps": [
+        "Catalog all roles that interact with AI systems",
+        "Map competency requirements to each role",
+        "Define minimum training hours per role",
+        "Create role-specific training pathways",
+        "Document role-training matrix"
+      ],
+      "evidence_types": [
+        "Role-training matrix document",
+        "Job descriptions with AI literacy requirements",
+        "Competency frameworks",
+        "Training pathway documentation"
+      ],
+      "effort_estimate": "Medium - 1-2 weeks for analysis and documentation"
+    },
+    {
+      "id": "PN-04-C5",
+      "key": "refresher-training",
+      "title": "Implement Ongoing Refresher Training",
+      "description": "Establish periodic refresher training to maintain AI literacy levels and update staff on new developments",
+      "category": "program",
+      "required": true,
+      "guidance": "AI technology and regulations evolve rapidly. Implement: (1) Annual or bi-annual refresher courses, (2) Updates when AI Act guidance changes, (3) Training for new AI system deployments, (4) Notifications of regulatory changes. Track refresher completion alongside initial training.",
+      "implementation_steps": [
+        "Define refresher training frequency by role",
+        "Create update/delta training materials",
+        "Establish triggers for ad-hoc training (new systems, regulation changes)",
+        "Implement automated reminders for upcoming refreshers",
+        "Track refresher completion separately from initial training"
+      ],
+      "evidence_types": [
+        "Refresher training schedules",
+        "Version history of training materials",
+        "Refresher completion records",
+        "Notifications sent to staff"
+      ],
+      "effort_estimate": "Low - Ongoing activity, 1-2 days per year"
+    },
+    {
+      "id": "PN-04-C6",
+      "key": "training-effectiveness",
+      "title": "Measure Training Effectiveness",
+      "description": "Monitor and evaluate the impact of AI literacy training on staff performance and decision-making",
+      "category": "assessment",
+      "required": false,
+      "guidance": "Go beyond completion tracking to measure actual effectiveness. Methods include: (1) Pre/post-training knowledge assessments, (2) Incident tracking related to AI misuse or misunderstanding, (3) Staff surveys on confidence levels, (4) Observation of staff interactions with AI systems, (5) Quality metrics for AI-assisted decisions.",
+      "implementation_steps": [
+        "Define effectiveness metrics and KPIs",
+        "Implement pre/post-training assessments",
+        "Track AI-related incidents and errors",
+        "Conduct periodic staff surveys",
+        "Analyze trends and adjust training accordingly"
+      ],
+      "evidence_types": [
+        "Effectiveness reports and analytics",
+        "Survey results",
+        "Incident reduction metrics",
+        "Before/after competency scores"
+      ],
+      "effort_estimate": "Medium - Ongoing monitoring, quarterly reviews"
+    },
+    {
+      "id": "PN-04-C7",
+      "key": "external-stakeholder-training",
+      "title": "Train External Stakeholders (if applicable)",
+      "description": "Extend AI literacy training to contractors, partners, or other third parties operating AI systems on behalf of the organization",
+      "category": "program",
+      "required": false,
+      "guidance": "Article 4 mentions 'other persons dealing with the operation and use of AI systems on their behalf'. If you engage contractors, consultants, or partners who operate your AI systems, they need appropriate training. Include: (1) Contractual requirements for AI literacy, (2) Verification of training completion, (3) Access to training materials, (4) Periodic audits of third-party competency.",
+      "implementation_steps": [
+        "Identify all external parties operating AI systems",
+        "Add AI literacy clauses to contracts",
+        "Provide or verify external training completion",
+        "Maintain records of third-party training",
+        "Audit third-party compliance periodically"
+      ],
+      "evidence_types": [
+        "Contracts with AI literacy requirements",
+        "Third-party training certificates",
+        "Audit reports of external compliance",
+        "Correspondence with external parties"
+      ],
+      "effort_estimate": "Medium - Initial setup 1 week, ongoing monitoring"
+    },
+    {
+      "id": "PN-04-C8",
+      "key": "documentation-policy",
+      "title": "Maintain AI Literacy Policy and Documentation",
+      "description": "Document the organization's AI literacy policy, requirements, and procedures",
+      "category": "documentation",
+      "required": true,
+      "guidance": "Create formal documentation including: (1) AI Literacy Policy statement, (2) Training requirements by role, (3) Procedures for onboarding new staff, (4) Responsibilities for maintaining training program, (5) Integration with HR policies and performance management, (6) Version control and update procedures.",
+      "implementation_steps": [
+        "Draft AI Literacy Policy document",
+        "Define governance structure (ownership, updates)",
+        "Integrate into employee handbook",
+        "Obtain management approval",
+        "Communicate policy to all staff",
+        "Establish review and update schedule"
+      ],
+      "evidence_types": [
+        "AI Literacy Policy document (signed)",
+        "Employee handbook with AI literacy section",
+        "Policy acknowledgment forms from staff",
+        "Version history of policy documents"
+      ],
+      "effort_estimate": "Low - 2-3 days for initial drafting"
+    }
+  ]
+}
