@@ -15,6 +15,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { RequirementsGrid } from '@/components/evaluation/RequirementsGrid';
 import { TaskRow } from '@/components/usecase/TaskRow';
+import { ResultsCard } from '@/components/usecase/ResultsCard';
 import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/types';
 import type { EvaluationState } from '@/lib/evaluation/types';
@@ -659,7 +660,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   };
 
   // Run evaluation INLINE (stay on cockpit)
-  const runInlineEvaluation = async (pnIds: string[]) => {
+  const runInlineEvaluation = async (pnIds: string[], options?: { suppressFinalReload?: boolean, forceGroup?: boolean }) => {
     if (pnIds.length === 0) return;
     if (!useCase) return;
 
@@ -699,7 +700,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
       // ✅ GROUP DETECTION: Check if all PNs share identical requirements (are a group)
       // If yes, evaluate only once and propagate results to all members
-      const isGroup = pnIds.length > 1 && areRequirementsIdentical(bundle.pns);
+      const isGroup = (options?.forceGroup === true) || (pnIds.length > 1 && areRequirementsIdentical(bundle.pns));
 
       if (isGroup) {
         console.log(`📦 [Group Eval] Detected group with ${pnIds.length} members sharing identical requirements`);
@@ -983,8 +984,10 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       // Clear selection
       setSelectedPNs([]);
 
-      // Single reload after all evaluations complete
-      scheduleReload('batch-complete', 500);
+      // Single reload after all evaluations complete (caller can suppress and do one trailing reload)
+      if (!options?.suppressFinalReload) {
+        scheduleReload('batch-complete', 500);
+      }
 
     } catch (error: any) {
       console.error('Failed to run inline evaluation:', error);
@@ -1021,7 +1024,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
   // Group evaluation handler
   const handleEvaluateGroup = async (groupId: string, pnIds: string[]) => {
-    await runInlineEvaluation(pnIds);
+    await runInlineEvaluation(pnIds, { forceGroup: true });
   };
 
   // Handler for viewing individual PN from group
@@ -1250,7 +1253,23 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
   // All pending tasks (groups + ungrouped)
   const allPendingTasks = [...pendingGroups, ...ungroupedPendingPNs];
-  const totalPendingObligations = pendingPNs.length;
+  const totalPendingTasks = allPendingTasks.length;
+
+  // Evaluate all tasks (groups treated as single tasks) sequentially
+  const runEvaluateAllTasks = async () => {
+    // Evaluate groups first
+    for (const group of pendingGroups) {
+      if (group.members?.length) {
+        await runInlineEvaluation(group.members, { suppressFinalReload: true, forceGroup: true });
+      }
+    }
+    // Then ungrouped PNs
+    for (const pn of ungroupedPendingPNs) {
+      await runInlineEvaluation([pn.pnId], { suppressFinalReload: true });
+    }
+    // One trailing reload to sync any history/state
+    scheduleReload('evaluate-all-tasks-complete', 500);
+  };
 
   return (
     <div className="h-full flex overflow-hidden">
@@ -1400,80 +1419,30 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
               {/* RESULTS SECTIONS - Top Position (The Answer) */}
               {/* APPLIES Section - Open by default (Critical obligations!) */}
               {(appliesGroups.length > 0 || ungroupedAppliesPNs.length > 0) && (
-                <details open className="group">
-                  <summary className="cursor-pointer flex items-center justify-between px-1 py-2 hover:bg-neutral-50 rounded transition-colors">
-                    <h2 className="text-sm font-bold text-green-700 uppercase tracking-wide flex items-center gap-2">
-                      <span>✓ Obligations That Apply ({appliesPNs.length})</span>
-                    </h2>
-                    <svg
-                      className="w-4 h-4 text-neutral-400 transition-transform group-open:rotate-180"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </summary>
-                  <div className="mt-2 space-y-2">
-                    {appliesGroups.map(group => (
-                      <TaskRow
-                        key={group.id}
-                        group={group}
-                        groupPNStatuses={pnStatuses.filter(ps => group.members.includes(ps.pnId))}
-                        sharedPrimitives={sharedPrimitives}
-                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
-                        onViewDetails={handleViewPN}
-                      />
-                    ))}
-                    {ungroupedAppliesPNs.map(pn => (
-                      <TaskRow
-                        key={pn.pnId}
-                        pnStatus={pn}
-                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
-                        onViewDetails={handleViewPN}
-                      />
-                    ))}
-                  </div>
-                </details>
+                <ResultsCard
+                  type="applies"
+                  groups={appliesGroups}
+                  ungroupedPNs={ungroupedAppliesPNs}
+                  allPNs={appliesPNs}
+                  sharedPrimitives={sharedPrimitives}
+                  onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                  onViewDetails={handleViewPN}
+                  defaultExpanded={true}
+                />
               )}
 
               {/* DOES NOT APPLY Section - Collapsed by default (Less critical) */}
               {(notApplicableGroups.length > 0 || ungroupedNotApplicablePNs.length > 0) && (
-                <details className="group">
-                  <summary className="cursor-pointer flex items-center justify-between px-1 py-2 hover:bg-neutral-50 rounded transition-colors">
-                    <h2 className="text-sm font-bold text-neutral-600 uppercase tracking-wide flex items-center gap-2">
-                      <span>✗ Obligations That Do Not Apply ({notApplicablePNs.length})</span>
-                    </h2>
-                    <svg
-                      className="w-4 h-4 text-neutral-400 transition-transform group-open:rotate-180"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </summary>
-                  <div className="mt-2 space-y-2">
-                    {notApplicableGroups.map(group => (
-                      <TaskRow
-                        key={group.id}
-                        group={group}
-                        groupPNStatuses={pnStatuses.filter(ps => group.members.includes(ps.pnId))}
-                        sharedPrimitives={sharedPrimitives}
-                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
-                        onViewDetails={handleViewPN}
-                      />
-                    ))}
-                    {ungroupedNotApplicablePNs.map(pn => (
-                      <TaskRow
-                        key={pn.pnId}
-                        pnStatus={pn}
-                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
-                        onViewDetails={handleViewPN}
-                      />
-                    ))}
-                  </div>
-                </details>
+                <ResultsCard
+                  type="not-applicable"
+                  groups={notApplicableGroups}
+                  ungroupedPNs={ungroupedNotApplicablePNs}
+                  allPNs={notApplicablePNs}
+                  sharedPrimitives={sharedPrimitives}
+                  onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                  onViewDetails={handleViewPN}
+                  defaultExpanded={false}
+                />
               )}
 
               {/* Empty Results State */}
