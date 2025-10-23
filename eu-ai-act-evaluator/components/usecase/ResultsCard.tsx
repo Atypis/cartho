@@ -1,10 +1,10 @@
 'use client';
 
 /**
- * ResultsCard Component - Modern expandable card for evaluation results
+ * ResultsCard Component - True minimalism
  *
- * Sophisticated design inspired by Linear, Vercel, and Stripe.
- * Emphasis on typography, spacing, and subtle interactions.
+ * Design philosophy: Remove everything that doesn't serve a purpose.
+ * Let typography and white space do the work.
  */
 
 import { useState } from 'react';
@@ -33,31 +33,6 @@ export function ResultsCard({
 }: ResultsCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
-  // Configuration based on type
-  const config = type === 'applies' ? {
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-      </svg>
-    ),
-    title: 'Applies',
-    accentColor: 'text-green-600',
-    iconBg: 'bg-green-500',
-    countColor: 'text-neutral-900',
-    metaColor: 'text-neutral-500',
-  } : {
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    ),
-    title: 'Does Not Apply',
-    accentColor: 'text-neutral-600',
-    iconBg: 'bg-neutral-400',
-    countColor: 'text-neutral-900',
-    metaColor: 'text-neutral-500',
-  };
-
   // Calculate metadata
   const totalCount = allPNs.length;
   const groupCount = groups.length;
@@ -79,76 +54,77 @@ export function ResultsCard({
       })
     : null;
 
+  // Minimal semantic color
+  const accentColor = type === 'applies' ? 'text-green-600' : 'text-neutral-900';
+
   return (
-    <div className="group/card rounded-xl border border-neutral-200 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-      {/* Card Header - Always Visible */}
+    <div className="border border-neutral-200 rounded-lg bg-white hover:border-neutral-300 transition-colors">
+      {/* Card Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-6 py-5 text-left hover:bg-neutral-50/50 transition-colors duration-200"
+        className="w-full px-8 py-6 text-left"
       >
-        <div className="flex items-center justify-between gap-6">
-          {/* Left: Icon + Content */}
-          <div className="flex items-center gap-4 min-w-0 flex-1">
-            {/* Icon - Circular with solid color */}
-            <div className={`w-11 h-11 rounded-full ${config.iconBg} flex items-center justify-center flex-shrink-0 text-white shadow-sm`}>
-              {config.icon}
+        <div className="flex items-start justify-between gap-8">
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            {/* Count - The Hero */}
+            <div className={`text-5xl font-bold tracking-tight ${accentColor} mb-1`}>
+              {totalCount}
             </div>
 
-            {/* Content */}
-            <div className="min-w-0 flex-1">
-              {/* Title */}
-              <div className="flex items-baseline gap-3 mb-1">
-                <h3 className={`text-base font-semibold ${config.accentColor}`}>
-                  {config.title}
-                </h3>
-                <span className={`text-2xl font-bold tabular-nums ${config.countColor}`}>
-                  {totalCount}
-                </span>
+            {/* Label */}
+            <div className="text-base font-medium text-neutral-900 mb-3">
+              {type === 'applies' ? 'Obligations Apply' : 'Obligations Do Not Apply'}
+            </div>
+
+            {/* Metadata - Whispers */}
+            {!isExpanded && (
+              <div className="text-sm text-neutral-400 space-x-3">
+                {/* Composition */}
+                {(groupCount > 0 || individualCount > 0) && (
+                  <span>
+                    {[
+                      groupCount > 0 && `${groupCount} ${groupCount === 1 ? 'group' : 'groups'}`,
+                      individualCount > 0 && `${individualCount} individual`
+                    ].filter(Boolean).join(', ')}
+                  </span>
+                )}
+
+                {/* Articles */}
+                {articles.length > 0 && (
+                  <span>
+                    ·
+                  </span>
+                )}
+                {articles.length > 0 && (
+                  <span>
+                    {articles.length === 1 ? `Article ${articles[0]}` : `${articles.length} articles`}
+                  </span>
+                )}
+
+                {/* Date */}
+                {mostRecentDate && (
+                  <>
+                    <span>·</span>
+                    <span>{mostRecentDate}</span>
+                  </>
+                )}
               </div>
-
-              {/* Metadata - Clean, minimal */}
-              {!isExpanded && (
-                <div className={`flex items-center gap-4 text-sm ${config.metaColor}`}>
-                  {/* Composition */}
-                  {(groupCount > 0 || individualCount > 0) && (
-                    <span className="font-medium">
-                      {[
-                        groupCount > 0 && `${groupCount} ${groupCount === 1 ? 'group' : 'groups'}`,
-                        individualCount > 0 && `${individualCount} individual`
-                      ].filter(Boolean).join(' · ')}
-                    </span>
-                  )}
-
-                  {/* Articles */}
-                  {articles.length > 0 && (
-                    <span>
-                      {articles.length === 1 ? `Art. ${articles[0]}` : `${articles.length} articles`}
-                    </span>
-                  )}
-
-                  {/* Last Evaluated */}
-                  {mostRecentDate && (
-                    <span className="text-neutral-400">
-                      {mostRecentDate}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
-          {/* Right: Expand Button */}
-          <div className={`w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center flex-shrink-0 transition-all duration-200 group-hover/card:bg-neutral-200 ${isExpanded ? 'rotate-180' : ''}`}>
-            <svg className="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Chevron - Subtle Affordance */}
+          <div className={`text-neutral-400 transition-transform mt-2 ${isExpanded ? 'rotate-180' : ''}`}>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
         </div>
       </button>
 
-      {/* Card Content - Expandable */}
+      {/* Card Content */}
       {isExpanded && (
-        <div className="px-6 pb-5 pt-1 space-y-2 bg-neutral-50/30">
+        <div className="px-8 pb-6 pt-2 space-y-2">
           {/* Groups */}
           {groups.map(group => (
             <TaskRow
