@@ -36,11 +36,38 @@ export function UseCaseCreator({ onComplete, onCancel }: UseCaseCreatorProps) {
   };
 
   const saveUseCase = async (data: UseCaseFormData, analysisData: UseCaseAnalysis): Promise<string> => {
+    // Ensure we attach a session for RLS policies that require it
+    let sessionId: string | null = null;
+    try {
+      const { data: sessions } = await supabase
+        .from('chat_sessions')
+        .select('id')
+        .eq('is_active', true)
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+      sessionId = sessions && sessions.length > 0 ? sessions[0].id : null;
+
+      if (!sessionId) {
+        const { data: newSession, error: sessionError } = await supabase
+          .from('chat_sessions')
+          .insert({ title: 'New Chat' })
+          .select()
+          .single();
+        if (!sessionError && newSession) {
+          sessionId = newSession.id;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not ensure chat session for use-case creation:', e);
+    }
+
     const { data: useCase, error } = await supabase
       .from('use_cases')
       .insert({
         title: data.title,
         description: data.description,
+        created_in_session_id: sessionId,
         tags: [], // Default empty tags array
       })
       .select()
@@ -48,7 +75,9 @@ export function UseCaseCreator({ onComplete, onCancel }: UseCaseCreatorProps) {
 
     if (error) {
       console.error('Error saving use case:', error);
-      throw new Error('Failed to save use case');
+      // Surface more informative message if available
+      const msg = (error as any)?.message || 'Failed to save use case';
+      throw new Error(msg);
     }
 
     return useCase.id;
