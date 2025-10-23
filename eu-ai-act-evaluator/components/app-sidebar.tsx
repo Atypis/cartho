@@ -30,6 +30,10 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { ThemeToggle } from "@/components/ThemeToggle"
+import { Separator } from "@/components/ui/separator"
+import { PixelLawyerAnimated } from "@/components/PixelLawyer"
+import { useThemeStore } from "@/stores/useThemeStore"
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   useCaseCount: number
@@ -47,6 +51,7 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const isHome = currentView === 'welcome'
   const { isMobile } = useSidebar()
+  const theme = useThemeStore((state) => state.theme)
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -58,12 +63,20 @@ export function AppSidebar({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-neutral-900">
-                <span className="text-sm font-bold text-white">EU</span>
-              </div>
+              {theme === 'medieval' ? (
+                <div className="flex aspect-square size-12 items-center justify-center">
+                  <PixelLawyerAnimated className="w-12 h-12" />
+                </div>
+              ) : (
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-neutral-900">
+                  <span className="text-sm font-bold text-white">EU</span>
+                </div>
+              )}
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">AI Act Evaluator</span>
-                <span className="truncate text-xs text-sidebar-foreground/50">Compliance</span>
+                <span className="truncate text-xs text-sidebar-foreground/50">
+                  {theme === 'medieval' ? 'Legal Scrolls' : 'Compliance'}
+                </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -109,6 +122,11 @@ export function AppSidebar({
       {/* Footer - User Profile */}
       <SidebarFooter>
         <SidebarMenu>
+          {/* Theme Toggle */}
+          <SidebarMenuItem>
+            <ThemeToggle />
+          </SidebarMenuItem>
+          <Separator className="my-2" />
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

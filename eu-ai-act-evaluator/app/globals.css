@@ -1,6 +1,9 @@
 /* Import Playfair Display for serif headings */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap');
 
+/* Import pixel fonts for medieval theme */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=MedievalSharp&family=VT323&display=swap');
+
 @import "tailwindcss";
 
 @import "tw-animate-css";
@@ -91,6 +94,420 @@ body {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.88 0 0);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Medieval Pixel Theme - "Aged Papyrus & Wax Seal" */
+[data-theme="medieval"] {
+  --radius: 0.125rem; /* Sharp pixel corners */
+
+  /* Pixel fonts - VT323 is more readable for body text */
+  --font-sans: 'VT323', monospace;
+  --font-heading: 'MedievalSharp', serif;
+  --font-pixel: 'Silkscreen', 'Press Start 2P', monospace;
+
+  /* Papyrus color palette */
+  --pixel-papyrus-bg: #F4E5C2;
+  --pixel-papyrus-dark: #E8D4A8;
+  --pixel-ink-black: #1A1210;
+  --pixel-ink-brown: #3D2817;
+  --pixel-seal-red: #8B1A1A;
+  --pixel-seal-gold: #D4AF37;
+  --pixel-parchment-border: #C4A574;
+
+  /* Status colors - wax seals */
+  --pixel-stamp-approved: #2D5016;
+  --pixel-stamp-denied: #6B1B1B;
+  --pixel-stamp-pending: #4A5D7C;
+  --pixel-stamp-reviewing: #7C5C2D;
+  --pixel-stamp-error: #8B3A3A;
+
+  /* Accent colors */
+  --pixel-quill-tip: #1A1210;
+  --pixel-ribbon-blue: #2B4C7E;
+  --pixel-ribbon-red: #7E2B2B;
+  --pixel-candle-flame: #FFB347;
+  --pixel-shadow: rgba(26, 18, 16, 0.3);
+
+  /* Map to semantic tokens */
+  --background: var(--pixel-papyrus-bg);
+  --foreground: var(--pixel-ink-black);
+  --card: var(--pixel-papyrus-dark);
+  --card-foreground: var(--pixel-ink-black);
+  --popover: var(--pixel-papyrus-dark);
+  --popover-foreground: var(--pixel-ink-black);
+  --primary: var(--pixel-seal-red);
+  --primary-foreground: var(--pixel-papyrus-bg);
+  --secondary: var(--pixel-papyrus-dark);
+  --secondary-foreground: var(--pixel-ink-black);
+  --muted: var(--pixel-papyrus-dark);
+  --muted-foreground: var(--pixel-ink-brown);
+  --accent: var(--pixel-seal-gold);
+  --accent-foreground: var(--pixel-ink-black);
+  --destructive: var(--pixel-stamp-error);
+  --border: var(--pixel-parchment-border);
+  --input: var(--pixel-parchment-border);
+  --ring: var(--pixel-seal-gold);
+
+  /* Chart colors - medieval palette */
+  --chart-1: var(--pixel-stamp-approved);
+  --chart-2: var(--pixel-stamp-pending);
+  --chart-3: var(--pixel-seal-red);
+  --chart-4: var(--pixel-seal-gold);
+  --chart-5: var(--pixel-ink-brown);
+
+  /* Sidebar - wooden bookshelf */
+  --sidebar: #4A2511; /* Dark oak */
+  --sidebar-foreground: var(--pixel-papyrus-bg);
+  --sidebar-primary: var(--pixel-seal-gold);
+  --sidebar-primary-foreground: var(--pixel-ink-black);
+  --sidebar-accent: #5C3A21; /* Medium wood */
+  --sidebar-accent-foreground: var(--pixel-papyrus-bg);
+  --sidebar-border: #2B1810; /* Darker wood */
+  --sidebar-ring: var(--pixel-seal-gold);
+}
+
+/* Apply pixel fonts and aged papyrus background when medieval theme is active */
+[data-theme="medieval"] body {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  background-color: #E8D5B5; /* Slightly darker aged papyrus */
+  background-image:
+    /* Subtle fiber texture */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 111, 71, 0.04) 2px,
+      rgba(139, 111, 71, 0.04) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 111, 71, 0.04) 2px,
+      rgba(139, 111, 71, 0.04) 4px
+    ),
+    /* Age spots and stains */
+    radial-gradient(
+      circle at 10% 20%,
+      rgba(139, 111, 71, 0.06) 0%,
+      transparent 5%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba(139, 111, 71, 0.05) 0%,
+      transparent 8%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(139, 111, 71, 0.03) 0%,
+      transparent 15%
+    );
+}
+
+/* Ensure main content area gets papyrus background */
+[data-theme="medieval"] main,
+[data-theme="medieval"] [class*="SidebarInset"],
+[data-theme="medieval"] .sidebar-inset {
+  background-color: var(--pixel-papyrus-bg);
+}
+
+[data-theme="medieval"] h1,
+[data-theme="medieval"] h2,
+[data-theme="medieval"] h3,
+[data-theme="medieval"] h4,
+[data-theme="medieval"] h5,
+[data-theme="medieval"] h6 {
+  font-family: var(--font-heading);
+  letter-spacing: 0.05em;
+  color: var(--pixel-ink-black) !important;
+  text-shadow: 1px 1px 0 rgba(212, 175, 55, 0.2); /* Subtle gold shadow */
+}
+
+/* Special styling for main headings - like legal document titles */
+[data-theme="medieval"] h1,
+[data-theme="medieval"] h2 {
+  position: relative;
+  padding-bottom: 12px;
+  border-bottom: 3px double #8B6F47;
+  margin-bottom: 20px !important;
+}
+
+/* Add decorative element after headings */
+[data-theme="medieval"] h1::after,
+[data-theme="medieval"] h2::after {
+  content: '§';
+  position: absolute;
+  right: 0;
+  bottom: -15px;
+  font-size: 1.5em;
+  color: #D4AF37;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Medieval Button Styles - Wax Seal Effect */
+[data-theme="medieval"] button,
+[data-theme="medieval"] [role="button"] {
+  border-width: 3px;
+  border-style: solid;
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
+  transition: all 0.1s ease;
+}
+
+[data-theme="medieval"] button:hover,
+[data-theme="medieval"] [role="button"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 var(--pixel-shadow);
+}
+
+[data-theme="medieval"] button:active,
+[data-theme="medieval"] [role="button"]:active {
+  transform: translateY(2px);
+  box-shadow: 1px 1px 0 var(--pixel-shadow);
+}
+
+/* Medieval Card Styles - Parchment Scroll with decorative corners */
+[data-theme="medieval"] [class*="card"]:not([class*="sidebar"]),
+[data-theme="medieval"] [data-card],
+[data-theme="medieval"] .card {
+  position: relative !important;
+  border-width: 4px !important;
+  border-style: double !important;
+  border-color: #8B6F47 !important; /* Darker border for contrast */
+  box-shadow:
+    4px 4px 0 var(--pixel-shadow),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.3),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.1) !important;
+  background-color: #F5E6D3 !important; /* Warmer parchment */
+  background-image:
+    /* Subtle paper texture */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 111, 71, 0.03) 2px,
+      rgba(139, 111, 71, 0.03) 4px
+    ),
+    /* Aged spots */
+    radial-gradient(
+      circle at 20% 30%,
+      rgba(139, 111, 71, 0.05) 0%,
+      transparent 3%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(139, 111, 71, 0.04) 0%,
+      transparent 4%
+    ),
+    radial-gradient(
+      circle at 60% 10%,
+      rgba(139, 111, 71, 0.03) 0%,
+      transparent 2%
+    ) !important;
+  padding: 24px !important;
+}
+
+/* Decorative corner flourishes using pseudo-elements */
+[data-theme="medieval"] [class*="card"]:not([class*="sidebar"])::before,
+[data-theme="medieval"] [class*="card"]:not([class*="sidebar"])::after {
+  content: '' !important;
+  position: absolute !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-color: #D4AF37 !important; /* Gold corners */
+  border-style: solid !important;
+}
+
+/* Top-left corner */
+[data-theme="medieval"] [class*="card"]:not([class*="sidebar"])::before {
+  top: 8px !important;
+  left: 8px !important;
+  border-width: 3px 0 0 3px !important;
+  border-radius: 2px 0 0 0 !important;
+}
+
+/* Bottom-right corner */
+[data-theme="medieval"] [class*="card"]:not([class*="sidebar"])::after {
+  bottom: 8px !important;
+  right: 8px !important;
+  border-width: 0 3px 3px 0 !important;
+  border-radius: 0 0 2px 0 !important;
+}
+
+/* Form labels - Medieval manuscript style */
+[data-theme="medieval"] label {
+  font-family: var(--font-heading) !important;
+  color: #5C3A21 !important; /* Brown ink */
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  font-size: 0.85em !important;
+  font-weight: bold !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+}
+
+/* Medieval Input Styles - Manuscript Entry with ink line */
+[data-theme="medieval"] input,
+[data-theme="medieval"] textarea,
+[data-theme="medieval"] select {
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: #8B6F47 !important;
+  box-shadow:
+    inset 2px 2px 3px rgba(26, 18, 16, 0.15),
+    0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  background-color: #FAF5ED !important; /* Very light parchment */
+  background-image:
+    /* Horizontal writing lines */
+    repeating-linear-gradient(
+      180deg,
+      transparent,
+      transparent 30px,
+      rgba(139, 111, 71, 0.1) 30px,
+      rgba(139, 111, 71, 0.1) 31px
+    ) !important;
+  color: var(--pixel-ink-black) !important;
+  font-family: var(--font-sans) !important;
+  padding: 12px 16px !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="medieval"] input:focus,
+[data-theme="medieval"] textarea:focus,
+[data-theme="medieval"] select:focus {
+  border-color: #D4AF37 !important; /* Gold border on focus */
+  box-shadow:
+    inset 2px 2px 3px rgba(26, 18, 16, 0.15),
+    0 0 0 3px rgba(212, 175, 55, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  outline: none !important;
+}
+
+/* Add quill icon effect before focused textareas */
+[data-theme="medieval"] textarea:focus::before {
+  content: '✒';
+  position: absolute;
+  left: -30px;
+  top: 10px;
+  font-size: 20px;
+  color: var(--pixel-ink-black);
+  opacity: 0.6;
+}
+
+/* Medieval Table Styles - Ledger with better contrast */
+[data-theme="medieval"] table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 3px double var(--pixel-ink-black) !important;
+  background-color: var(--pixel-papyrus-bg) !important;
+}
+
+[data-theme="medieval"] thead {
+  background-color: #D4AF37 !important; /* Gold header for contrast */
+  border-bottom: 3px solid var(--pixel-ink-black) !important;
+}
+
+[data-theme="medieval"] th {
+  background-color: #D4AF37 !important; /* Gold header */
+  color: var(--pixel-ink-black) !important;
+  border: 2px solid var(--pixel-ink-black) !important;
+  font-family: var(--font-heading) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  font-size: 0.8em !important;
+  padding: 12px 16px !important;
+  font-weight: bold !important;
+}
+
+[data-theme="medieval"] tbody tr {
+  background-color: #F9F2E3 !important; /* Lighter rows */
+}
+
+[data-theme="medieval"] tbody tr:nth-child(even) {
+  background-color: #EFE2C8 !important; /* Alternating darker rows */
+}
+
+[data-theme="medieval"] tbody tr:hover {
+  background-color: #E8D4A8 !important; /* Hover effect */
+}
+
+[data-theme="medieval"] td {
+  border: 1px solid var(--pixel-parchment-border) !important;
+  padding: 12px 16px !important;
+  color: var(--pixel-ink-black) !important;
+}
+
+/* Medieval Badge Styles - Wax Seals */
+[data-theme="medieval"] [class*="badge"] {
+  border-width: 2px;
+  border-style: solid;
+  box-shadow: 1px 1px 0 var(--pixel-shadow);
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  padding: 4px 8px;
+}
+
+/* Medieval smaller text adjustments */
+[data-theme="medieval"] .text-xs,
+[data-theme="medieval"] [class*="text-xs"] {
+  font-size: 16px;
+}
+
+[data-theme="medieval"] .text-sm,
+[data-theme="medieval"] [class*="text-sm"] {
+  font-size: 17px;
+}
+
+/* Keep sidebar as dark oak with proper light text */
+[data-theme="medieval"] [class*="sidebar"],
+[data-theme="medieval"] aside {
+  background-color: var(--sidebar) !important;
+  color: var(--sidebar-foreground) !important;
+}
+
+/* Force light text on all sidebar elements */
+[data-theme="medieval"] [class*="sidebar"] *,
+[data-theme="medieval"] aside * {
+  color: var(--sidebar-foreground) !important;
+}
+
+/* Sidebar buttons need special treatment */
+[data-theme="medieval"] [class*="sidebar"] button,
+[data-theme="medieval"] [class*="sidebar"] [role="button"] {
+  color: var(--sidebar-foreground) !important;
+  border-color: #6B4728 !important; /* Lighter wood tone */
+}
+
+[data-theme="medieval"] [class*="sidebar"] button:hover,
+[data-theme="medieval"] [class*="sidebar"] [role="button"]:hover {
+  background-color: #5C3A21 !important; /* Medium wood on hover */
+  color: var(--pixel-seal-gold) !important; /* Gold text on hover */
+}
+
+/* Placeholder text color */
+[data-theme="medieval"] input::placeholder,
+[data-theme="medieval"] textarea::placeholder {
+  color: var(--pixel-ink-brown) !important;
+  opacity: 0.6;
+}
+
+/* Better button contrast - primary action */
+[data-theme="medieval"] button[class*="bg-neutral"]:not([class*="outline"]),
+[data-theme="medieval"] button[class*="bg-gray"]:not([class*="outline"]) {
+  background-color: var(--pixel-seal-red) !important;
+  color: var(--pixel-papyrus-bg) !important;
+  border-color: var(--pixel-ink-black) !important;
+}
+
+/* Secondary buttons */
+[data-theme="medieval"] button[class*="outline"],
+[data-theme="medieval"] button[class*="secondary"],
+[data-theme="medieval"] button[class*="ghost"] {
+  background-color: transparent !important;
+  color: var(--pixel-ink-black) !important;
+  border-color: var(--pixel-parchment-border) !important;
 }
 
 .dark {
