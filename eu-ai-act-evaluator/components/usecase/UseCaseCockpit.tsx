@@ -73,6 +73,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
   // Ref to track current activeTab (for SSE handler closure)
   const activeTabRef = useRef<string | null>(activeTab);
+  // Ref to track current openTabs (avoid stale captures inside SSE loop)
+  const openTabsRef = useRef<string[]>(openTabs);
 
   // Evaluation history
   const [showHistory, setShowHistory] = useState(false);
@@ -91,6 +93,10 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   useEffect(() => {
     activeTabRef.current = activeTab;
   }, [activeTab]);
+
+  useEffect(() => {
+    openTabsRef.current = openTabs;
+  }, [openTabs]);
 
   useEffect(() => {
     pnSelectedNodeMapRef.current = pnSelectedNodeMap;
@@ -698,8 +704,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
                   autoSelectFromStates(pnId, states);
 
-                  // If this PN has an open tab, update its tree live!
-                  if (openTabs.includes(pnId)) {
+                  // If this PN has an open tab, update its tree live (using ref to avoid stale closure)
+                  if (openTabsRef.current.includes(pnId)) {
                     setTabData(prev => {
                       const next = new Map(prev);
                       next.set(pnId, {
@@ -769,6 +775,20 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                   });
 
                   autoSelectFromStates(pnId, statesForPN, pnData.requirements.root);
+
+                  // Ensure any open inspector tab reflects the final state as soon as it arrives
+                  if (openTabsRef.current.includes(pnId)) {
+                    setTabData(prev => {
+                      const next = new Map(prev);
+                      next.set(pnId, {
+                        evaluation,
+                        nodes: expandedNodes,
+                        rootId: pnData.requirements.root,
+                        evaluationStates: statesForPN,
+                      });
+                      return next;
+                    });
+                  }
 
                   // Retry logic to handle DB replication lag
                   const reloadWithRetry = async (attempts = 0) => {
@@ -1539,7 +1559,7 @@ function PNTable({
   };
 
   return (
-    <div className={`bg-white rounded-lg border ${getBorderColor()} overflow-hidden`}>
+    <div data-pn-box className={`rounded-lg border ${getBorderColor()} overflow-hidden`}>
       {showHeader && title && (
         <div className={`px-4 py-2 ${getHeaderBg()} border-b ${getBorderColor()}`}>
           <h3 className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
