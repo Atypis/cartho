@@ -108,7 +108,7 @@ export function GroupCard({
   };
 
   return (
-    <div className="bg-white rounded-lg border border-neutral-200 mb-2">
+    <div data-group-card className="bg-white rounded-lg border border-neutral-200 mb-2">
       {/* Header - Always Visible */}
       <button
         onClick={() => setExpanded(!expanded)}

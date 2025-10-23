@@ -505,6 +505,90 @@ body {
   border-color: var(--pixel-parchment-border) !important;
 }
 
+/* ============================================
+   GROUP CARD - Medieval Article Styling
+   ============================================ */
+
+/* Style GroupCard as wax seal red article cards */
+[data-theme="medieval"] [data-group-card] {
+  background-color: var(--pixel-seal-red) !important; /* Wax seal red */
+  border: 4px solid #5C3A21 !important; /* Thick dark brown border */
+  box-shadow: 3px 3px 0 rgba(26, 18, 16, 0.2) !important;
+}
+
+/* All text inside GroupCard should be light cream */
+[data-theme="medieval"] [data-group-card],
+[data-theme="medieval"] [data-group-card] *,
+[data-theme="medieval"] [data-group-card] h3,
+[data-theme="medieval"] [data-group-card] span,
+[data-theme="medieval"] [data-group-card] button {
+  color: #F4E5C2 !important; /* Light cream on red */
+}
+
+/* Hover state for GroupCard header button */
+[data-theme="medieval"] [data-group-card] > button:hover {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Inner content areas inside GroupCard - make transparent/darker */
+[data-theme="medieval"] [data-group-card] .bg-neutral-50 {
+  background-color: rgba(0, 0, 0, 0.15) !important; /* Dark overlay instead of gray */
+}
+
+/* Individual PN rows inside GroupCard - transparent background */
+[data-theme="medieval"] [data-group-card] div[class*="border-neutral-200"]:not([data-group-card]) {
+  background-color: transparent !important;
+  border-color: rgba(244, 229, 194, 0.3) !important; /* Subtle cream border */
+}
+
+/* PN row hover state inside GroupCard */
+[data-theme="medieval"] [data-group-card] div[class*="hover:border-neutral-300"]:hover {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  border-color: rgba(244, 229, 194, 0.5) !important; /* Brighter cream border on hover */
+}
+
+/* ============================================
+   PN BOX - Medieval Obligation Styling
+   ============================================ */
+
+/* Medieval theme - red wax seal style - OUTER CONTAINER */
+[data-theme="medieval"] div[data-pn-box] {
+  background-color: var(--pixel-seal-red) !important; /* Wax seal red */
+  border: 4px solid #5C3A21 !important; /* Thick dark brown border */
+  box-shadow: 3px 3px 0 rgba(26, 18, 16, 0.2) !important;
+}
+
+/* All text inside PN boxes should be light cream */
+[data-theme="medieval"] [data-pn-box],
+[data-theme="medieval"] [data-pn-box] *,
+[data-theme="medieval"] [data-pn-box] span,
+[data-theme="medieval"] [data-pn-box] div {
+  color: #F4E5C2 !important; /* Light cream on red */
+}
+
+/* PN box header backgrounds - override green/blue/neutral with darker overlay */
+[data-theme="medieval"] [data-pn-box] div[class*="bg-green-"],
+[data-theme="medieval"] [data-pn-box] div[class*="bg-blue-"],
+[data-theme="medieval"] [data-pn-box] div[class*="bg-neutral-"] {
+  background-color: rgba(0, 0, 0, 0.2) !important; /* Dark overlay */
+}
+
+/* Dividers inside PN boxes - use cream color instead of gray */
+[data-theme="medieval"] [data-pn-box] [class*="divide-neutral"] > * {
+  border-color: rgba(244, 229, 194, 0.2) !important;
+}
+
+/* Hover state - brown overlay instead of white - AGGRESSIVE SELECTOR */
+[data-theme="medieval"] [data-pn-box] div[class*="hover:bg-neutral"]:hover {
+  background-color: rgba(0, 0, 0, 0.15) !important; /* Dark brown overlay */
+}
+
+/* Active/selected state - brown overlay - AGGRESSIVE SELECTOR */
+[data-theme="medieval"] [data-pn-box] div.bg-blue-50 {
+  background-color: rgba(0, 0, 0, 0.2) !important; /* Darker overlay for active */
+  border-left-color: var(--pixel-seal-gold) !important; /* Gold border for active */
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
