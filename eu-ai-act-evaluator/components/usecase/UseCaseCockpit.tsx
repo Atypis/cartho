@@ -495,6 +495,17 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     });
   };
 
+  // Helper: Check if all PNs in a bundle have identical requirements (are a group)
+  const areRequirementsIdentical = (pns: any[]): boolean => {
+    if (pns.length <= 1) return false;
+
+    const firstRoot = pns[0]?.requirements?.root;
+    if (!firstRoot) return false;
+
+    // Compare root node IDs - if identical, requirements are shared
+    return pns.every(pn => pn?.requirements?.root === firstRoot);
+  };
+
   const autoSelectFromStates = (pnId: string, states: EvaluationState[], fallback?: string | null) => {
     const evaluatingState = states.find(state => state.status === 'evaluating');
     if (evaluatingState) {
@@ -692,11 +703,27 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       }
       const bundle = await bundleRes.json();
 
+      // ✅ GROUP DETECTION: Check if all PNs share identical requirements (are a group)
+      // If yes, evaluate only once and propagate results to all members
+      const isGroup = pnIds.length > 1 && areRequirementsIdentical(bundle.pns);
+
+      if (isGroup) {
+        console.log(`📦 [Group Eval] Detected group with ${pnIds.length} members sharing identical requirements`);
+        console.log(`📦 [Group Eval] Will evaluate once and propagate to all members`);
+      }
+
       // ✅ Sequential evaluation to avoid overwhelming SSE streams
       // (Previously: unbounded concurrency caused UI blank/freeze)
-      console.log(`📋 [Inline Eval] Starting SEQUENTIAL evaluation of ${pnIds.length} obligations...`);
+      const pnsToEvaluate = isGroup ? [bundle.pns[0]] : bundle.pns; // Only evaluate first PN if group
+      const evaluationIndices = isGroup ? [0] : pnIds.map((_, i) => i); // Track which indices to process
 
-      for (let i = 0; i < pnIds.length; i++) {
+      console.log(`📋 [Inline Eval] Starting SEQUENTIAL evaluation of ${pnsToEvaluate.length} obligation(s)...`);
+      if (isGroup) {
+        console.log(`📋 [Inline Eval] Group mode: will replicate results to ${pnIds.length} members`);
+      }
+
+      for (let idx = 0; idx < evaluationIndices.length; idx++) {
+        const i = evaluationIndices[idx];
         const pnId = pnIds[i];
         const pnData = bundle.pns[i];
 
@@ -888,6 +915,41 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                     progressCurrent: resolvedCount,
                     progressTotal: totalPrimitiveNodes,
                   });
+
+                  // ✅ GROUP PROPAGATION: If this is a group evaluation, propagate results to all members
+                  if (isGroup) {
+                    console.log(`📦 [Group Propagation] Propagating result to ${pnIds.length} group members`);
+
+                    for (const memberPnId of pnIds) {
+                      if (memberPnId === pnId) continue; // Skip the one we just evaluated
+
+                      const memberMeta = availablePNs.find(p => p.id === memberPnId);
+                      const memberArticle = memberMeta?.article || memberPnId.replace('PN-', '');
+                      const memberTitle = memberMeta?.title || memberPnId;
+
+                      // Publish the same status for this member
+                      publishLiveStatus({
+                        pnId: memberPnId,
+                        article: memberArticle,
+                        title: memberTitle,
+                        status: finalStatusType,
+                        evaluationId: evaluation.id,
+                        evaluatedAt: new Date().toISOString(),
+                        rootDecision: rootDecision ?? undefined,
+                        progressCurrent: resolvedCount,
+                        progressTotal: totalPrimitiveNodes,
+                      });
+
+                      // Cache states for this member too
+                      setEvaluationStatesMap(prev => {
+                        const next = new Map(prev);
+                        next.set(memberPnId, statesForPN);
+                        return next;
+                      });
+
+                      console.log(`📦 [Group Propagation] ✅ ${memberPnId}: ${finalStatusType}`);
+                    }
+                  }
 
                   autoSelectFromStates(pnId, statesForPN, pnData.requirements.root);
 
