@@ -95,6 +95,37 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [pnSelectedNodeMap, setPnSelectedNodeMap] = useState<Map<string, string | null>>(new Map());
   const pnSelectedNodeMapRef = useRef(pnSelectedNodeMap);
 
+  // Coalesced reload control to avoid duplicate expensive reloads
+  const reloadTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const reloadInFlightRef = useRef(false);
+  const reloadQueuedRef = useRef(false);
+
+  const performReload = async () => {
+    if (reloadInFlightRef.current) {
+      reloadQueuedRef.current = true;
+      return;
+    }
+    reloadInFlightRef.current = true;
+    try {
+      await loadUseCaseAndEvaluations();
+    } finally {
+      reloadInFlightRef.current = false;
+      if (reloadQueuedRef.current) {
+        reloadQueuedRef.current = false;
+        // run again immediately to process the queued request
+        performReload();
+      }
+    }
+  };
+
+  const scheduleReload = (reason: string, delay = 150) => {
+    if (reloadTimerRef.current) clearTimeout(reloadTimerRef.current);
+    reloadTimerRef.current = setTimeout(() => {
+      // console.log(`♻️  [Reload] ${reason}`);
+      performReload();
+    }, delay);
+  };
+
   // Keep activeTab ref in sync with state (for SSE handler closure)
   useEffect(() => {
     activeTabRef.current = activeTab;
@@ -151,14 +182,15 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     const subscription = supabase
       .channel(`usecase_cockpit_${useCaseId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'evaluations', filter: `use_case_id=eq.${useCaseId}` }, () => {
-        console.log('🔄 [Cockpit] Evaluation changed, reloading...');
-        loadUseCaseAndEvaluations();
+        console.log('🔄 [Cockpit] Evaluation changed, scheduling reload...');
+        scheduleReload('realtime-evaluations-change', 120);
       })
       .subscribe();
 
     return () => {
       console.log(`🧹 [Cockpit] Cleanup for use case: ${useCaseId}`);
       subscription.unsubscribe();
+      if (reloadTimerRef.current) clearTimeout(reloadTimerRef.current);
     };
   }, [useCaseId, availablePNs.length]); // Add availablePNs.length to re-trigger when catalog loads
 
@@ -811,27 +843,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                     });
                   }
 
-                  // Retry logic to handle DB replication lag
-                  const reloadWithRetry = async (attempts = 0) => {
-                    await loadUseCaseAndEvaluations();
-
-                    // Check if evaluation still appears as running
-                    const { data: checkEval } = await supabase
-                      .from('evaluations')
-                      .select('status')
-                      .eq('id', evaluation.id)
-                      .single();
-
-                    if (checkEval?.status === 'running' && attempts < 3) {
-                      console.log(`⏳ [SSE Complete] Evaluation still "running" in DB, retrying in 1s (attempt ${attempts + 1}/3)`);
-                      setTimeout(() => reloadWithRetry(attempts + 1), 1000);
-                    } else {
-                      console.log(`✅ [SSE Complete] Reload successful, status: ${checkEval?.status}`);
-                    }
-                  };
-
-                  // Wait 1s for DB replication, then reload with retry
-                  setTimeout(() => reloadWithRetry(), 1000);
+                  // Coalesced single reload shortly after completion; realtime will also update
+                  scheduleReload('sse-complete', 300);
                 } else if (data.type === 'error') {
                   throw new Error(data.error);
                 }
@@ -849,8 +862,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       // Clear selection
       setSelectedPNs([]);
 
-      // Reload immediately to show "evaluating" status
-      await loadUseCaseAndEvaluations();
+      // Coalesce a reload to reflect "evaluating" status without duplicate loads
+      scheduleReload('sse-start-evaluating', 0);
 
       // Wait for all evaluations to complete (in background)
       Promise.all(evaluationPromises).catch(error => {
