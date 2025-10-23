@@ -1059,9 +1059,9 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
   return (
     <div className="h-full flex overflow-hidden">
-      {/* Main Content Area - Stable Width */}
-      <div className="flex-1 min-w-0 overflow-y-auto border-r border-neutral-200">
-        <div className="w-full px-6 py-4 space-y-4">
+      {/* Main Content Area - Takes 3/5 of space (60%) */}
+      <div className="flex-[3] min-w-0 overflow-y-auto border-r border-neutral-200">
+        <div className="px-6 py-4 space-y-4">
           {/* Use Case Header - Clean & Minimal */}
           {useCase ? (
             <div className="space-y-3">
@@ -1399,8 +1399,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         </div>
       </div>
 
-      {/* Right-Side Inspector Panel - Always Visible IDE Style */}
-      <div className="w-[40%] min-w-0 flex-shrink-0 bg-neutral-50 flex flex-col overflow-hidden">
+      {/* Right-Side Inspector Panel - Always Visible IDE Style - Takes 2/5 of space (40%) */}
+      <div className="flex-[2] min-w-0 bg-neutral-50 flex flex-col overflow-hidden">
         {/* Tab Bar */}
         {openTabs.length > 0 ? (
           <div className="border-b border-neutral-200 bg-white flex items-center overflow-x-auto">
@@ -1434,19 +1434,29 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
         {/* Inspector Content */}
         <div className="flex-1 min-w-0 overflow-y-auto">
-          {activeTab && tabData.has(activeTab) ? (
-            <div className="p-5 min-w-0">
-              <RequirementsGrid
-                nodes={tabData.get(activeTab)?.nodes || []}
-                rootId={tabData.get(activeTab)?.rootId || ''}
-                evaluationStates={tabData.get(activeTab)?.evaluationStates || []}
-                onNodeClick={(nodeId) => handleNodeSelection(activeTab, nodeId)}
-                selectedNodeId={pnSelectedNodeMap.get(activeTab) ?? null}
-                isRunning={pnStatuses.find(p => p.pnId === activeTab)?.status === 'evaluating'}
-                totalNodes={tabData.get(activeTab)?.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
-                evaluationStatus={pnStatuses.find(p => p.pnId === activeTab)?.status || tabData.get(activeTab)?.evaluation?.status || 'pending'}
-              />
-            </div>
+          {openTabs.length > 0 ? (
+            openTabs.map((pnId) => {
+              const data = tabData.get(pnId);
+              if (!data) return null;
+              const isActive = activeTab === pnId;
+              return (
+                <div key={pnId} className={isActive ? '' : 'hidden'}>
+                  <div className="p-5 min-w-0">
+                    <RequirementsGrid
+                      key={pnId}
+                      nodes={data.nodes || []}
+                      rootId={data.rootId || ''}
+                      evaluationStates={data.evaluationStates || []}
+                      onNodeClick={(nodeId) => handleNodeSelection(pnId, nodeId)}
+                      selectedNodeId={pnSelectedNodeMap.get(pnId) ?? null}
+                      isRunning={pnStatuses.find(p => p.pnId === pnId)?.status === 'evaluating'}
+                      totalNodes={data.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
+                      evaluationStatus={pnStatuses.find(p => p.pnId === pnId)?.status || data.evaluation?.status || 'pending'}
+                    />
+                  </div>
+                </div>
+              );
+            })
           ) : (
             <div className="h-full flex items-center justify-center p-12">
               <div className="text-center max-w-sm">
