@@ -441,6 +441,25 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     });
   };
 
+  const saveDescription = async (newDescription: string) => {
+    const { error } = await supabase
+      .from('use_cases')
+      .update({ description: newDescription })
+      .eq('id', useCaseId);
+
+    if (error) {
+      console.error('Error updating description:', error);
+      alert('Failed to save description');
+      return false;
+    }
+
+    // Update local state
+    if (useCase) {
+      setUseCase({ ...useCase, description: newDescription });
+    }
+    return true;
+  };
+
   const setPNSelection = (pnId: string, nodeId: string | null) => {
     setPnSelectedNodeMap(prev => {
       const current = prev.get(pnId) ?? null;
@@ -1173,19 +1192,54 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                 <div className="bg-white rounded-lg border border-neutral-200 p-4">
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <h3 className="text-sm font-semibold text-neutral-900">Description</h3>
-                    <button
-                      className="text-xs text-neutral-600 hover:text-neutral-900 transition-colors"
-                      onClick={() => {
-                        // TODO: Implement edit functionality
-                        alert('Edit functionality coming soon');
-                      }}
-                    >
-                      Edit
-                    </button>
+                    {!isEditingDescription ? (
+                      <button
+                        className="text-xs text-neutral-600 hover:text-neutral-900 transition-colors"
+                        onClick={() => {
+                          setEditedDescription(useCase.description);
+                          setIsEditingDescription(true);
+                        }}
+                      >
+                        Edit
+                      </button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <button
+                          className="text-xs text-neutral-600 hover:text-neutral-900 transition-colors"
+                          onClick={() => {
+                            setIsEditingDescription(false);
+                            setEditedDescription('');
+                          }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="text-xs text-blue-600 hover:text-blue-800 transition-colors font-medium"
+                          onClick={async () => {
+                            const success = await saveDescription(editedDescription);
+                            if (success) {
+                              setIsEditingDescription(false);
+                              setEditedDescription('');
+                            }
+                          }}
+                        >
+                          Save
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <div className="text-sm text-neutral-700 leading-relaxed whitespace-pre-wrap">
-                    {useCase.description}
-                  </div>
+                  {!isEditingDescription ? (
+                    <div className="text-sm text-neutral-700 leading-relaxed whitespace-pre-wrap">
+                      {useCase.description}
+                    </div>
+                  ) : (
+                    <textarea
+                      value={editedDescription}
+                      onChange={(e) => setEditedDescription(e.target.value)}
+                      className="w-full min-h-[200px] text-sm text-neutral-700 leading-relaxed border border-neutral-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter use case description..."
+                    />
+                  )}
                 </div>
               )}
             </div>
