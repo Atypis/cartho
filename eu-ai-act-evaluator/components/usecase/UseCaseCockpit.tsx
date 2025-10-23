@@ -71,12 +71,6 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [selectedPNs, setSelectedPNs] = useState<string[]>([]);
   const [triggering, setTriggering] = useState(false);
 
-  // Mode switching (Evaluate/Results)
-  const [mode, setMode] = useState<'evaluate' | 'results'>('evaluate');
-
-  // Collapsed sections
-  const [completedCollapsed, setCompletedCollapsed] = useState(true);
-
   // Focus Mode during batch evaluation
   const [focusModeActive, setFocusModeActive] = useState(false);
   const [batchEvaluationProgress, setBatchEvaluationProgress] = useState({
@@ -1385,31 +1379,6 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
             </div>
           )}
 
-          {/* Mode Toggle */}
-          {!loading && totalObligations > 0 && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setMode('evaluate')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  mode === 'evaluate'
-                    ? 'bg-neutral-900 text-white'
-                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                }`}
-              >
-                Evaluate ({totalPendingObligations} pending)
-              </button>
-              <button
-                onClick={() => setMode('results')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  mode === 'results'
-                    ? 'bg-neutral-900 text-white'
-                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                }`}
-              >
-                Results ({evaluatedCount} evaluated)
-              </button>
-            </div>
-          )}
 
           {/* Loading skeleton */}
           {loading && (
@@ -1425,8 +1394,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
             </div>
           )}
 
-          {/* EVALUATE MODE - Focus on pending obligations */}
-          {!loading && mode === 'evaluate' && (
+          {/* Main Content - Single Page Layout */}
+          {!loading && (
             <div className="space-y-4">
               {/* RUNNING EVALUATIONS Section */}
               {runningEvaluations.size > 0 && (
@@ -1543,25 +1512,15 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-sm font-semibold text-neutral-900 mb-1">All Evaluations Complete</h3>
-                  <p className="text-xs text-neutral-600">Switch to Results mode to review your compliance assessment.</p>
-                  <button
-                    onClick={() => setMode('results')}
-                    className="mt-3 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium"
-                  >
-                    View Results
-                  </button>
+                  <h3 className="text-sm font-semibold text-neutral-900 mb-1">All Evaluations Complete!</h3>
+                  <p className="text-xs text-neutral-600">Review your results in the sections below.</p>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* RESULTS MODE - Completed obligations */}
-          {!loading && mode === 'results' && (
-            <div className="space-y-4">
+              {/* RESULTS SECTIONS - Collapsed by Default */}
               {/* APPLIES Section */}
               {(appliesGroups.length > 0 || ungroupedAppliesPNs.length > 0) && (
-                <details open={!completedCollapsed} className="group">
+                <details className="group">
                   <summary className="cursor-pointer flex items-center justify-between px-1 py-2 hover:bg-neutral-50 rounded transition-colors">
                     <h2 className="text-sm font-bold text-green-700 uppercase tracking-wide flex items-center gap-2">
                       <span>✓ Obligations That Apply ({appliesPNs.length})</span>
@@ -1600,7 +1559,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
 
               {/* DOES NOT APPLY Section */}
               {(notApplicableGroups.length > 0 || ungroupedNotApplicablePNs.length > 0) && (
-                <details open={!completedCollapsed} className="group">
+                <details className="group">
                   <summary className="cursor-pointer flex items-center justify-between px-1 py-2 hover:bg-neutral-50 rounded transition-colors">
                     <h2 className="text-sm font-bold text-neutral-600 uppercase tracking-wide flex items-center gap-2">
                       <span>✗ Obligations That Do Not Apply ({notApplicablePNs.length})</span>
@@ -1645,13 +1604,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                     </svg>
                   </div>
                   <h3 className="text-sm font-semibold text-neutral-900 mb-1">No Results Yet</h3>
-                  <p className="text-xs text-neutral-600">Switch to Evaluate mode to start assessing obligations.</p>
-                  <button
-                    onClick={() => setMode('evaluate')}
-                    className="mt-3 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium"
-                  >
-                    Go to Evaluate
-                  </button>
+                  <p className="text-xs text-neutral-600">Evaluate pending obligations to see results here.</p>
                 </div>
               )}
             </div>
