@@ -948,6 +948,14 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         nodes: expandedNodes,
         rootId: pnData.requirements.root,
         evaluationStates: cachedStates, // ✅ Use live states from SSE
+        pnMeta: {
+          id: pnId,
+          title: pnData.title || availablePNs.find((p) => p.id === pnId)?.title,
+          article:
+            availablePNs.find((p) => p.id === pnId)?.article ||
+            (pnData.article_refs && pnData.article_refs[0]?.article),
+          legalText: pnData.legal_consequence?.verbatim,
+        },
       };
 
       setTabData(prev => {
@@ -1000,6 +1008,14 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       nodes: reconstruction.nodes,
       rootId: pnData.requirements.root,
       evaluationStates,
+      pnMeta: {
+        id: pnId,
+        title: pnData.title || availablePNs.find((p) => p.id === pnId)?.title,
+        article:
+          availablePNs.find((p) => p.id === pnId)?.article ||
+          (pnData.article_refs && pnData.article_refs[0]?.article),
+        legalText: pnData.legal_consequence?.verbatim,
+      },
     };
 
     setTabData(prev => {
@@ -1452,6 +1468,9 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                       isRunning={pnStatuses.find(p => p.pnId === pnId)?.status === 'evaluating'}
                       totalNodes={data.nodes?.filter((n: any) => n.kind === 'primitive').length || 0}
                       evaluationStatus={pnStatuses.find(p => p.pnId === pnId)?.status || data.evaluation?.status || 'pending'}
+                      pnTitle={data.pnMeta?.title || pnStatuses.find(p => p.pnId === pnId)?.title}
+                      pnArticle={data.pnMeta?.article || pnStatuses.find(p => p.pnId === pnId)?.article}
+                      pnLegalText={data.pnMeta?.legalText}
                     />
                   </div>
                 </div>

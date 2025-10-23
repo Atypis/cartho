@@ -23,6 +23,9 @@ interface RequirementsGridProps {
   isRunning?: boolean;
   totalNodes?: number;
   evaluationStatus?: string;
+  pnTitle?: string;
+  pnArticle?: string | number;
+  pnLegalText?: string;
 }
 
 export function RequirementsGrid({
@@ -34,6 +37,9 @@ export function RequirementsGrid({
   isRunning = false,
   totalNodes = 0,
   evaluationStatus,
+  pnTitle,
+  pnArticle,
+  pnLegalText,
 }: RequirementsGridProps) {
   const [progressExpanded, setProgressExpanded] = useState(true);
   const [summaryExpanded, setSummaryExpanded] = useState(true);
@@ -134,7 +140,7 @@ export function RequirementsGrid({
   // Show progress header if evaluation is running or has results
   const showProgress = isRunning || hasResolvedNodes;
 
-  // Calculate applicability status for Article 4
+  // Calculate applicability status (generic across PNs)
   const hasResults = hasResolvedNodes;
   // Check BOTH database status AND completion count (handles short-circuit optimization)
   const allCompleted =
@@ -266,7 +272,7 @@ export function RequirementsGrid({
         </div>
       )}
 
-      {/* Article 4 Obligation Summary Card */}
+      {/* Obligation Summary Card */}
       {showSummary && (
         <div ref={summaryCardRef} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
           {/* Header */}
@@ -274,7 +280,7 @@ export function RequirementsGrid({
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {/* Title */}
               <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-wide break-words">
-                Article 4: AI Literacy Obligation
+                {pnArticle && pnTitle ? `Article ${pnArticle}: ${pnTitle}` : (pnTitle || 'Obligation Summary')}
               </h4>
 
               {/* Status Badge - Only show final status when complete */}
@@ -319,19 +325,17 @@ export function RequirementsGrid({
           {/* Expanded Content */}
           {summaryExpanded && (
             <div className="px-4 py-3 space-y-3 text-xs w-full min-w-0">
-              {/* Obligation Overview - Always visible */}
-              <div className="min-w-0">
-                <div className="font-bold text-neutral-900 mb-1.5 text-[10px] uppercase tracking-wide">
-                  Legal Obligation Under EU AI Act
+              {/* Legal Consequence (if available) */}
+              {pnLegalText && (
+                <div className="min-w-0">
+                  <div className="font-bold text-neutral-900 mb-1.5 text-[10px] uppercase tracking-wide">
+                    Legal Consequence
+                  </div>
+                  <div className="text-neutral-700 text-xs leading-relaxed bg-neutral-50 rounded p-3 border border-neutral-200 break-words">
+                    {pnLegalText}
+                  </div>
                 </div>
-                <div className="text-neutral-700 text-xs leading-relaxed bg-neutral-50 rounded p-3 border border-neutral-200 break-words">
-                  Providers and deployers of AI systems shall take measures to ensure, to their best extent,
-                  a <strong>sufficient level of AI literacy</strong> of their staff and other persons dealing
-                  with the operation and use of AI systems on their behalf, taking into account their technical
-                  knowledge, experience, education and training and the context the AI systems are to be used in,
-                  and considering the persons or groups of persons on whom the AI systems are to be used.
-                </div>
-              </div>
+              )}
 
               {/* Applicability Result - Only show when complete */}
               {isEvaluationFinished && applicabilityStatus === 'applies' && (
@@ -340,7 +344,12 @@ export function RequirementsGrid({
                     This Obligation Applies
                   </div>
                   <div className="text-green-900 text-xs leading-relaxed mb-2 opacity-90">
-                    Based on the evaluation, <strong>Article 4 AI Literacy obligations apply to your AI system.</strong>
+                    {`Based on the evaluation, `}
+                    <strong>
+                      {pnArticle && pnTitle
+                        ? `Article ${pnArticle} ${pnTitle} obligations apply to your AI system.`
+                        : 'this obligation applies to your AI system.'}
+                    </strong>
                   </div>
                   <div className="text-green-900 text-xs leading-relaxed opacity-90">
                     <strong>What this means:</strong> You must implement measures to ensure sufficient AI literacy
@@ -355,8 +364,13 @@ export function RequirementsGrid({
                     This Obligation Does Not Apply
                   </div>
                   <div className="text-neutral-700 text-xs leading-relaxed">
-                    Based on the evaluation, <strong>Article 4 AI Literacy obligations do not apply to your AI system.</strong>
-                    You are not required to implement AI literacy measures under this specific obligation.
+                    {`Based on the evaluation, `}
+                    <strong>
+                      {pnArticle && pnTitle
+                        ? `Article ${pnArticle} ${pnTitle} obligations do not apply to your AI system.`
+                        : 'this obligation does not apply to your AI system.'}
+                    </strong>
+                    {` You may not be required to implement measures under this specific obligation.`}
                   </div>
                 </div>
               )}
@@ -368,8 +382,10 @@ export function RequirementsGrid({
                     Evaluation In Progress
                   </div>
                   <div className="text-blue-900 text-xs leading-relaxed opacity-90">
-                    AI is currently evaluating whether Article 4 obligations apply to your AI system.
-                    The result will be determined once the evaluation is complete.
+                    {pnArticle && pnTitle
+                      ? `AI is currently evaluating whether Article ${pnArticle} ${pnTitle} obligations apply to your AI system.`
+                      : 'AI is currently evaluating whether this obligation applies to your AI system.'}
+                    {` The result will be determined once the evaluation is complete.`}
                   </div>
                 </div>
               )}
