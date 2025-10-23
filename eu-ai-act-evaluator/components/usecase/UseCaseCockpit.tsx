@@ -1060,8 +1060,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   return (
     <div className="h-full flex overflow-hidden">
       {/* Main Content Area - Stable Width */}
-      <div className="flex-1 overflow-y-auto border-r border-neutral-200">
-        <div className="max-w-4xl mx-auto px-6 py-4 space-y-4">
+      <div className="flex-1 min-w-0 overflow-y-auto border-r border-neutral-200">
+        <div className="w-full px-6 py-4 space-y-4">
           {/* Use Case Header - Clean & Minimal */}
           {useCase ? (
             <div className="space-y-3">
@@ -1265,8 +1265,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                             }`}
                           >
                             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse flex-shrink-0" />
-                            <div className="text-xs font-mono font-semibold text-neutral-900">{pnId}</div>
-                            <div className="text-xs text-neutral-600 flex-1 truncate">{pnStatus?.title || 'Evaluating...'}</div>
+                            <div className="text-xs font-mono font-semibold text-neutral-900 flex-shrink-0">{pnId}</div>
+                            <div className="text-xs text-neutral-600 flex-1 min-w-0 truncate">{pnStatus?.title || 'Evaluating...'}</div>
                             {pnStatus?.progressCurrent !== undefined && pnStatus.progressTotal && (
                               <div className="text-xs text-neutral-500 font-medium tabular-nums">
                                 {pnStatus.progressCurrent}/{pnStatus.progressTotal}
@@ -1400,7 +1400,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
       </div>
 
       {/* Right-Side Inspector Panel - Always Visible IDE Style */}
-      <div className="w-[45%] flex-shrink-0 bg-neutral-50 flex flex-col overflow-hidden">
+      <div className="w-[40%] min-w-0 flex-shrink-0 bg-neutral-50 flex flex-col overflow-hidden">
         {/* Tab Bar */}
         {openTabs.length > 0 ? (
           <div className="border-b border-neutral-200 bg-white flex items-center overflow-x-auto">
@@ -1571,13 +1571,13 @@ function PNTable({
                   className="flex-1 flex items-center justify-between text-left disabled:cursor-default"
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="text-xs font-mono font-semibold text-neutral-900">
+                    <div className="text-xs font-mono font-semibold text-neutral-900 flex-shrink-0">
                       {pn.pnId}
                     </div>
-                    <div className="text-[10px] text-neutral-400 uppercase tracking-wider">
+                    <div className="text-[10px] text-neutral-400 uppercase tracking-wider flex-shrink-0">
                       Art. {pn.article}
                     </div>
-                    <div className="text-sm text-neutral-700 flex-1 truncate">
+                    <div className="text-sm text-neutral-700 flex-1 min-w-0 truncate">
                       {pn.title}
                     </div>
                   </div>
