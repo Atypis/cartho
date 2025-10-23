@@ -73,6 +73,111 @@ function sha256(s: string) {
   return crypto.createHash('sha256').update(s).digest('hex');
 }
 
+/**
+ * Create or update obligation instance for a completed evaluation
+ */
+async function handleObligationInstanceUpdate(
+  evaluationId: string,
+  pnId: string,
+  pnTitle: string | null,
+  pnArticle: string | null,
+  rootDecision: boolean
+) {
+  try {
+    // Get evaluation details to find use_case_id
+    const { data: evaluation } = await supabase
+      .from('evaluations')
+      .select('use_case_id')
+      .eq('id', evaluationId)
+      .single();
+
+    if (!evaluation) {
+      console.error(`❌ [Obligation] Evaluation ${evaluationId} not found`);
+      return;
+    }
+
+    const useCaseId = evaluation.use_case_id;
+    const applicabilityState = rootDecision ? 'applies' : 'not_applicable';
+    const now = new Date().toISOString();
+
+    // Check if obligation instance already exists
+    const { data: existing } = await supabase
+      .from('obligation_instances')
+      .select('*')
+      .eq('use_case_id', useCaseId)
+      .eq('pn_id', pnId)
+      .single();
+
+    if (existing) {
+      // Update existing obligation
+      console.log(`🔄 [Obligation] Updating obligation ${existing.id} for PN ${pnId}`);
+
+      await supabase
+        .from('obligation_instances')
+        .update({
+          applicability_state: applicabilityState,
+          latest_evaluation_id: evaluationId,
+          root_decision: rootDecision,
+          evaluated_at: now,
+          pn_title: pnTitle || existing.pn_title,
+          pn_article: pnArticle || existing.pn_article,
+        })
+        .eq('id', existing.id);
+
+      // Log state change if applicability changed
+      if (existing.applicability_state !== applicabilityState) {
+        await supabase.from('obligation_status_history').insert({
+          obligation_instance_id: existing.id,
+          from_state: existing.applicability_state,
+          to_state: applicabilityState,
+          kind: 'applicability',
+          changed_at: now,
+        });
+        console.log(`📝 [Obligation] Logged state change: ${existing.applicability_state} → ${applicabilityState}`);
+      }
+    } else {
+      // Create new obligation instance
+      console.log(`➕ [Obligation] Creating new obligation for PN ${pnId} × use case ${useCaseId}`);
+
+      const { data: newObligation, error: insertError } = await supabase
+        .from('obligation_instances')
+        .insert({
+          use_case_id: useCaseId,
+          pn_id: pnId,
+          pn_title: pnTitle,
+          pn_article: pnArticle,
+          applicability_state: applicabilityState,
+          latest_evaluation_id: evaluationId,
+          root_decision: rootDecision,
+          evaluated_at: now,
+          // Set implementation_state to not_started if it applies
+          implementation_state: rootDecision ? 'not_started' : null,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error(`❌ [Obligation] Error creating obligation:`, insertError);
+        return;
+      }
+
+      // Log initial state
+      if (newObligation) {
+        await supabase.from('obligation_status_history').insert({
+          obligation_instance_id: newObligation.id,
+          from_state: null,
+          to_state: applicabilityState,
+          kind: 'applicability',
+          changed_at: now,
+        });
+        console.log(`✅ [Obligation] Created obligation ${newObligation.id}`);
+      }
+    }
+  } catch (error) {
+    console.error(`❌ [Obligation] Error handling obligation instance:`, error);
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     console.log('📥 [API] Received evaluation request');
@@ -264,6 +369,15 @@ export async function POST(req: NextRequest) {
             .eq('id', evaluationId);
 
           console.log(`✅ [DB] Marked evaluation ${evaluationId} as completed`);
+
+          // Create/update obligation instance for this PN × Use Case
+          await handleObligationInstanceUpdate(
+            evaluationId,
+            prescriptiveNorm.id,
+            prescriptiveNorm.title || null,
+            prescriptiveNorm.article_refs?.[0]?.article?.toString() || null,
+            result.compliant
+          );
         }
 
         // Send final result

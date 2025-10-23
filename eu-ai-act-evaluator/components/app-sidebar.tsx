@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Folder, Plus, User, ChevronUp } from "lucide-react"
+import { Folder, Plus, User, ChevronUp, LayoutDashboard, CheckSquare } from "lucide-react"
+import { useRouter } from 'next/navigation'
 
 import {
   DropdownMenu,
@@ -117,6 +118,31 @@ export function AppSidebar({
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <Separator className="my-2 mx-2" />
+
+        {/* Compliance Center Section */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {/* Compliance Overview */}
+              <ComplianceSidebarItem
+                href="/compliance-center"
+                icon={<LayoutDashboard />}
+                label="Compliance Center"
+                tooltip="Compliance Overview"
+              />
+
+              {/* Obligations Registry */}
+              <ComplianceSidebarItem
+                href="/compliance-center/obligations"
+                icon={<CheckSquare />}
+                label="Obligations"
+                tooltip="All Obligations"
+              />
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       {/* Footer - User Profile */}
@@ -182,5 +208,34 @@ export function AppSidebar({
 
       <SidebarRail />
     </Sidebar>
+  )
+}
+
+// Helper component for Compliance Center navigation items
+function ComplianceSidebarItem({
+  href,
+  icon,
+  label,
+  tooltip,
+}: {
+  href: string
+  icon: React.ReactNode
+  label: string
+  tooltip: string
+}) {
+  const router = useRouter()
+  const isActive = typeof window !== 'undefined' && window.location.pathname === href
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        onClick={() => router.push(href)}
+        isActive={isActive}
+        tooltip={tooltip}
+      >
+        {icon}
+        <span>{label}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   )
 }

@@ -150,6 +150,94 @@ export interface Database {
           created_at?: string;
         };
       };
+      obligation_instances: {
+        Row: {
+          id: string;
+          use_case_id: string;
+          pn_id: string;
+          pn_title: string | null;
+          pn_article: string | null;
+          applicability_state: 'pending' | 'evaluating' | 'applies' | 'not_applicable';
+          latest_evaluation_id: string | null;
+          root_decision: boolean | null;
+          evaluated_at: string | null;
+          implementation_state: 'not_started' | 'in_progress' | 'compliant' | 'partial' | 'non_compliant' | 'waived' | null;
+          owner_id: string | null;
+          due_date: string | null;
+          risk_level: 'low' | 'medium' | 'high' | 'critical' | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          use_case_id: string;
+          pn_id: string;
+          pn_title?: string | null;
+          pn_article?: string | null;
+          applicability_state?: 'pending' | 'evaluating' | 'applies' | 'not_applicable';
+          latest_evaluation_id?: string | null;
+          root_decision?: boolean | null;
+          evaluated_at?: string | null;
+          implementation_state?: 'not_started' | 'in_progress' | 'compliant' | 'partial' | 'non_compliant' | 'waived' | null;
+          owner_id?: string | null;
+          due_date?: string | null;
+          risk_level?: 'low' | 'medium' | 'high' | 'critical' | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          use_case_id?: string;
+          pn_id?: string;
+          pn_title?: string | null;
+          pn_article?: string | null;
+          applicability_state?: 'pending' | 'evaluating' | 'applies' | 'not_applicable';
+          latest_evaluation_id?: string | null;
+          root_decision?: boolean | null;
+          evaluated_at?: string | null;
+          implementation_state?: 'not_started' | 'in_progress' | 'compliant' | 'partial' | 'non_compliant' | 'waived' | null;
+          owner_id?: string | null;
+          due_date?: string | null;
+          risk_level?: 'low' | 'medium' | 'high' | 'critical' | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      obligation_status_history: {
+        Row: {
+          id: string;
+          obligation_instance_id: string;
+          changed_by: string | null;
+          from_state: string | null;
+          to_state: string;
+          kind: 'applicability' | 'implementation';
+          reason: string | null;
+          changed_at: string;
+        };
+        Insert: {
+          id?: string;
+          obligation_instance_id: string;
+          changed_by?: string | null;
+          from_state?: string | null;
+          to_state: string;
+          kind: 'applicability' | 'implementation';
+          reason?: string | null;
+          changed_at?: string;
+        };
+        Update: {
+          id?: string;
+          obligation_instance_id?: string;
+          changed_by?: string | null;
+          from_state?: string | null;
+          to_state?: string;
+          kind?: 'applicability' | 'implementation';
+          reason?: string | null;
+          changed_at?: string;
+        };
+      };
     };
   };
 }
