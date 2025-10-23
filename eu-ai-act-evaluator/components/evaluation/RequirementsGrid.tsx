@@ -26,6 +26,17 @@ interface RequirementsGridProps {
   pnTitle?: string;
   pnArticle?: string | number;
   pnLegalText?: string;
+
+  // Focus Mode props
+  focusModeActive?: boolean;
+  batchProgress?: {
+    current: number;
+    total: number;
+    currentTaskId: string;
+  };
+  onPrevious?: () => void;
+  onNext?: () => void;
+  onPause?: () => void;
 }
 
 export function RequirementsGrid({
@@ -40,6 +51,11 @@ export function RequirementsGrid({
   pnTitle,
   pnArticle,
   pnLegalText,
+  focusModeActive = false,
+  batchProgress,
+  onPrevious,
+  onNext,
+  onPause,
 }: RequirementsGridProps) {
   const [progressExpanded, setProgressExpanded] = useState(true);
   const [summaryExpanded, setSummaryExpanded] = useState(true);
@@ -462,6 +478,60 @@ export function RequirementsGrid({
               selectedNodeId={selectedNodeId}
             />
           ))}
+        </div>
+      )}
+
+      {/* Focus Mode Sticky Footer */}
+      {focusModeActive && batchProgress && (
+        <div className="sticky bottom-0 left-0 right-0 bg-white border-t-2 border-blue-500 shadow-lg">
+          <div className="px-4 py-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <div className="text-xs font-semibold text-neutral-900">
+                  Batch Evaluation Progress
+                </div>
+                <div className="text-xs text-neutral-600">
+                  {batchProgress.current} of {batchProgress.total}
+                </div>
+              </div>
+              <div className="text-xs font-semibold text-blue-600">
+                {Math.round((batchProgress.current / batchProgress.total) * 100)}%
+              </div>
+            </div>
+
+            <div className="relative h-1.5 bg-neutral-100 rounded-full overflow-hidden mb-3">
+              <div
+                className="absolute inset-y-0 left-0 bg-blue-500 transition-all duration-500 ease-out rounded-full"
+                style={{ width: `${(batchProgress.current / batchProgress.total) * 100}%` }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <button
+                onClick={onPrevious}
+                disabled={!onPrevious || batchProgress.current === 1}
+                className="px-3 py-1.5 text-sm text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                ← Previous
+              </button>
+
+              <button
+                onClick={onPause}
+                disabled={!onPause}
+                className="px-4 py-1.5 text-sm bg-neutral-100 text-neutral-700 hover:bg-neutral-200 rounded transition-colors font-medium"
+              >
+                Pause All
+              </button>
+
+              <button
+                onClick={onNext}
+                disabled={!onNext || batchProgress.current === batchProgress.total}
+                className="px-3 py-1.5 text-sm text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

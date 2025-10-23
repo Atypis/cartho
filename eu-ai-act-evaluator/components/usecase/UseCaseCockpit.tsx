@@ -14,7 +14,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { RequirementsGrid } from '@/components/evaluation/RequirementsGrid';
-import { GroupCard } from '@/components/usecase/GroupCard';
+import { TaskRow } from '@/components/usecase/TaskRow';
 import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/types';
 import type { EvaluationState } from '@/lib/evaluation/types';
@@ -69,6 +69,20 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const [pnStatuses, setPNStatuses] = useState<PNStatus[]>([]);
   const [selectedPNs, setSelectedPNs] = useState<string[]>([]);
   const [triggering, setTriggering] = useState(false);
+
+  // Mode switching (Evaluate/Results)
+  const [mode, setMode] = useState<'evaluate' | 'results'>('evaluate');
+
+  // Collapsed sections
+  const [completedCollapsed, setCompletedCollapsed] = useState(true);
+
+  // Focus Mode during batch evaluation
+  const [focusModeActive, setFocusModeActive] = useState(false);
+  const [batchEvaluationProgress, setBatchEvaluationProgress] = useState({
+    current: 0,
+    total: 0,
+    currentTaskId: '',
+  });
 
   // Tab system for IDE-style inspector (multiple open PNs)
   const [openTabs, setOpenTabs] = useState<string[]>([]); // Array of open PN IDs
@@ -1150,401 +1164,413 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     );
   }
 
+  // Calculate all obligations (groups + ungrouped)
+  const totalObligations = availablePNs.length;
+  const evaluatedCount = appliesPNs.length + notApplicablePNs.length;
+  const evaluatedPercent = totalObligations > 0 ? (evaluatedCount / totalObligations) * 100 : 0;
+
+  // All pending tasks (groups + ungrouped)
+  const allPendingTasks = [...pendingGroups, ...ungroupedPendingPNs];
+  const totalPendingObligations = pendingPNs.length;
+
   return (
     <div className="h-full flex overflow-hidden">
       {/* Main Content Area - Takes 3/5 of space (60%) */}
       <div className="flex-[3] min-w-0 min-h-0 overflow-y-auto overscroll-contain border-r border-neutral-200">
         <div className="px-6 py-4 space-y-4">
-          {/* Use Case Header - Clean & Minimal */}
+          {/* Use Case Header */}
           {useCase ? (
             <div className="space-y-3">
               <div className="flex items-baseline justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-lg font-semibold text-neutral-900 tracking-tight">
-                    {useCase.title}
-                  </h1>
-                  {useCase.tags && useCase.tags.length > 0 && (
-                    <div className="flex gap-2 mt-1.5">
-                      {useCase.tags.map((tag, idx) => (
-                        <span
-                          key={idx}
-                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-neutral-100 text-neutral-600"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Inline Minimal Stats */}
-                <div className="flex items-center gap-3 text-sm font-medium flex-shrink-0">
-                  <span className="text-green-700">{appliesPNs.length} Apply</span>
-                  <span className="text-neutral-400">•</span>
-                  <span className="text-neutral-500">{notApplicablePNs.length} N/A</span>
-                  <span className="text-neutral-400">•</span>
-                  <span className="text-neutral-600">{pendingPNs.length} Pending</span>
-                </div>
+                <h1 className="text-lg font-semibold text-neutral-900 tracking-tight flex-1">
+                  {useCase.title}
+                </h1>
+                {useCase.tags && useCase.tags.length > 0 && (
+                  <div className="flex gap-2">
+                    {useCase.tags.map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-neutral-100 text-neutral-600"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Use Case Description */}
+              {/* Use Case Description - Collapsible */}
               {useCase.description && (
-                <div className="bg-white rounded-lg border border-neutral-200 p-4">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3 className="text-sm font-semibold text-neutral-900">Description</h3>
+                <details className="group bg-white rounded-lg border border-neutral-200 overflow-hidden">
+                  <summary className="cursor-pointer px-4 py-2.5 flex items-center justify-between hover:bg-neutral-50 transition-colors">
+                    <h3 className="text-xs font-semibold text-neutral-900 uppercase tracking-wide">Description</h3>
+                    <svg
+                      className="w-4 h-4 text-neutral-400 transition-transform group-open:rotate-180"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="border-t border-neutral-200 p-4">
                     {!isEditingDescription ? (
-                      <button
-                        className="text-xs text-neutral-600 hover:text-neutral-900 transition-colors"
-                        onClick={() => {
-                          setEditedDescription(useCase.description);
-                          setIsEditingDescription(true);
-                        }}
-                      >
-                        Edit
-                      </button>
-                    ) : (
-                      <div className="flex gap-2">
+                      <>
+                        <div className="text-sm text-neutral-700 leading-relaxed whitespace-pre-wrap mb-2">
+                          {useCase.description}
+                        </div>
                         <button
                           className="text-xs text-neutral-600 hover:text-neutral-900 transition-colors"
                           onClick={() => {
-                            setIsEditingDescription(false);
-                            setEditedDescription('');
+                            setEditedDescription(useCase.description);
+                            setIsEditingDescription(true);
                           }}
                         >
-                          Cancel
+                          Edit
                         </button>
-                        <button
-                          className="text-xs text-blue-600 hover:text-blue-800 transition-colors font-medium"
-                          onClick={async () => {
-                            const success = await saveDescription(editedDescription);
-                            if (success) {
+                      </>
+                    ) : (
+                      <>
+                        <textarea
+                          value={editedDescription}
+                          onChange={(e) => setEditedDescription(e.target.value)}
+                          className="w-full min-h-[150px] text-sm text-neutral-700 leading-relaxed border border-neutral-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-2"
+                          placeholder="Enter use case description..."
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            className="text-xs px-3 py-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded transition-colors"
+                            onClick={() => {
                               setIsEditingDescription(false);
                               setEditedDescription('');
-                            }
-                          }}
-                        >
-                          Save
-                        </button>
-                      </div>
+                            }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium"
+                            onClick={async () => {
+                              const success = await saveDescription(editedDescription);
+                              if (success) {
+                                setIsEditingDescription(false);
+                                setEditedDescription('');
+                              }
+                            }}
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </>
                     )}
                   </div>
-                  {!isEditingDescription ? (
-                    <div className="text-sm text-neutral-700 leading-relaxed whitespace-pre-wrap">
-                      {useCase.description}
-                    </div>
-                  ) : (
-                    <textarea
-                      value={editedDescription}
-                      onChange={(e) => setEditedDescription(e.target.value)}
-                      className="w-full min-h-[200px] text-sm text-neutral-700 leading-relaxed border border-neutral-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter use case description..."
-                    />
-                  )}
-                </div>
+                </details>
               )}
             </div>
           ) : (
-            <div className="flex items-baseline justify-between gap-4">
-              <div className="h-6 bg-neutral-100 rounded animate-pulse w-1/3"></div>
-              <div className="h-5 bg-neutral-100 rounded animate-pulse w-1/4"></div>
+            <div className="h-6 bg-neutral-100 rounded animate-pulse w-1/3"></div>
+          )}
+
+          {/* Progress Dashboard */}
+          {!loading && totalObligations > 0 && (
+            <div className="bg-white rounded-lg border border-neutral-200 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-neutral-900">Compliance Assessment Progress</h3>
+                <div className="text-xs text-neutral-500">{evaluatedCount} of {totalObligations} evaluated</div>
+              </div>
+              <div className="relative h-2 bg-neutral-100 rounded-full overflow-hidden mb-2">
+                <div
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-out rounded-full"
+                  style={{ width: `${evaluatedPercent}%` }}
+                />
+              </div>
+              <div className="flex items-center gap-4 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <span className="text-neutral-700">{appliesPNs.length} Apply</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-neutral-400"></div>
+                  <span className="text-neutral-700">{notApplicablePNs.length} Do Not Apply</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  <span className="text-neutral-700">{pendingPNs.length} Pending</span>
+                </div>
+              </div>
             </div>
           )}
 
-        {/* Loading skeleton for PN sections */}
-        {loading && (
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg border border-neutral-200 p-4">
-              <div className="h-5 bg-neutral-100 rounded animate-pulse mb-3 w-48"></div>
-              <div className="space-y-2">
-                <div className="h-16 bg-neutral-50 rounded animate-pulse"></div>
-                <div className="h-16 bg-neutral-50 rounded animate-pulse"></div>
-                <div className="h-16 bg-neutral-50 rounded animate-pulse"></div>
+          {/* Mode Toggle */}
+          {!loading && totalObligations > 0 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setMode('evaluate')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  mode === 'evaluate'
+                    ? 'bg-neutral-900 text-white'
+                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                }`}
+              >
+                Evaluate ({totalPendingObligations} pending)
+              </button>
+              <button
+                onClick={() => setMode('results')}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  mode === 'results'
+                    ? 'bg-neutral-900 text-white'
+                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                }`}
+              >
+                Results ({evaluatedCount} evaluated)
+              </button>
+            </div>
+          )}
+
+          {/* Loading skeleton */}
+          {loading && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-lg border border-neutral-200 p-4">
+                <div className="h-5 bg-neutral-100 rounded animate-pulse mb-3 w-48"></div>
+                <div className="space-y-2">
+                  <div className="h-16 bg-neutral-50 rounded animate-pulse"></div>
+                  <div className="h-16 bg-neutral-50 rounded animate-pulse"></div>
+                  <div className="h-16 bg-neutral-50 rounded animate-pulse"></div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* APPLIES Section - Groups + Individual PNs */}
-        {!loading && (appliesGroups.length > 0 || ungroupedAppliesPNs.length > 0) && (
-          <div className="space-y-2">
-            <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide px-1">
-              ✓ OBLIGATIONS THAT APPLY
-            </h2>
+          {/* EVALUATE MODE - Focus on pending obligations */}
+          {!loading && mode === 'evaluate' && (
+            <div className="space-y-4">
+              {/* RUNNING EVALUATIONS Section */}
+              {runningEvaluations.size > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                    Evaluating Now
+                  </h2>
 
-            {/* Groups in Applies */}
-            {appliesGroups.map(group => (
-              <GroupCard
-                key={group.id}
-                group={group}
-                pnStatuses={pnStatuses}
-                sharedPrimitives={sharedPrimitives}
-                onEvaluateGroup={handleEvaluateGroup}
-                onEvaluatePN={(pnId) => {
-                  setSelectedPNs([pnId]);
-                  setTimeout(() => triggerEvaluation(), 100);
-                }}
-                onViewPN={handleViewPN}
-              />
-            ))}
+                  {Array.from(runningEvaluations).map(evaluationId => {
+                    const evaluation = evaluationHistory.find(e => e.id === evaluationId);
+                    if (!evaluation) return null;
 
-            {/* Individual PNs in Applies */}
-            {ungroupedAppliesPNs.length > 0 && (
-              <PNTable
-                title=""
-                pns={ungroupedAppliesPNs}
-                activeTab={activeTab}
-                onExpandPN={handleExpandPN}
-                type="applies"
-                showHeader={false}
-                useCaseId={useCaseId}
-                pnSelectedNodeMap={pnSelectedNodeMap}
-                onSelectNode={handleNodeSelection}
-              />
-            )}
-          </div>
-        )}
+                    const pnIds = evaluation.pn_ids as string[];
+                    const progress = evaluationProgress.get(evaluationId);
+                    const progressPercent = progress ? (progress.current / progress.total) * 100 : 0;
 
-        {/* NOT APPLICABLE Section - Groups + Individual PNs */}
-        {!loading && (notApplicableGroups.length > 0 || ungroupedNotApplicablePNs.length > 0) && (
-          <div className="space-y-2">
-            <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide px-1">
-              ✗ OBLIGATIONS THAT DO NOT APPLY
-            </h2>
-
-            {/* Groups in N/A */}
-            {notApplicableGroups.map(group => (
-              <GroupCard
-                key={group.id}
-                group={group}
-                pnStatuses={pnStatuses}
-                sharedPrimitives={sharedPrimitives}
-                onEvaluateGroup={handleEvaluateGroup}
-                onEvaluatePN={(pnId) => {
-                  setSelectedPNs([pnId]);
-                  setTimeout(() => triggerEvaluation(), 100);
-                }}
-                onViewPN={handleViewPN}
-              />
-            ))}
-
-            {/* Individual PNs in N/A */}
-            {ungroupedNotApplicablePNs.length > 0 && (
-              <PNTable
-                title=""
-                pns={ungroupedNotApplicablePNs}
-                activeTab={activeTab}
-                onExpandPN={handleExpandPN}
-                type="not-applicable"
-                showHeader={false}
-                useCaseId={useCaseId}
-                pnSelectedNodeMap={pnSelectedNodeMap}
-                onSelectNode={handleNodeSelection}
-              />
-            )}
-          </div>
-        )}
-
-        {/* EVALUATIONS IN PROGRESS Section */}
-        {runningEvaluations.size > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-neutral-900 uppercase tracking-wide px-1 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              In Progress
-            </h2>
-
-            {Array.from(runningEvaluations).map(evaluationId => {
-              const evaluation = evaluationHistory.find(e => e.id === evaluationId);
-              if (!evaluation) return null;
-
-              const pnIds = evaluation.pn_ids as string[];
-              const progress = evaluationProgress.get(evaluationId);
-              const runningPNs = pnStatuses.filter(ps =>
-                pnIds.includes(ps.pnId) && ps.evaluationId === evaluationId
-              );
-
-              const progressPercent = progress ? (progress.current / progress.total) * 100 : 0;
-
-              return (
-                <div data-progress-card key={evaluationId} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
-                  {/* Elegant Progress Header */}
-                  <div className="px-5 py-4 border-b border-neutral-100">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="text-sm font-medium text-neutral-900">
-                          {pnIds.length} {pnIds.length === 1 ? 'Obligation' : 'Obligations'}
-                        </div>
-                        {progress && (
-                          <div className="text-xs text-neutral-500 font-medium">
-                            {progress.current} of {progress.total}
-                          </div>
-                        )}
-                      </div>
-                      {progress && (
-                        <div className="text-sm font-semibold text-blue-600">
-                          {Math.round(progressPercent)}%
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Refined Progress Bar */}
-                    {progress && (
-                      <div className="relative h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                        <div
-                          className="absolute inset-y-0 left-0 bg-blue-500 transition-all duration-500 ease-out rounded-full"
-                          style={{ width: `${progressPercent}%` }}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* List of PNs being evaluated */}
-                  <div className="divide-y divide-neutral-100">
-                    {pnIds.map(pnId => {
-                      const pnStatus = pnStatuses.find(ps => ps.pnId === pnId);
-                      const isActive = activeTab === pnId;
-
-                      return (
-                        <div key={pnId}>
-                          <button
-                            onClick={() => handleExpandPN(pnId)}
-                            className={`w-full text-left px-5 py-3 transition-colors flex items-center gap-3 ${
-                              isActive
-                                ? 'bg-blue-50 border-l-2 border-blue-500'
-                                : 'hover:bg-neutral-50'
-                            }`}
-                          >
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse flex-shrink-0" />
-                            <div className="text-xs font-mono font-semibold text-neutral-900 flex-shrink-0">{pnId}</div>
-                            <div className="text-xs text-neutral-600 flex-1 min-w-0 truncate">{pnStatus?.title || 'Evaluating...'}</div>
-                            {pnStatus?.progressCurrent !== undefined && pnStatus.progressTotal && (
-                              <div className="text-xs text-neutral-500 font-medium tabular-nums">
-                                {pnStatus.progressCurrent}/{pnStatus.progressTotal}
+                    return (
+                      <div key={evaluationId} className="bg-white rounded-lg border-2 border-blue-200 overflow-hidden">
+                        <div className="px-4 py-3 bg-blue-50 border-b border-blue-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-sm font-medium text-blue-900">
+                              Evaluating {pnIds.length} {pnIds.length === 1 ? 'obligation' : 'obligations'}
+                            </div>
+                            {progress && (
+                              <div className="text-sm font-semibold text-blue-700">
+                                {progress.current}/{progress.total} ({Math.round(progressPercent)}%)
                               </div>
                             )}
-                            <svg
-                              className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${isActive ? 'rotate-180' : ''}`}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </button>
+                          </div>
+                          {progress && (
+                            <div className="relative h-2 bg-blue-200 rounded-full overflow-hidden">
+                              <div
+                                className="absolute inset-y-0 left-0 bg-blue-600 transition-all duration-500 ease-out rounded-full"
+                                style={{ width: `${progressPercent}%` }}
+                              />
+                            </div>
+                          )}
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* PENDING Section - Groups + Individual PNs */}
-        {!loading && (pendingGroups.length > 0 || ungroupedPendingPNs.length > 0) && (
-          <div className="space-y-2">
-            <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide px-1">
-              ○ PENDING EVALUATION
-            </h2>
-
-            {/* Groups in Pending */}
-            {pendingGroups.map(group => (
-              <GroupCard
-                key={group.id}
-                group={group}
-                pnStatuses={pnStatuses}
-                sharedPrimitives={sharedPrimitives}
-                onEvaluateGroup={handleEvaluateGroup}
-                onEvaluatePN={(pnId) => {
-                  setSelectedPNs([pnId]);
-                  setTimeout(() => triggerEvaluation(), 100);
-                }}
-                onViewPN={handleViewPN}
-              />
-            ))}
-
-            {/* Individual PNs in Pending */}
-            {ungroupedPendingPNs.length > 0 && (
-              <PNTable
-                title=""
-                pns={ungroupedPendingPNs}
-                activeTab={activeTab}
-                onExpandPN={handleExpandPN}
-                type="pending"
-                showHeader={false}
-                selectedPNs={selectedPNs}
-                onTogglePN={handleTogglePN}
-                onEvaluateSelected={handleEvaluateSelectedPNs}
-                onEvaluateAll={() => handleEvaluateAllPendingPNs(ungroupedPendingPNs.map(p => p.pnId))}
-                useCaseId={useCaseId}
-                pnSelectedNodeMap={pnSelectedNodeMap}
-                onSelectNode={handleNodeSelection}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Evaluation History */}
-        {evaluationHistory.length > 0 && (
-          <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
-            <button
-              onClick={() => setShowHistory(!showHistory)}
-              className="w-full px-6 py-4 flex items-center justify-between hover:bg-neutral-50 transition-colors"
-            >
-              <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-wide">
-                Evaluation History ({evaluationHistory.length} runs)
-              </h3>
-              <svg
-                className={`w-4 h-4 text-neutral-500 transition-transform ${showHistory ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {showHistory && (
-              <div className="border-t border-neutral-200 p-6">
-                <div className="space-y-2">
-                  {evaluationHistory.map((evaluation) => (
-                    <button
-                      key={evaluation.id}
-                      onClick={() => onViewEvaluation(evaluation.id)}
-                      className="w-full flex items-center justify-between p-3 rounded border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 transition-colors text-left"
-                    >
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-neutral-900">
-                          {(evaluation.pn_ids as string[]).join(', ')}
-                        </div>
-                        <div className="text-xs text-neutral-500">
-                          {new Date(evaluation.triggered_at).toLocaleString('en', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
+                        <div className="divide-y divide-neutral-100">
+                          {pnIds.map(pnId => {
+                            const pnStatus = pnStatuses.find(ps => ps.pnId === pnId);
+                            return (
+                              <button
+                                key={pnId}
+                                onClick={() => handleExpandPN(pnId)}
+                                className="w-full text-left px-4 py-2.5 hover:bg-neutral-50 transition-colors flex items-center gap-3"
+                              >
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse flex-shrink-0" />
+                                <span className="text-xs font-mono font-semibold text-neutral-900 flex-shrink-0">{pnId}</span>
+                                <span className="text-xs text-neutral-600 flex-1 truncate">{pnStatus?.title}</span>
+                                {pnStatus?.progressCurrent !== undefined && pnStatus.progressTotal && (
+                                  <span className="text-xs text-blue-600 font-medium tabular-nums">
+                                    {pnStatus.progressCurrent}/{pnStatus.progressTotal}
+                                  </span>
+                                )}
+                              </button>
+                            );
                           })}
                         </div>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded font-medium ${
-                        evaluation.status === 'completed'
-                          ? 'bg-green-100 text-green-700'
-                          : evaluation.status === 'running'
-                          ? 'bg-blue-100 text-blue-700'
-                          : evaluation.status === 'failed'
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-neutral-100 text-neutral-700'
-                      }`}>
-                        {evaluation.status.toUpperCase()}
-                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* PENDING Section with Evaluate All CTA */}
+              {allPendingTasks.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">
+                      Pending Evaluation
+                    </h2>
+                    <button
+                      onClick={() => {
+                        const allPendingPNIds = pendingPNs.map(p => p.pnId);
+                        if (allPendingPNIds.length > 0) {
+                          runInlineEvaluation(allPendingPNIds);
+                        }
+                      }}
+                      disabled={totalPendingObligations === 0 || triggering}
+                      className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold text-sm shadow-sm"
+                    >
+                      Evaluate All Pending ({totalPendingObligations})
                     </button>
+                  </div>
+
+                  {/* Groups */}
+                  {pendingGroups.map(group => (
+                    <TaskRow
+                      key={group.id}
+                      group={group}
+                      groupPNStatuses={pnStatuses.filter(ps => group.members.includes(ps.pnId))}
+                      sharedPrimitives={sharedPrimitives}
+                      onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                      onViewDetails={handleViewPN}
+                    />
+                  ))}
+
+                  {/* Individual PNs */}
+                  {ungroupedPendingPNs.map(pn => (
+                    <TaskRow
+                      key={pn.pnId}
+                      pnStatus={pn}
+                      onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                      onViewDetails={handleViewPN}
+                    />
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              ) : (
+                <div className="bg-white rounded-lg border border-neutral-200 p-8 text-center">
+                  <div className="text-green-600 mb-2">
+                    <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-sm font-semibold text-neutral-900 mb-1">All Evaluations Complete</h3>
+                  <p className="text-xs text-neutral-600">Switch to Results mode to review your compliance assessment.</p>
+                  <button
+                    onClick={() => setMode('results')}
+                    className="mt-3 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium"
+                  >
+                    View Results
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* RESULTS MODE - Completed obligations */}
+          {!loading && mode === 'results' && (
+            <div className="space-y-4">
+              {/* APPLIES Section */}
+              {(appliesGroups.length > 0 || ungroupedAppliesPNs.length > 0) && (
+                <details open={!completedCollapsed} className="group">
+                  <summary className="cursor-pointer flex items-center justify-between px-1 py-2 hover:bg-neutral-50 rounded transition-colors">
+                    <h2 className="text-sm font-bold text-green-700 uppercase tracking-wide flex items-center gap-2">
+                      <span>✓ Obligations That Apply ({appliesPNs.length})</span>
+                    </h2>
+                    <svg
+                      className="w-4 h-4 text-neutral-400 transition-transform group-open:rotate-180"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="mt-2 space-y-2">
+                    {appliesGroups.map(group => (
+                      <TaskRow
+                        key={group.id}
+                        group={group}
+                        groupPNStatuses={pnStatuses.filter(ps => group.members.includes(ps.pnId))}
+                        sharedPrimitives={sharedPrimitives}
+                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                        onViewDetails={handleViewPN}
+                      />
+                    ))}
+                    {ungroupedAppliesPNs.map(pn => (
+                      <TaskRow
+                        key={pn.pnId}
+                        pnStatus={pn}
+                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                        onViewDetails={handleViewPN}
+                      />
+                    ))}
+                  </div>
+                </details>
+              )}
+
+              {/* DOES NOT APPLY Section */}
+              {(notApplicableGroups.length > 0 || ungroupedNotApplicablePNs.length > 0) && (
+                <details open={!completedCollapsed} className="group">
+                  <summary className="cursor-pointer flex items-center justify-between px-1 py-2 hover:bg-neutral-50 rounded transition-colors">
+                    <h2 className="text-sm font-bold text-neutral-600 uppercase tracking-wide flex items-center gap-2">
+                      <span>✗ Obligations That Do Not Apply ({notApplicablePNs.length})</span>
+                    </h2>
+                    <svg
+                      className="w-4 h-4 text-neutral-400 transition-transform group-open:rotate-180"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="mt-2 space-y-2">
+                    {notApplicableGroups.map(group => (
+                      <TaskRow
+                        key={group.id}
+                        group={group}
+                        groupPNStatuses={pnStatuses.filter(ps => group.members.includes(ps.pnId))}
+                        sharedPrimitives={sharedPrimitives}
+                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                        onViewDetails={handleViewPN}
+                      />
+                    ))}
+                    {ungroupedNotApplicablePNs.map(pn => (
+                      <TaskRow
+                        key={pn.pnId}
+                        pnStatus={pn}
+                        onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                        onViewDetails={handleViewPN}
+                      />
+                    ))}
+                  </div>
+                </details>
+              )}
+
+              {appliesPNs.length === 0 && notApplicablePNs.length === 0 && (
+                <div className="bg-white rounded-lg border border-neutral-200 p-8 text-center">
+                  <div className="text-neutral-400 mb-2">
+                    <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-sm font-semibold text-neutral-900 mb-1">No Results Yet</h3>
+                  <p className="text-xs text-neutral-600">Switch to Evaluate mode to start assessing obligations.</p>
+                  <button
+                    onClick={() => setMode('evaluate')}
+                    className="mt-3 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium"
+                  >
+                    Go to Evaluate
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
