@@ -11,6 +11,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
@@ -96,29 +98,31 @@ export default function ObligationsRegistryPage() {
   });
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b px-8 py-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push('/compliance-center')}
-              className="mr-4"
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Obligations Registry</h1>
-              <p className="text-gray-600 mt-1">
-                {total} total obligations ({filteredObligations.length} shown)
-              </p>
+    <SidebarInset>
+      <div className="flex flex-col h-full bg-gray-50">
+        {/* Header */}
+        <div className="bg-white border-b px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/compliance-center')}
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Back
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Obligations Registry</h1>
+                <p className="text-gray-600 mt-1">
+                  {total} total obligations ({filteredObligations.length} shown)
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
       {/* Filters */}
       <div className="bg-white border-b px-8 py-4">
@@ -273,6 +277,7 @@ export default function ObligationsRegistryPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </SidebarInset>
   );
 }

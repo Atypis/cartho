@@ -11,6 +11,8 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { Separator } from '@/components/ui/separator';
 import { StatusBadge } from '@/components/compliance/shared/StatusBadge';
 import { RiskBadge } from '@/components/compliance/shared/RiskBadge';
 import { DueDateBadge } from '@/components/compliance/shared/DueDateBadge';
@@ -137,37 +139,39 @@ export default function ObligationDetailPage({ params }: { params: { id: string 
   const { obligation } = detail;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b px-8 py-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push('/compliance-center/obligations')}
-              className="mr-4"
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Back
-            </Button>
-            <div>
-              <div className="flex items-center space-x-3 mb-1">
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {obligation.pn_id}
-                </h1>
-                {obligation.pn_article && (
-                  <span className="text-lg text-gray-500">
-                    Article {obligation.pn_article}
-                  </span>
-                )}
+    <SidebarInset>
+      <div className="flex flex-col h-full bg-gray-50">
+        {/* Header */}
+        <div className="bg-white border-b px-8 py-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/compliance-center/obligations')}
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Back
+              </Button>
+              <div>
+                <div className="flex items-center space-x-3 mb-1">
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {obligation.pn_id}
+                  </h1>
+                  {obligation.pn_article && (
+                    <span className="text-lg text-gray-500">
+                      Article {obligation.pn_article}
+                    </span>
+                  )}
+                </div>
+                <p className="text-lg text-gray-700">
+                  {obligation.pn_title || 'No title available'}
+                </p>
               </div>
-              <p className="text-lg text-gray-700">
-                {obligation.pn_title || 'No title available'}
-              </p>
             </div>
           </div>
-        </div>
 
         {/* Use Case Context */}
         <div className="bg-gray-50 rounded-lg p-4 mb-4">
@@ -356,6 +360,7 @@ export default function ObligationDetailPage({ params }: { params: { id: string 
           </div>
         </Tabs>
       </div>
-    </div>
+      </div>
+    </SidebarInset>
   );
 }

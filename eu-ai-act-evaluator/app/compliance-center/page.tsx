@@ -10,6 +10,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { Separator } from '@/components/ui/separator';
 import { CheckCircle2, AlertCircle, Clock, FileText, TrendingUp, ChevronRight } from 'lucide-react';
 
 interface ComplianceStats {
@@ -106,22 +108,27 @@ export default function ComplianceCenterPage() {
     : 0;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b px-8 py-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Compliance Center</h1>
-            <p className="text-gray-600 mt-1">
-              Track and manage AI Act obligations across all use cases
-            </p>
+    <SidebarInset>
+      <div className="flex flex-col h-full bg-gray-50">
+        {/* Header */}
+        <div className="bg-white border-b px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Compliance Center</h1>
+                <p className="text-gray-600 mt-1">
+                  Track and manage AI Act obligations across all use cases
+                </p>
+              </div>
+            </div>
+            <Button onClick={() => router.push('/compliance-center/obligations')}>
+              View All Obligations
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
           </div>
-          <Button onClick={() => router.push('/compliance-center/obligations')}>
-            View All Obligations
-            <ChevronRight className="w-4 h-4 ml-2" />
-          </Button>
         </div>
-      </div>
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto p-8">
@@ -415,6 +422,7 @@ export default function ComplianceCenterPage() {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </SidebarInset>
   );
 }

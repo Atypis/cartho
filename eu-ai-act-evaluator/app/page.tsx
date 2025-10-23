@@ -52,9 +52,26 @@ export default function Home() {
   const [evaluationStatesMap, setEvaluationStatesMap] = useState<Map<string, EvaluationState[]>>(new Map());
   const [totalNodesMap, setTotalNodesMap] = useState<Map<string, number>>(new Map());
 
-  // Handle query params for routing from use case page
+  // Handle query params for routing
   useEffect(() => {
     const evaluationParam = searchParams.get('evaluation');
+    const createParam = searchParams.get('create');
+    const useCaseParam = searchParams.get('usecase');
+
+    // Handle create new use case
+    if (createParam === 'true' && canvasView !== 'creator') {
+      setCanvasView('creator');
+      return;
+    }
+
+    // Handle use case cockpit
+    if (useCaseParam && canvasView !== 'usecase-cockpit') {
+      setSelectedUseCaseId(useCaseParam);
+      setCanvasView('usecase-cockpit');
+      return;
+    }
+
+    // Handle evaluation
     if (evaluationParam && evaluationParam !== selectedEvaluationId) {
       console.log(`🔗 [Route] Query param evaluation: ${evaluationParam}`);
       setSelectedEvaluationId(evaluationParam);
@@ -465,21 +482,8 @@ export default function Home() {
     : false;
 
   return (
-    // Force a hard viewport-height boundary so inner panes can scroll independently
-    <SidebarProvider className="h-svh">
-      {/* Left Panel: Sidebar */}
-      <AppSidebar
-        useCaseCount={useCases.length}
-        onNavigateHome={() => {
-          setCanvasView('welcome');
-          setSelectedEvaluationId(null);
-          setSelectedUseCaseId(null);
-          setEvaluationData(null);
-        }}
-        onCreateNew={() => setCanvasView('creator')}
-        currentView={canvasView}
-      />
-
+    // Main content area wrapped in SidebarInset
+    <>
       {/* Old chat interface - keep for non-welcome views if needed */}
       {false && (
         <div className="w-[500px] border-r border-neutral-200 flex flex-col">
@@ -742,6 +746,6 @@ export default function Home() {
         )}
           </div>
         </SidebarInset>
-    </SidebarProvider>
+    </>
   );
 }
