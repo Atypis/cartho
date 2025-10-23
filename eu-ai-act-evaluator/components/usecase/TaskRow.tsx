@@ -51,7 +51,7 @@ interface TaskRowProps {
   sharedPrimitives?: SharedPrimitive[];
 
   // Actions
-  onEvaluate: (pnIds: string[]) => void;
+  onEvaluate: (pnIds: string[], options?: { forceGroup?: boolean }) => void;
   onViewDetails: (pnId: string, evaluationId?: string) => void;
 
   // Selection state (for pending tasks)
@@ -226,7 +226,7 @@ export function TaskRow({
           <button
             onClick={() => {
               const pnIds = isGroup ? group!.members : [pnStatus!.pnId];
-              onEvaluate(pnIds);
+              onEvaluate(pnIds, isGroup ? { forceGroup: true } : undefined);
             }}
             className="px-4 py-1.5 text-sm bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors font-medium flex-shrink-0"
           >

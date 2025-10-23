@@ -815,8 +815,8 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                   autoSelectFromStates(pnId, states);
 
                   // Ensure the inspector follows the currently evaluated PN
-                  // In batch mode (multiple PNs), keep only ONE tab open to avoid DOM bloat
-                  const isBatchMode = pnIds.length > 1;
+                  // In batch mode (groups or orchestrated batches), keep only ONE tab open to avoid DOM bloat
+                  const isBatchMode = (pnIds.length > 1) || (options?.suppressFinalReload === true);
 
                   if (!openTabsRef.current.includes(pnId)) {
                     // Load data directly and open tab without relying on pnStatuses
@@ -1425,7 +1425,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                   ungroupedPNs={ungroupedAppliesPNs}
                   allPNs={appliesPNs}
                   sharedPrimitives={sharedPrimitives}
-                  onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                  onEvaluate={(pnIds, options) => runInlineEvaluation(pnIds, options)}
                   onViewDetails={handleViewPN}
                   defaultExpanded={true}
                 />
@@ -1439,7 +1439,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                   ungroupedPNs={ungroupedNotApplicablePNs}
                   allPNs={notApplicablePNs}
                   sharedPrimitives={sharedPrimitives}
-                  onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                  onEvaluate={(pnIds, options) => runInlineEvaluation(pnIds, options)}
                   onViewDetails={handleViewPN}
                   defaultExpanded={false}
                 />
@@ -1531,16 +1531,15 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                       Pending Evaluation
                     </h2>
                     <button
-                      onClick={() => {
-                        const allPendingPNIds = pendingPNs.map(p => p.pnId);
-                        if (allPendingPNIds.length > 0) {
-                          runInlineEvaluation(allPendingPNIds);
+                      onClick={async () => {
+                        if (totalPendingTasks > 0) {
+                          await runEvaluateAllTasks();
                         }
                       }}
-                      disabled={totalPendingObligations === 0 || triggering}
+                      disabled={totalPendingTasks === 0 || triggering}
                       className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold text-sm shadow-sm"
                     >
-                      Evaluate All Pending ({totalPendingObligations})
+                      Evaluate All Pending ({totalPendingTasks})
                     </button>
                   </div>
 
@@ -1551,7 +1550,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                       group={group}
                       groupPNStatuses={pnStatuses.filter(ps => group.members.includes(ps.pnId))}
                       sharedPrimitives={sharedPrimitives}
-                      onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                      onEvaluate={(pnIds, options) => runInlineEvaluation(pnIds, options)}
                       onViewDetails={handleViewPN}
                     />
                   ))}
@@ -1561,7 +1560,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                     <TaskRow
                       key={pn.pnId}
                       pnStatus={pn}
-                      onEvaluate={(pnIds) => runInlineEvaluation(pnIds)}
+                      onEvaluate={(pnIds, options) => runInlineEvaluation(pnIds, options)}
                       onViewDetails={handleViewPN}
                     />
                   ))}

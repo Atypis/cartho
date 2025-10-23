@@ -75,7 +75,10 @@ export function ResultsCard({
             {/* Label + Metadata */}
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-neutral-900">
-                {type === 'applies' ? 'Obligations Apply' : 'Obligations Do Not Apply'}
+                {type === 'applies'
+                  ? (totalCount === 1 ? 'Obligation Applies' : 'Obligations Apply')
+                  : (totalCount === 1 ? 'Obligation Does Not Apply' : 'Obligations Do Not Apply')
+                }
               </div>
 
               {!isExpanded && (
