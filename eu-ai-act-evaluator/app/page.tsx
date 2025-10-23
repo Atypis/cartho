@@ -459,7 +459,8 @@ export default function Home() {
     : false;
 
   return (
-    <SidebarProvider>
+    // Force a hard viewport-height boundary so inner panes can scroll independently
+    <SidebarProvider className="h-svh">
       {/* Left Panel: Sidebar */}
       <AppSidebar
         useCaseCount={useCases.length}
@@ -562,8 +563,8 @@ export default function Home() {
       )}
 
       {/* Right Panel: Main Content Area */}
-      <SidebarInset>
-          <div className="flex-1 flex flex-col overflow-hidden">
+      <SidebarInset className="h-full min-h-0">
+          <div className="flex-1 h-full min-h-0 flex flex-col overflow-hidden">
             {/* Top Navigation Bar - only show for non-welcome views */}
             {canvasView !== 'welcome' && (
               <div className="bg-white border-b border-neutral-200 px-6 py-3">
@@ -724,11 +725,14 @@ export default function Home() {
         )}
 
         {canvasView === 'usecase-cockpit' && selectedUseCaseId && (
-          <UseCaseCockpit
-            useCaseId={selectedUseCaseId}
-            onTriggerEvaluation={runEvaluation}
-            onViewEvaluation={handleViewEvaluation}
-          />
+          // Ensure the cockpit occupies remaining height and manages its own scroll areas
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <UseCaseCockpit
+              useCaseId={selectedUseCaseId}
+              onTriggerEvaluation={runEvaluation}
+              onViewEvaluation={handleViewEvaluation}
+            />
+          </div>
         )}
           </div>
         </SidebarInset>

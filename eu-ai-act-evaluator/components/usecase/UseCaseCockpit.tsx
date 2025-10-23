@@ -1076,7 +1076,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   return (
     <div className="h-full flex overflow-hidden">
       {/* Main Content Area - Takes 3/5 of space (60%) */}
-      <div className="flex-[3] min-w-0 overflow-y-auto border-r border-neutral-200">
+      <div className="flex-[3] min-w-0 min-h-0 overflow-y-auto overscroll-contain border-r border-neutral-200">
         <div className="px-6 py-4 space-y-4">
           {/* Use Case Header - Clean & Minimal */}
           {useCase ? (
@@ -1449,7 +1449,7 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         ) : null}
 
         {/* Inspector Content */}
-        <div className="flex-1 min-w-0 overflow-y-auto">
+        <div className="flex-1 min-w-0 min-h-0 overflow-y-auto overscroll-contain">
           {openTabs.length > 0 ? (
             openTabs.map((pnId) => {
               const data = tabData.get(pnId);
