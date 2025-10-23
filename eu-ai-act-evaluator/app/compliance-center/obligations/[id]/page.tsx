@@ -212,7 +212,7 @@ export default function ObligationDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       {/* Tabs */}
-      <div className="flex-1 overflow-hidden flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           <div className="bg-white border-b px-8">
             <TabsList>
