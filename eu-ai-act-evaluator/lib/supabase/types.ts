@@ -128,6 +128,8 @@ export interface Database {
           reasoning: string;
           citations: any; // JSONB array
           created_at: string;
+          prompt: string | null; // Full prompt sent to LLM
+          llm_raw_response: any | null; // JSONB - Raw LLM response
         };
         Insert: {
           id?: string;
@@ -138,6 +140,8 @@ export interface Database {
           reasoning: string;
           citations?: any;
           created_at?: string;
+          prompt?: string | null;
+          llm_raw_response?: any | null;
         };
         Update: {
           id?: string;
@@ -148,6 +152,8 @@ export interface Database {
           reasoning?: string;
           citations?: any;
           created_at?: string;
+          prompt?: string | null;
+          llm_raw_response?: any | null;
         };
       };
       obligation_instances: {

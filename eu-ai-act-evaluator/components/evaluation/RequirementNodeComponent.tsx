@@ -176,6 +176,40 @@ export const RequirementNodeComponent = memo(({ data, selected }: NodeProps & { 
                       </div>
                     </div>
                   </div>
+
+                  {/* LLM Transparency Details */}
+                  {(result.prompt || result.llm_raw_response) && (
+                    <details className="mt-3 group">
+                      <summary className="cursor-pointer text-xs font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-1">
+                        <span className="group-open:rotate-90 transition-transform">▶</span>
+                        🔍 Show LLM Details (Transparency)
+                      </summary>
+                      <div className="mt-2 space-y-2 pl-3 border-l-2 border-blue-300">
+                        <div>
+                          <div className="font-medium text-gray-700 mb-1">Model:</div>
+                          <div className="font-mono text-xs text-gray-600">GPT-5-mini (reasoning: high)</div>
+                        </div>
+
+                        {result.prompt && (
+                          <div>
+                            <div className="font-medium text-gray-700 mb-1">Full Prompt Sent:</div>
+                            <pre className="text-[10px] bg-slate-900 text-green-400 p-2 rounded overflow-x-auto max-h-48 overflow-y-auto whitespace-pre-wrap font-mono">
+                              {result.prompt}
+                            </pre>
+                          </div>
+                        )}
+
+                        {result.llm_raw_response && (
+                          <div>
+                            <div className="font-medium text-gray-700 mb-1">Raw LLM Response:</div>
+                            <pre className="text-[10px] bg-slate-900 text-green-400 p-2 rounded overflow-x-auto max-h-48 overflow-y-auto font-mono">
+                              {JSON.stringify(result.llm_raw_response, null, 2)}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  )}
                 </div>
               )}
 

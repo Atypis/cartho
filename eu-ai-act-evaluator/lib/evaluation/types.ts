@@ -107,6 +107,8 @@ export interface EvaluationResult {
   confidence: number;
   reasoning: string;
   citations?: unknown;
+  prompt?: string; // Full prompt sent to LLM (for transparency)
+  llm_raw_response?: any; // Raw JSON response from LLM (for transparency)
 }
 
 export interface EvaluationState {

@@ -1,6 +1,39 @@
 import type { EvaluationResult } from './types';
 import { supabase } from '@/lib/supabase/client';
 
+const cloneEvaluationResult = (result: EvaluationResult): EvaluationResult => {
+  const clone: EvaluationResult = {
+    nodeId: result.nodeId,
+    decision: result.decision,
+    confidence: result.confidence,
+    reasoning: result.reasoning,
+  };
+
+  if (result.citations !== undefined) {
+    clone.citations = Array.isArray(result.citations)
+      ? [...result.citations]
+      : result.citations;
+  }
+
+  if (result.prompt !== undefined) {
+    clone.prompt = result.prompt;
+  }
+
+  if (result.llm_raw_response !== undefined) {
+    try {
+      clone.llm_raw_response =
+        result.llm_raw_response === null
+          ? null
+          : JSON.parse(JSON.stringify(result.llm_raw_response));
+    } catch {
+      // Fallback to original reference if cloning fails; transparency data is best-effort.
+      clone.llm_raw_response = result.llm_raw_response;
+    }
+  }
+
+  return clone;
+};
+
 export interface SharedEvaluationCache {
   getOrEvaluate(
     key: string,
@@ -18,30 +51,13 @@ export class InMemorySharedEvaluationCache implements SharedEvaluationCache {
     if (!this.cache.has(key)) {
       const promise = (async () => {
         const result = await evaluator();
-        return this.cloneResult(result);
+        return cloneEvaluationResult(result);
       })();
       this.cache.set(key, promise);
     }
 
     const cached = await this.cache.get(key)!;
-    return this.cloneResult(cached);
-  }
-
-  private cloneResult(result: EvaluationResult): EvaluationResult {
-    const clone: EvaluationResult = {
-      nodeId: result.nodeId,
-      decision: result.decision,
-      confidence: result.confidence,
-      reasoning: result.reasoning,
-    };
-
-    if (result.citations !== undefined) {
-      clone.citations = Array.isArray(result.citations)
-        ? [...result.citations]
-        : result.citations;
-    }
-
-    return clone;
+    return cloneEvaluationResult(cached);
   }
 }
 
@@ -77,7 +93,7 @@ export class PerUseCasePersistentSharedCache implements SharedEvaluationCache {
 
         const existing: any = rawExisting as any;
         if (existing && !readError) {
-          return this.cloneResult({
+          return cloneEvaluationResult({
             nodeId: '',
             decision: existing.decision as any,
             confidence: (existing.confidence as any) ?? 0.5,
@@ -109,28 +125,13 @@ export class PerUseCasePersistentSharedCache implements SharedEvaluationCache {
           console.error('⚠️  [SharedCache] Persist failed, continuing with evaluated result:', e);
         }
 
-        return this.cloneResult(evaluated);
+        return cloneEvaluationResult(evaluated);
       })();
 
       this.local.set(key, promise);
     }
 
     const cached = await this.local.get(key)!;
-    return this.cloneResult(cached);
-  }
-
-  private cloneResult(result: EvaluationResult): EvaluationResult {
-    const clone: EvaluationResult = {
-      nodeId: result.nodeId,
-      decision: result.decision,
-      confidence: result.confidence,
-      reasoning: result.reasoning,
-    };
-
-    if (result.citations !== undefined) {
-      clone.citations = Array.isArray(result.citations) ? [...result.citations] : result.citations;
-    }
-
-    return clone;
+    return cloneEvaluationResult(cached);
   }
 }

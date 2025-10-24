@@ -266,6 +266,8 @@ export async function POST(req: NextRequest) {
                       confidence: state.result.confidence,
                       reasoning: state.result.reasoning,
                       citations: state.result.citations || [],
+                      prompt: state.result.prompt || null,
+                      llm_raw_response: state.result.llm_raw_response || null,
                     });
 
                   if (!error) {
@@ -358,17 +360,22 @@ export async function POST(req: NextRequest) {
 
       // Prefer JSON parse
       let parsed: EvaluationResult;
+      let rawResponseObj: any;
       try {
-        const obj = JSON.parse(content);
+        rawResponseObj = JSON.parse(content);
         parsed = {
           nodeId: '',
-          decision: !!obj.decision,
-          confidence: Math.max(0, Math.min(1, Number(obj.confidence) || 0.5)),
-          reasoning: String(obj.reasoning || ''),
+          decision: !!rawResponseObj.decision,
+          confidence: Math.max(0, Math.min(1, Number(rawResponseObj.confidence) || 0.5)),
+          reasoning: String(rawResponseObj.reasoning || ''),
+          prompt: prompt, // Store full prompt for transparency
+          llm_raw_response: rawResponseObj, // Store raw response for transparency
         };
       } catch {
         // Fallback to legacy parser
         parsed = parseEvaluationResponse(content);
+        parsed.prompt = prompt; // Add transparency fields to fallback too
+        parsed.llm_raw_response = { raw: content }; // Store raw string if JSON parse failed
       }
 
       console.log(

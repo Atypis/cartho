@@ -210,6 +210,40 @@ export function RequirementBlock({
                   <div className="text-xs text-neutral-700 bg-white rounded p-3 leading-relaxed">
                     {result.reasoning}
                   </div>
+
+                  {/* LLM Transparency Details */}
+                  {(result.prompt || result.llm_raw_response) && (
+                    <details className="mt-3 group">
+                      <summary className="cursor-pointer text-xs font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-1.5 py-2">
+                        <span className="group-open:rotate-90 transition-transform">▶</span>
+                        🔍 Show LLM Details (Transparency)
+                      </summary>
+                      <div className="mt-2 space-y-3 pl-3 border-l-2 border-blue-300">
+                        <div>
+                          <div className="text-xs font-medium text-neutral-700 mb-1">Model:</div>
+                          <div className="font-mono text-xs text-neutral-600">GPT-5-mini (reasoning: high)</div>
+                        </div>
+
+                        {result.prompt && (
+                          <div>
+                            <div className="text-xs font-medium text-neutral-700 mb-1">Full Prompt Sent:</div>
+                            <pre className="text-[10px] bg-slate-900 text-green-400 p-3 rounded overflow-x-auto max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed">
+                              {result.prompt}
+                            </pre>
+                          </div>
+                        )}
+
+                        {result.llm_raw_response && (
+                          <div>
+                            <div className="text-xs font-medium text-neutral-700 mb-1">Raw LLM Response:</div>
+                            <pre className="text-[10px] bg-slate-900 text-green-400 p-3 rounded overflow-x-auto max-h-48 overflow-y-auto font-mono leading-relaxed">
+                              {JSON.stringify(result.llm_raw_response, null, 2)}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  )}
                 </div>
               </div>
             )}
