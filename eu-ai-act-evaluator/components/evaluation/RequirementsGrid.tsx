@@ -464,7 +464,7 @@ export function RequirementsGrid({
           ))}
         </div>
       ) : (
-        <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
+        <div className="bg-white">
           {rootLevelRequirements.map((req, idx) => (
             <TreeNode
               key={req.id}
