@@ -242,21 +242,104 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
     }
     setUseCase(useCaseData);
 
-    // Load all evaluations for this use case
-    const { data: evaluations } = await supabase
-      .from('evaluations')
-      .select('*')
-      .eq('use_case_id', useCaseId)
-      .order('triggered_at', { ascending: false });
+    // FAST PATH: summarized status via API (avoids reconstruction and N+1)
+    try {
+      const statusRes = await fetch(`/api/usecase/status?useCaseId=${encodeURIComponent(useCaseId)}`);
+      if (statusRes.ok) {
+        const summary = await statusRes.json();
+        const statusMap = new Map<string, PNStatus>();
+        // Initialize all PNs as pending
+        for (const pn of availablePNs) {
+          statusMap.set(pn.id, {
+            pnId: pn.id,
+            article: pn.article || pn.id.replace('PN-', ''),
+            title: pn.title || pn.id,
+            status: 'pending',
+          });
+        }
 
-    console.log(`📊 [Cockpit] Loaded ${evaluations?.length || 0} evaluations for use case`);
+        // Apply final statuses
+        for (const row of summary.applies || []) {
+          const meta = availablePNs.find((p:any) => p.id === row.pnId);
+          statusMap.set(row.pnId, {
+            pnId: row.pnId,
+            article: String(row.article || meta?.article || row.pnId.replace('PN-', '')),
+            title: row.title || meta?.title || row.pnId,
+            status: 'applies',
+            evaluationId: row.evaluationId || undefined,
+            evaluatedAt: row.evaluatedAt || undefined,
+            rootDecision: true,
+          });
+        }
+        for (const row of summary.notApplicable || []) {
+          const meta = availablePNs.find((p:any) => p.id === row.pnId);
+          statusMap.set(row.pnId, {
+            pnId: row.pnId,
+            article: String(row.article || meta?.article || row.pnId.replace('PN-', '')),
+            title: row.title || meta?.title || row.pnId,
+            status: 'not-applicable',
+            evaluationId: row.evaluationId || undefined,
+            evaluatedAt: row.evaluatedAt || undefined,
+            rootDecision: false,
+          });
+        }
 
-    setEvaluationHistory(evaluations || []);
+        // Overlay running/evaluating
+        const nextRunning = new Set<string>();
+        const nextProgress = new Map<string, { current: number; total: number }>();
+        for (const ev of summary.runningEvaluations || []) {
+          nextRunning.add(ev.id);
+          if (typeof ev.progress_current === 'number' && typeof ev.progress_total === 'number') {
+            nextProgress.set(ev.id, { current: ev.progress_current, total: ev.progress_total });
+          }
+        }
+        for (const row of summary.evaluatingPNs || []) {
+          const meta = availablePNs.find((p:any) => p.id === row.pnId);
+          const existing = statusMap.get(row.pnId) || {
+            pnId: row.pnId,
+            article: String(meta?.article || row.pnId.replace('PN-', '')),
+            title: meta?.title || row.pnId,
+            status: 'pending' as const,
+          };
+          statusMap.set(row.pnId, {
+            ...existing,
+            status: 'evaluating',
+            evaluationId: row.evaluationId,
+            progressCurrent: row.progressCurrent,
+            progressTotal: row.progressTotal,
+            evaluatedAt: row.evaluatedAt,
+          });
+        }
 
-    // Build PN status map (OPTIMIZED)
-    console.log(`🔨 [Cockpit] About to call buildPNStatusMapOptimized...`);
-    await buildPNStatusMapOptimized(evaluations || []);
-    console.log(`✅ [Cockpit] buildPNStatusMapOptimized completed`);
+        setPNStatuses(availablePNs.map((pn:any) => statusMap.get(pn.id) || {
+          pnId: pn.id,
+          article: pn.article || pn.id.replace('PN-', ''),
+          title: pn.title || pn.id,
+          status: 'pending',
+        }));
+        setRunningEvaluations(nextRunning);
+        setEvaluationProgress(nextProgress);
+        setEvaluationHistory(summary.runningEvaluations || []);
+      } else {
+        // Fallback to prior (slower) method
+        const { data: evaluations } = await supabase
+          .from('evaluations')
+          .select('*')
+          .eq('use_case_id', useCaseId)
+          .order('triggered_at', { ascending: false });
+        setEvaluationHistory(evaluations || []);
+        await buildPNStatusMapOptimized(evaluations || []);
+      }
+    } catch (e) {
+      console.warn('[Status] Endpoint failed, falling back:', e);
+      const { data: evaluations } = await supabase
+        .from('evaluations')
+        .select('*')
+        .eq('use_case_id', useCaseId)
+        .order('triggered_at', { ascending: false });
+      setEvaluationHistory(evaluations || []);
+      await buildPNStatusMapOptimized(evaluations || []);
+    }
     setLoading(false);
     setIsRefreshing(false);
   };
