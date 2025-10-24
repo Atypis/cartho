@@ -132,13 +132,22 @@ Return ONLY valid JSON, no other text.`;
 
   try {
     const { text } = await generateText({
-      model: anthropic('claude-3-5-sonnet-20241022'),
+      model: anthropic('claude-haiku-4-5-20251001'),
       prompt,
       maxTokens: 2000,
     });
 
+    // Clean markdown fences if present (LLM sometimes wraps in ```json)
+    let cleanedText = text.trim();
+    if (cleanedText.startsWith('```')) {
+      // Remove opening fence
+      cleanedText = cleanedText.replace(/^```(?:json)?\s*\n/, '');
+      // Remove closing fence
+      cleanedText = cleanedText.replace(/\n```\s*$/, '');
+    }
+
     // Parse the JSON response
-    const analysis: UseCaseAnalysis = JSON.parse(text);
+    const analysis: UseCaseAnalysis = JSON.parse(cleanedText);
 
     return Response.json(analysis);
   } catch (error) {
