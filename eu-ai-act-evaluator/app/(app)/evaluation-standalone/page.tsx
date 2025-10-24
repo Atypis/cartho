@@ -320,6 +320,14 @@ export default function StandaloneEvaluationPage() {
             isRunning={isEvaluating}
             totalNodes={expandedNodes.filter((n: any) => n.kind === 'primitive').length}
             evaluationStatus={isEvaluating ? 'running' : 'completed'}
+            pnTitle={pnData.title}
+            pnArticle={pnData.article_refs?.[0]?.article?.toString()}
+            pnLegalText={pnData.legal_consequence?.verbatim}
+            pnLegalNotes={pnData.legal_consequence?.notes}
+            pnLegalContextItems={pnData.legal_consequence?.context?.items}
+            pnLegalContextRefs={pnData.legal_consequence?.context?.refs}
+            pnEffectiveFrom={pnData.side_info?.effective_from}
+            pnArticleRefs={pnData.article_refs}
           />
         </div>
 

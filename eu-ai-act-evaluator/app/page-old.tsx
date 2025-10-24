@@ -242,6 +242,14 @@ export default function Home() {
               evaluationStates={evaluationStates}
               onNodeClick={handleNodeClick}
               selectedNodeId={selectedNodeId}
+              pnTitle={prescriptiveNorm.title}
+              pnArticle={prescriptiveNorm.article_refs?.[0]?.article}
+              pnLegalText={prescriptiveNorm.legal_consequence?.verbatim}
+              pnLegalNotes={prescriptiveNorm.legal_consequence?.notes}
+              pnLegalContextItems={prescriptiveNorm.legal_consequence?.context?.items}
+              pnLegalContextRefs={prescriptiveNorm.legal_consequence?.context?.refs}
+              pnEffectiveFrom={prescriptiveNorm.side_info?.effective_from}
+              pnArticleRefs={prescriptiveNorm.article_refs}
             />
           )}
 
