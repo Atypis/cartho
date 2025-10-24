@@ -21,12 +21,14 @@ export class EvaluationEngine {
   private evaluationStates: Map<string, EvaluationState>;
   private onStateUpdate?: (states: EvaluationState[]) => void;
   private sharedCache?: SharedEvaluationCache;
+  private preResolved?: Map<string, { decision: boolean; confidence?: number; reasoning?: string; citations?: any }>; 
 
   constructor(
     pn: PrescriptiveNorm,
     sharedPrimitives: SharedPrimitive[] = [],
     onStateUpdate?: (states: EvaluationState[]) => void,
-    sharedCache?: SharedEvaluationCache
+    sharedCache?: SharedEvaluationCache,
+    preResolved?: Map<string, { decision: boolean; confidence?: number; reasoning?: string; citations?: any }>
   ) {
     this.pn = pn;
     this.expandedNodes = expandSharedRequirements(pn.requirements.nodes, sharedPrimitives);
@@ -34,9 +36,29 @@ export class EvaluationEngine {
     this.evaluationStates = new Map();
     this.onStateUpdate = onStateUpdate;
     this.sharedCache = sharedCache;
+    this.preResolved = preResolved;
 
     // Build node map from PN
     this.buildNodeMap();
+
+    // Seed pre-resolved primitive nodes, if provided (resume support)
+    if (this.preResolved && this.preResolved.size > 0) {
+      for (const [nodeId, res] of this.preResolved.entries()) {
+        if (this.nodeMap.has(nodeId)) {
+          this.evaluationStates.set(nodeId, {
+            nodeId,
+            status: 'completed',
+            result: {
+              nodeId,
+              decision: !!res.decision,
+              confidence: typeof res.confidence === 'number' ? res.confidence : 0.5,
+              reasoning: res.reasoning || '',
+              citations: res.citations,
+            },
+          });
+        }
+      }
+    }
   }
 
   /**
@@ -96,6 +118,11 @@ export class EvaluationEngine {
     caseInput: string,
     evaluateFn: (prompt: string) => Promise<EvaluationResult>
   ): Promise<EvaluationResult> {
+    // If already completed (resume), skip
+    const current = this.evaluationStates.get(node.id);
+    if (current && current.status === 'completed' && current.result) {
+      return current.result;
+    }
     if (!node.question) {
       throw new Error(`Primitive node ${node.id} has no question`);
     }
@@ -296,6 +323,11 @@ export class EvaluationEngine {
     caseInput: string,
     evaluateFn: (prompt: string) => Promise<EvaluationResult>
   ): Promise<boolean> {
+    // Fast path: if node already completed (pre-resolved or from earlier step), reuse
+    const existing = this.evaluationStates.get(node.id);
+    if (existing && existing.status === 'completed' && existing.result) {
+      return existing.result.decision;
+    }
     if (node.kind === 'primitive') {
       const result = await this.evaluatePrimitive(node, caseInput, evaluateFn);
       return result.decision;

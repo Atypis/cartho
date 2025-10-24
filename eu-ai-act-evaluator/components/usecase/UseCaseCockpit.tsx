@@ -1530,17 +1530,37 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
                     <h2 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">
                       Pending Evaluation
                     </h2>
-                    <button
-                      onClick={async () => {
-                        if (totalPendingTasks > 0) {
-                          await runEvaluateAllTasks();
-                        }
-                      }}
-                      disabled={totalPendingTasks === 0 || triggering}
-                      className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold text-sm shadow-sm"
-                    >
-                      Evaluate All Pending ({totalPendingTasks})
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={async () => {
+                          if (totalPendingTasks > 0) {
+                            await runEvaluateAllTasks();
+                          }
+                        }}
+                        disabled={totalPendingTasks === 0 || triggering}
+                        className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold text-sm shadow-sm"
+                      >
+                        Evaluate All Pending ({totalPendingTasks})
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(`/api/maintenance/resume?useCaseId=${encodeURIComponent(useCaseId)}&auto=true`, { method: 'POST' });
+                            if (res.ok) {
+                              scheduleReload('resume-all', 500);
+                            } else {
+                              console.warn('Resume endpoint returned non-200');
+                            }
+                          } catch (e) {
+                            console.error('Failed to call resume endpoint', e);
+                          }
+                        }}
+                        className="px-4 py-2.5 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors font-medium text-sm"
+                        title="Scan for stalled/failed evaluations and resume them"
+                      >
+                        Resume All
+                      </button>
+                    </div>
                   </div>
 
                   {/* Groups */}

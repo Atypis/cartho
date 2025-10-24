@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
   try {
     console.log('📥 [API] Received evaluation request');
 
-    const { prescriptiveNorm, sharedPrimitives, caseInput, evaluationId } = await req.json();
+    const { prescriptiveNorm, sharedPrimitives, caseInput, evaluationId, baseEvaluationId, skipResolved } = await req.json();
 
     if (!prescriptiveNorm || !caseInput) {
       console.log('❌ [API] Missing required fields');
@@ -153,6 +153,16 @@ export async function POST(req: NextRequest) {
     console.log(`📋 [API] Evaluating PN: ${prescriptiveNorm.id}`);
     console.log(`📄 [API] Case input length: ${caseInput.length} chars`);
     console.log(`📝 [API] Evaluation ID: ${evaluationId || 'none'}`);
+
+    // Best-effort kickoff heartbeat
+    if (evaluationId) {
+      try {
+        await supabase
+          .from('evaluations')
+          .update({ heartbeat_at: new Date().toISOString() as any })
+          .eq('id', evaluationId);
+      } catch {}
+    }
 
     // Create a stream for progress updates
     const encoder = new TextEncoder();
@@ -199,6 +209,34 @@ export async function POST(req: NextRequest) {
       }
     }
     console.log(`🔍 [API] Identified ${primitiveNodeIds.size} primitive nodes to track`);
+
+    // Seed pre-resolved primitives from a base evaluation (resume)
+    let preResolved: Map<string, { decision: boolean; confidence?: number; reasoning?: string; citations?: any }> | undefined = undefined;
+    if (skipResolved && (baseEvaluationId || evaluationId)) {
+      const baseId = baseEvaluationId || evaluationId;
+      try {
+        const { data: existingResults } = await supabase
+          .from('evaluation_results')
+          .select('node_id, decision, confidence, reasoning, citations')
+          .eq('evaluation_id', baseId as string);
+        if (existingResults && existingResults.length > 0) {
+          preResolved = new Map();
+          for (const r of existingResults as any[]) {
+            if (primitiveNodeIds.has(r.node_id)) {
+              preResolved.set(r.node_id, {
+                decision: !!r.decision,
+                confidence: typeof r.confidence === 'number' ? r.confidence : undefined,
+                reasoning: (r.reasoning as string) || undefined,
+                citations: r.citations,
+              });
+            }
+          }
+          console.log(`⏭️  [API] Pre-resolved ${preResolved.size} primitive nodes from base evaluation ${baseId}`);
+        }
+      } catch (e) {
+        console.warn('⚠️  [API] Failed to seed preResolved from base evaluation:', e);
+      }
+    }
 
     // Start evaluation in background
     (async () => {
@@ -247,6 +285,23 @@ export async function POST(req: NextRequest) {
               }
             }
 
+            // Update heartbeat + progress for the evaluation row (best effort)
+            if (evaluationId) {
+              try {
+                const completedPrimitiveCount = states.reduce((acc, s) => acc + (primitiveNodeIds.has(s.nodeId) && (s.status === 'completed' || s.status === 'skipped') ? 1 : 0), 0);
+                await supabase
+                  .from('evaluations')
+                  .update({
+                    heartbeat_at: new Date().toISOString() as any,
+                    progress_current: completedPrimitiveCount,
+                    progress_total: primitiveNodeIds.size,
+                  } as any)
+                  .eq('id', evaluationId as string);
+              } catch (hbErr) {
+                // ignore if columns don’t exist
+              }
+            }
+
             // Stream progress update (only if writer not closed)
             if (!writerClosed) {
               try {
@@ -259,7 +314,8 @@ export async function POST(req: NextRequest) {
               }
             }
           },
-          sharedCache
+          sharedCache,
+          preResolved
         );
 
     console.log(`🔧 [API] Engine created, starting evaluation...`);
