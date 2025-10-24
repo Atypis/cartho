@@ -195,7 +195,7 @@ export function RequirementsGrid({
     <div className="space-y-3">
       {/* Compact Stats Bar - Refined */}
       {showProgress && (
-        <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+        <div className="bg-white">
           <div className="px-4 py-3 flex items-center justify-between gap-4">
             {/* Left: Status & Progress */}
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -290,7 +290,7 @@ export function RequirementsGrid({
 
       {/* Obligation Summary Card */}
       {showSummary && (
-        <div ref={summaryCardRef} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+        <div ref={summaryCardRef} className="bg-white">
           {/* Header */}
           <div className="px-4 py-2 flex items-center justify-between gap-3 bg-neutral-50 border-b border-neutral-200">
             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -670,20 +670,24 @@ function TreeNode({
           {/* Disclosure Triangle - Apple Style */}
           {hasChildren ? (
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
+                e.preventDefault();
                 setIsExpanded(!isExpanded);
               }}
-              className="flex-shrink-0 w-4 h-4 flex items-center justify-center group/disclosure"
+              className="flex-shrink-0 w-4 h-4 flex items-center justify-center hover:bg-neutral-100 rounded transition-colors z-10"
             >
               <svg
-                className={`w-2 h-2 text-neutral-400 group-hover/disclosure:text-neutral-600 transition-all duration-200 ease-out ${
+                className={`w-2 h-2 text-neutral-400 transition-all duration-200 ease-out ${
                   isExpanded ? 'rotate-90' : ''
                 }`}
-                fill="currentColor"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 6 10"
+                strokeWidth="1.5"
               >
-                <path d="M1 1l4 4-4 4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M1 1l4 4-4 4" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
           ) : (
