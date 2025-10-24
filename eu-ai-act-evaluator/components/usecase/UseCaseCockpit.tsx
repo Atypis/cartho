@@ -11,7 +11,8 @@
  * Includes inline TREEMAXX expansion and evaluation history
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import type { PointerEvent as ReactPointerEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { RequirementsGrid } from '@/components/evaluation/RequirementsGrid';
 import { TaskRow } from '@/components/usecase/TaskRow';
@@ -52,6 +53,10 @@ interface UseCaseCockpitProps {
   onTriggerEvaluation: (evaluationId: string, useCaseId: string, pnIds: string[]) => void;
   onViewEvaluation: (evaluationId: string) => void;
 }
+
+const DEFAULT_PANE_RATIO = 0.55;
+const MIN_PANE_RATIO = 0.35;
+const MAX_PANE_RATIO = 0.75;
 
 export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluation }: UseCaseCockpitProps) {
   const router = useRouter();
@@ -113,6 +118,136 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   const reloadTimerRef = useRef<NodeJS.Timeout | null>(null);
   const reloadInFlightRef = useRef(false);
   const reloadQueuedRef = useRef(false);
+
+  // Adjustable cockpit layout
+  const cockpitContainerRef = useRef<HTMLDivElement | null>(null);
+  const [paneRatio, setPaneRatio] = useState(DEFAULT_PANE_RATIO);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const clampPaneRatio = useCallback((value: number) => {
+    return Math.min(Math.max(value, MIN_PANE_RATIO), MAX_PANE_RATIO);
+  }, []);
+
+  const updatePaneRatio = useCallback(
+    (clientX: number) => {
+      const container = cockpitContainerRef.current;
+      if (!container) {
+        return;
+      }
+
+      const { left, width } = container.getBoundingClientRect();
+      if (width <= 0) {
+        return;
+      }
+
+      const rawRatio = (clientX - left) / width;
+      const nextRatio = clampPaneRatio(rawRatio);
+
+      setPaneRatio((current) => {
+        if (Math.abs(current - nextRatio) < 0.001) {
+          return current;
+        }
+        return nextRatio;
+      });
+    },
+    [clampPaneRatio],
+  );
+
+  const adjustPaneRatio = useCallback(
+    (delta: number) => {
+      setPaneRatio((current) => clampPaneRatio(current + delta));
+    },
+    [clampPaneRatio],
+  );
+
+  const handleResizeStart = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      updatePaneRatio(event.clientX);
+      setIsResizing(true);
+    },
+    [updatePaneRatio],
+  );
+
+  const handleResizeKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLDivElement>) => {
+      switch (event.key) {
+        case 'ArrowLeft':
+          event.preventDefault();
+          adjustPaneRatio(-0.02);
+          break;
+        case 'ArrowRight':
+          event.preventDefault();
+          adjustPaneRatio(0.02);
+          break;
+        case 'Home':
+          event.preventDefault();
+          setPaneRatio(MIN_PANE_RATIO);
+          break;
+        case 'End':
+          event.preventDefault();
+          setPaneRatio(MAX_PANE_RATIO);
+          break;
+        case 'Enter':
+        case ' ':
+          event.preventDefault();
+          setPaneRatio(DEFAULT_PANE_RATIO);
+          break;
+        default:
+          break;
+      }
+    },
+    [adjustPaneRatio],
+  );
+
+  useEffect(() => {
+    if (!isResizing) {
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const handlePointerMove = (event: PointerEvent) => {
+      updatePaneRatio(event.clientX);
+    };
+
+    const stopResizing = () => {
+      setIsResizing(false);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', stopResizing);
+    window.addEventListener('pointercancel', stopResizing);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', stopResizing);
+      window.removeEventListener('pointercancel', stopResizing);
+    };
+  }, [isResizing, updatePaneRatio]);
+
+  useEffect(() => {
+    if (!isResizing) {
+      return;
+    }
+
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const previousUserSelect = document.body.style.userSelect;
+    const previousCursor = document.body.style.cursor;
+
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'col-resize';
+
+    return () => {
+      document.body.style.userSelect = previousUserSelect;
+      document.body.style.cursor = previousCursor;
+    };
+  }, [isResizing]);
 
   const performReload = async (isInitialLoad = false) => {
     if (reloadInFlightRef.current) {
@@ -1355,9 +1490,12 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
   };
 
   return (
-    <div className="h-full flex overflow-hidden">
-      {/* Main Content Area - Takes 3/5 of space (60%) */}
-      <div className="flex-[3] min-w-0 min-h-0 overflow-y-auto overscroll-contain border-r border-neutral-200">
+    <div ref={cockpitContainerRef} className="relative h-full flex overflow-hidden">
+      {/* Main Content Area with adjustable split */}
+      <div
+        className="min-w-0 min-h-0 overflow-y-auto overscroll-contain border-r border-neutral-200"
+        style={{ flex: `0 0 ${paneRatio * 100}%` }}
+      >
         <div className="px-6 py-4 space-y-4">
           {/* Use Case Header */}
           {useCase ? (
@@ -1687,8 +1825,34 @@ export function UseCaseCockpit({ useCaseId, onTriggerEvaluation, onViewEvaluatio
         </div>
       </div>
 
-      {/* Right-Side Inspector Panel - Always Visible IDE Style - Takes 2/5 of space (40%) */}
-      <div className="flex-[2] min-w-0 bg-neutral-50 flex flex-col overflow-hidden">
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize cockpit panels"
+        aria-valuemin={Math.round(MIN_PANE_RATIO * 100)}
+        aria-valuemax={Math.round(MAX_PANE_RATIO * 100)}
+        aria-valuenow={Math.round(paneRatio * 100)}
+        tabIndex={0}
+        className={`absolute top-0 bottom-0 w-3 transform -translate-x-1/2 cursor-col-resize select-none z-10 flex items-center justify-center ${
+          isResizing ? 'bg-neutral-200/40' : ''
+        }`}
+        style={{ left: `${paneRatio * 100}%` }}
+        onPointerDown={handleResizeStart}
+        onKeyDown={handleResizeKeyDown}
+        onDoubleClick={() => setPaneRatio(DEFAULT_PANE_RATIO)}
+      >
+        <span
+          className={`h-12 w-[2px] rounded-full ${
+            isResizing ? 'bg-neutral-500' : 'bg-neutral-300'
+          }`}
+        />
+      </div>
+
+      {/* Right-Side Inspector Panel - Always Visible IDE Style */}
+      <div
+        className="min-w-0 bg-neutral-50 flex flex-col overflow-hidden"
+        style={{ flex: '1 1 auto' }}
+      >
         {/* Tab Bar */}
         {openTabs.length > 0 ? (
           <div className="border-b border-neutral-200 bg-white flex items-center overflow-x-auto">
