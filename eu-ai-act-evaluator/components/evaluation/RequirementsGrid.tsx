@@ -538,7 +538,7 @@ export function RequirementsGrid({
   );
 }
 
-// TREEMAXX 🌲💪 - The Ultimate Interactive Tree View
+// Jony Ive Edition - Refined Tree View
 function TreeNode({
   node,
   nodeMap,
@@ -624,250 +624,240 @@ function TreeNode({
     <>
       <div
         ref={nodeRef}
-        className={`group relative transition-all duration-200 ${
-          isActiveSubsumption
-            ? 'bg-blue-50 ring-2 ring-blue-400 ring-inset animate-pulse shadow-lg z-10'
-            : isSelected
-            ? 'bg-blue-50/50'
-            : ''
-        } ${
-          status === 'completed' && result?.decision ? 'bg-green-50/30' : ''
-        } ${status === 'completed' && !result?.decision ? 'bg-red-50/30' : ''}`}
+        className="group relative"
       >
-        {/* Main Row */}
+        {/* Main Row - Refined */}
         <div
-          className={`flex items-center gap-2 px-3 py-2 hover:bg-neutral-100/50 border-b border-neutral-100 cursor-pointer transition-all ${
-            isActiveSubsumption
-              ? 'border-l-4 border-l-blue-600 shadow-md bg-gradient-to-r from-blue-100 to-transparent'
-              : isSelected
-              ? 'border-l-4 border-l-blue-500 shadow-sm'
-              : 'border-l-4 border-l-transparent'
+          className={`flex items-center gap-3 py-2.5 cursor-pointer transition-all duration-200 border-b border-neutral-100 hover:bg-neutral-50 active:scale-[0.998] ${
+            isSelected ? 'bg-neutral-50' : ''
           }`}
-          style={{ paddingLeft: `${depth * 20 + 12}px` }}
+          style={{ paddingLeft: `${depth * 24 + 16}px` }}
           onClick={() => {
             onNodeClick(node.id);
           }}
         >
-          {/* Expand/Collapse Icon */}
+          {/* Connection Lines - Left Margin */}
+          <div className="absolute left-0 top-0 bottom-0 pointer-events-none" style={{ width: `${depth * 24 + 16}px` }}>
+            {depth > 0 && (
+              <>
+                {/* Vertical line from parent */}
+                <div
+                  className="absolute top-0 bottom-0 w-px bg-neutral-200"
+                  style={{ left: `${(depth - 1) * 24 + 16 + 8}px` }}
+                />
+                {/* Horizontal line to this node */}
+                <div
+                  className="absolute top-1/2 h-px bg-neutral-200"
+                  style={{
+                    left: `${(depth - 1) * 24 + 16 + 8}px`,
+                    width: '16px'
+                  }}
+                />
+              </>
+            )}
+          </div>
+
+          {/* Selected Accent Line */}
+          {isSelected && (
+            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500" />
+          )}
+
+          {/* Evaluating Accent Line */}
+          {isActiveSubsumption && (
+            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500 animate-pulse" />
+          )}
+
+          {/* Disclosure Triangle - Apple Style */}
           {hasChildren ? (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setIsExpanded(!isExpanded);
               }}
-              className="p-0.5 hover:bg-neutral-200 rounded transition-colors"
+              className="flex-shrink-0 w-4 h-4 flex items-center justify-center group/disclosure"
             >
               <svg
-                className={`w-3.5 h-3.5 text-neutral-500 transition-transform duration-200 ${
+                className={`w-2 h-2 text-neutral-400 group-hover/disclosure:text-neutral-600 transition-all duration-200 ease-out ${
                   isExpanded ? 'rotate-90' : ''
                 }`}
                 fill="currentColor"
-                viewBox="0 0 20 20"
+                viewBox="0 0 6 10"
               >
-                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
+                <path d="M1 1l4 4-4 4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
           ) : (
-            <div className="w-4 flex-shrink-0">
-              <div className="w-1 h-1 rounded-full bg-neutral-300 mx-auto" />
-            </div>
+            <div className="w-4 h-4 flex-shrink-0" />
           )}
 
-          {/* Number with depth coloring */}
-          <span className={`text-xs font-mono flex-shrink-0 w-12 font-semibold ${
-            depth === 0 ? 'text-blue-600' :
-            depth === 1 ? 'text-indigo-600' :
-            depth === 2 ? 'text-purple-600' :
-            'text-neutral-500'
-          }`}>
+          {/* Hierarchical Number - Monochrome */}
+          <span className="text-xs font-mono flex-shrink-0 w-12 text-neutral-400 font-medium">
             {numberPrefix}.
           </span>
 
-          {/* Status Icon with animations */}
-          <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+          {/* Minimal Status Indicator */}
+          <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
             {status === 'evaluating' && (
-              <div className="relative">
-                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                <div className="absolute inset-0 w-4 h-4 border-2 border-blue-400 rounded-full animate-ping opacity-25" />
-              </div>
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
             )}
             {status === 'completed' && result && (
-              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shadow-sm ${
+              <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
                 result.decision
-                  ? 'bg-gradient-to-br from-green-400 to-green-500 text-white'
-                  : 'bg-gradient-to-br from-red-400 to-red-500 text-white'
+                  ? 'bg-green-500'
+                  : 'bg-neutral-300'
               }`}>
-                {result.decision ? '✓' : '✗'}
+                <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 12 12">
+                  {result.decision ? (
+                    <path d="M10.28 2.28L3.5 9.06 1.22 6.78a.75.75 0 00-1.06 1.06l2.5 2.5a.75.75 0 001.06 0l7-7a.75.75 0 10-1.06-1.06z" />
+                  ) : (
+                    <path d="M2.22 2.22a.75.75 0 011.06 0L6 4.94l2.72-2.72a.75.75 0 111.06 1.06L7.06 6l2.72 2.72a.75.75 0 11-1.06 1.06L6 7.06 3.28 9.78a.75.75 0 01-1.06-1.06L4.94 6 2.22 3.28a.75.75 0 010-1.06z" />
+                  )}
+                </svg>
               </div>
             )}
             {status === 'pending' && (
-              <div className="w-3.5 h-3.5 rounded-full border-2 border-neutral-300 bg-white" />
+              <div className="w-2 h-2 rounded-full border border-neutral-300" />
             )}
             {status === 'error' && (
-              <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center">
-                <span className="text-xs font-bold text-red-600">!</span>
+              <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+                <span className="text-[8px] font-bold text-white">!</span>
               </div>
             )}
           </div>
 
-          {/* Label with depth sizing */}
-          <span className={`flex-1 text-neutral-900 truncate font-medium ${
-            depth === 0 ? 'text-base' :
-            depth === 1 ? 'text-sm' :
-            'text-sm'
-          }`}>
+          {/* Label - Clean Typography */}
+          <span className={`flex-1 min-w-0 truncate transition-colors ${
+            depth === 0 ? 'text-sm font-semibold text-neutral-900' :
+            'text-sm font-medium text-neutral-700'
+          } ${isSelected ? 'text-neutral-900' : ''}`}>
             {node.label}
           </span>
 
-          {/* Operator badge for composite nodes */}
+          {/* Operator Label - Subtle */}
           {node.kind === 'composite' && node.operator && (
-            <span className={`text-xs px-2 py-0.5 rounded font-medium ${
-              node.operator === 'allOf'
-                ? 'bg-blue-100 text-blue-700'
-                : node.operator === 'anyOf'
-                ? 'bg-purple-100 text-purple-700'
-                : 'bg-neutral-100 text-neutral-700'
-            }`}>
-              {node.operator === 'allOf' ? 'ALL' : node.operator === 'anyOf' ? 'ANY' : node.operator}
+            <span className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-neutral-100 text-neutral-500 uppercase tracking-wide">
+              {node.operator === 'allOf' ? 'all' : node.operator === 'anyOf' ? 'any' : node.operator}
             </span>
           )}
 
-          {/* Child Stats (for composite) */}
+          {/* Child Stats - Minimal Indicators */}
           {childStats && childStats.total > 0 && (
-            <div className="flex items-center gap-1 text-xs">
-              {childStats.passed > 0 && (
-                <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded font-medium">
-                  {childStats.passed}✓
-                </span>
-              )}
-              {childStats.failed > 0 && (
-                <span className="px-1.5 py-0.5 bg-red-100 text-red-700 rounded font-medium">
-                  {childStats.failed}✗
-                </span>
-              )}
-              {childStats.evaluating > 0 && (
-                <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-medium animate-pulse">
-                  {childStats.evaluating}⟳
-                </span>
-              )}
+            <div className="flex items-center gap-1.5 text-[10px] font-medium text-neutral-400">
+              <span className="tabular-nums">{childStats.passed + childStats.failed}/{childStats.total}</span>
             </div>
           )}
 
-          {/* Confidence Badge with color coding */}
+          {/* Confidence - Subtle, Show on Hover */}
           {status === 'completed' && result && (
-            <div className={`px-2 py-0.5 rounded text-xs font-semibold ${
-              result.confidence >= 0.9 ? 'bg-green-100 text-green-700' :
-              result.confidence >= 0.7 ? 'bg-yellow-100 text-yellow-700' :
-              'bg-orange-100 text-orange-700'
-            }`}>
+            <div className="text-[10px] font-medium text-neutral-400 tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
               {(result.confidence * 100).toFixed(0)}%
             </div>
           )}
 
-          {/* Details toggle */}
+          {/* Details Toggle - Minimal Chevron */}
           {(node.kind === 'primitive' && node.question) || (status === 'completed' && result) ? (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setShowDetails(!showDetails);
               }}
-              className="p-1 hover:bg-neutral-200 rounded transition-colors opacity-0 group-hover:opacity-100"
+              className="flex-shrink-0 w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               title="Show details"
             >
               <svg
-                className={`w-3.5 h-3.5 text-neutral-500 transition-transform duration-200 ${
+                className={`w-2 h-2 text-neutral-400 hover:text-neutral-600 transition-all duration-200 ease-out ${
                   showDetails ? 'rotate-180' : ''
                 }`}
                 fill="none"
                 stroke="currentColor"
-                viewBox="0 0 24 24"
+                viewBox="0 0 12 12"
+                strokeWidth="2"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <path d="M3 4.5l3 3 3-3" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           ) : (
-            <div className="w-5" />
+            <div className="w-4 h-4 flex-shrink-0" />
           )}
         </div>
 
-        {/* Inline Details Panel */}
+        {/* Details Panel - Clean & Refined */}
         {showDetails && (
-          <div className="bg-gradient-to-b from-neutral-50 to-white border-b border-neutral-200 px-4 py-2 text-xs animate-in slide-in-from-top-2 fade-in duration-200"
-               style={{ paddingLeft: `${depth * 20 + 40}px` }}>
+          <div className="bg-neutral-50 border-b border-neutral-100 px-4 py-3 text-xs transition-all duration-200"
+               style={{ paddingLeft: `${depth * 24 + 40}px` }}>
 
-            {/* AI Thinking Indicator - ONLY for primitives */}
+            {/* AI Thinking - Minimal Indicator */}
             {isActiveSubsumption && (
-              <div className="mb-2 p-2 bg-blue-50 border-l-4 border-blue-500 rounded animate-pulse">
-                <div className="flex items-center gap-1.5">
-                  <div className="relative">
-                    <div className="w-2.5 h-2.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                  <span className="font-semibold text-blue-900 text-xs">
-                    AI is analyzing this requirement...
-                  </span>
-                </div>
-                <div className="mt-1.5 text-blue-700 italic text-[10px]">
-                  Evaluating compliance based on legal context and case facts
-                </div>
+              <div className="mb-3 flex items-center gap-2 text-neutral-600">
+                <div className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                <span className="text-xs font-medium">Analyzing requirement...</span>
               </div>
             )}
 
-            {/* Question */}
+            {/* Question - Clean */}
             {node.kind === 'primitive' && node.question && (
-              <div className="mb-2">
-                <div className="font-semibold text-neutral-700 mb-1 uppercase tracking-wide text-[10px]">Question:</div>
-                <div className="text-neutral-900 leading-relaxed text-xs">{node.question.prompt}</div>
+              <div className="mb-3">
+                <div className="text-[10px] font-semibold text-neutral-500 mb-1.5 tracking-wide">QUESTION</div>
+                <div className="text-sm text-neutral-900 leading-relaxed">{node.question.prompt}</div>
                 {node.question.help && (
-                  <div className="mt-1 text-neutral-600 italic text-[10px]">{node.question.help}</div>
+                  <div className="mt-1.5 text-xs text-neutral-500">{node.question.help}</div>
                 )}
               </div>
             )}
 
-            {/* Legal Context */}
+            {/* Legal Context - Refined */}
             {node.context?.items && node.context.items.length > 0 && (
-              <div className="mb-2">
-                <div className="font-semibold text-neutral-700 mb-1 uppercase tracking-wide text-[10px]">Legal Context:</div>
-                {node.context.items.map((item, idx) => (
-                  <div key={idx} className="pl-2 border-l-2 border-neutral-300 mb-1.5">
-                    <div className="font-medium text-neutral-800 text-xs">{item.label}</div>
-                    <div className="text-neutral-600 leading-relaxed text-xs">{item.text}</div>
-                    {item.sources?.[0] && (
-                      <div className="mt-0.5 font-mono text-neutral-500 text-[10px]">
-                        Art. {item.sources[0].article}
-                        {item.sources[0].paragraph && `(${item.sources[0].paragraph})`}
-                        {item.sources[0].point && ` pt. ${item.sources[0].point}`}
-                      </div>
-                    )}
-                  </div>
-                ))}
+              <div className="mb-3">
+                <div className="text-[10px] font-semibold text-neutral-500 mb-1.5 tracking-wide">LEGAL CONTEXT</div>
+                <div className="space-y-2">
+                  {node.context.items.map((item, idx) => (
+                    <div key={idx} className="pl-3 border-l border-neutral-200">
+                      <div className="text-xs font-medium text-neutral-700 mb-0.5">{item.label}</div>
+                      <div className="text-xs text-neutral-600 leading-relaxed">{item.text}</div>
+                      {item.sources?.[0] && (
+                        <div className="mt-1 font-mono text-[10px] text-neutral-400">
+                          Art. {item.sources[0].article}
+                          {item.sources[0].paragraph && `(${item.sources[0].paragraph})`}
+                          {item.sources[0].point && ` pt. ${item.sources[0].point}`}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* AI Reasoning */}
+            {/* AI Analysis - Minimal */}
             {status === 'completed' && result && (
               <div>
-                <div className="font-semibold text-neutral-700 mb-1 uppercase tracking-wide text-[10px]">AI Analysis:</div>
-                <div className="bg-white rounded p-2 border border-neutral-200 text-neutral-900 leading-relaxed text-xs">
+                <div className="text-[10px] font-semibold text-neutral-500 mb-1.5 tracking-wide">ANALYSIS</div>
+                <div className="text-xs text-neutral-700 leading-relaxed">
                   {result.reasoning}
                 </div>
 
-                {/* LLM Transparency Details */}
+                {/* LLM Transparency - Refined Disclosure */}
                 {(result.prompt || result.llm_raw_response) && (
-                  <details className="mt-3 group">
-                    <summary className="cursor-pointer text-xs font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-1.5 py-2">
-                      <span className="group-open:rotate-90 transition-transform">▶</span>
-                      🔍 Show LLM Details (Transparency)
+                  <details className="mt-4 group">
+                    <summary className="cursor-pointer text-xs font-medium text-neutral-500 hover:text-neutral-700 flex items-center gap-2 py-1 transition-colors">
+                      <svg
+                        className="w-2 h-2 text-neutral-400 group-open:rotate-90 transition-transform"
+                        fill="currentColor"
+                        viewBox="0 0 6 10"
+                      >
+                        <path d="M1 1l4 4-4 4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span>LLM Details</span>
                     </summary>
-                    <div className="mt-2 space-y-3 pl-3 border-l-2 border-blue-300">
+                    <div className="mt-2 space-y-2 pl-4 border-l border-neutral-200">
                       <div>
-                        <div className="text-xs font-medium text-neutral-700 mb-1">Model:</div>
-                        <div className="font-mono text-xs text-neutral-600">GPT-5-mini (reasoning: high)</div>
+                        <div className="text-[10px] font-semibold text-neutral-400 mb-0.5 tracking-wide">MODEL</div>
+                        <div className="font-mono text-xs text-neutral-600">GPT-5-mini</div>
                       </div>
 
                       {result.prompt && (
                         <div>
-                          <div className="text-xs font-medium text-neutral-700 mb-1">Full Prompt Sent:</div>
-                          <pre className="text-[10px] bg-slate-900 text-green-400 p-3 rounded overflow-x-auto max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed">
+                          <div className="text-[10px] font-semibold text-neutral-400 mb-0.5 tracking-wide">PROMPT</div>
+                          <pre className="text-[10px] bg-neutral-900 text-neutral-300 p-2 rounded overflow-x-auto max-h-40 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed">
                             {result.prompt}
                           </pre>
                         </div>
@@ -875,8 +865,8 @@ function TreeNode({
 
                       {result.llm_raw_response && (
                         <div>
-                          <div className="text-xs font-medium text-neutral-700 mb-1">Raw LLM Response:</div>
-                          <pre className="text-[10px] bg-slate-900 text-green-400 p-3 rounded overflow-x-auto max-h-48 overflow-y-auto font-mono leading-relaxed">
+                          <div className="text-[10px] font-semibold text-neutral-400 mb-0.5 tracking-wide">RESPONSE</div>
+                          <pre className="text-[10px] bg-neutral-900 text-neutral-300 p-2 rounded overflow-x-auto max-h-40 overflow-y-auto font-mono leading-relaxed">
                             {JSON.stringify(result.llm_raw_response, null, 2)}
                           </pre>
                         </div>
